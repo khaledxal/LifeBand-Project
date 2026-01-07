@@ -1,15 +1,13 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+// استيراد المكتبات اللازمة من Firebase
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+// إعدادات تطبيقك التي حصلت عليها
 const firebaseConfig = {
   apiKey: "AIzaSyDY65kaF-DfYWkxoMZOAxlnwGj6y_MpM7I",
   authDomain: "lifeband-affa0.firebaseapp.com",
-  databaseURL: "https://lifeband-affa0-default-rtdb.firebaseio.com",
+  databaseURL: "https://lifeband-affa0-default-rtdb.firebaseio.com", // هذا الرابط هو الأهم لعمل الداتابيز
   projectId: "lifeband-affa0",
   storageBucket: "lifeband-affa0.firebasestorage.app",
   messagingSenderId: "615316480384",
@@ -17,6 +15,7 @@ const firebaseConfig = {
   measurementId: "G-1PL4ZTZ1N3"
 };
 
-// Initialize Firebase
+// تشغيل Firebase وتصدير الأدوات لاستخدامها في الملفات الأخرى
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+export const db = getDatabase(app); // قاعدة البيانات الحقيقية
+export const auth = getAuth(app);    // نظام تسجيل الدخول
