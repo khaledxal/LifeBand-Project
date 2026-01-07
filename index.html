@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8" />
-    <title>LifeBand – نظام الإنقاذ الطبي الذكي</title>
+    <title>LifeBand – نظام الإنقاذ الذكي</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="style.css" />
 </head>
@@ -25,59 +25,24 @@
             <section id="view-landing" class="view active">
                 <div class="hero">
                     <div class="hero-text">
-                        <h1>نظام الإنقاذ الطبي الذكي (NFC)</h1>
-                        <p>
-                            منصة ذكية تتيح للمسعفين الوصول الفوري للمعلومات الطبية الحرجة، 
-                            تحليل الأعراض بالذكاء الاصطناعي، وإرسال تنبيهات تلقائية للمستشفيات والأهل.
-                        </p>
+                        <h1>LifeBand – نظام الإنقاذ الطبي الذكي</h1>
+                        <p>منصة ذكية تتيح للمسعفين الوصول الفوري للمعلومات الطبية عبر تقنية NFC وتحليلها بالذكاء الاصطناعي.</p>
                         <div class="hero-actions">
-                            <button class="primary-btn" data-view="emergency">بدء فحص طوارئ</button>
-                            <button class="ghost-btn" data-view="patient">دخول المريض</button>
+                            <button class="primary-btn" data-view="emergency">بدء فحص الطوارئ</button>
+                            <a href="login.html" class="ghost-btn">دخول المريض</a>
                         </div>
-                    </div>
-                    <div class="hero-card">
-                        <h2>ملخص النظام</h2>
-                        <ul>
-                            <li><strong>NFC:</strong> فحص وتوثيق الهوية</li>
-                            <li><strong>البيانات:</strong> استرجاع الملف الطبي فوراً</li>
-                            <li><strong>AI:</strong> تحليل حالة المريض ذكياً</li>
-                            <li><strong>التنبيهات:</strong> إرسال بلاغ فوري للمستشفى</li>
-                        </ul>
                     </div>
                 </div>
             </section>
 
             <section id="view-emergency" class="view">
-                <h2>فحص الطوارئ واسترجاع البيانات</h2>
                 <div class="card">
-                    <h3>الخطوة 1 – مسح سوار NFC</h3>
-                    <div class="form-row">
-                        <label>معرف البطاقة (Tag ID)</label>
-                        <input id="tagIdInput" type="text" placeholder="مثال: TAG123" />
-                    </div>
-                    <button id="btnScanTag" class="primary-btn">قراءة البيانات</button>
-                    <p id="scanStatus" class="status-text"></p>
-                </div>
-
-                <div id="patientProfileCard" class="card hidden">
-                    <h3>الملف الطبي للمريض</h3>
-                    <div class="profile-grid">
-                        <div>
-                            <h4>معلومات أساسية</h4>
-                            <p><strong>الاسم:</strong> <span id="ppName"></span></p>
-                            <p><strong>الفصيلة:</strong> <span id="ppBlood"></span></p>
-                            <p><strong>الحالات المزمنة:</strong> <span id="ppConditions"></span></p>
-                        </div>
-                    </div>
+                    <h3>مسح سوار NFC</h3>
+                    <input type="text" id="tagIdInput" placeholder="أدخل معرف المريض (مثال: TAG123)" />
+                    <button id="btnScanTag" class="primary-btn">تحميل الملف الطبي</button>
                 </div>
             </section>
-            
-            </main>
-
-        <footer class="footer">
-            <span>LifeBand – مشروع تخرج TM471</span>
-            <span>نظام مدعوم بالذكاء الاصطناعي وقاعدة بيانات فعلية</span>
-        </footer>
+        </main>
     </div>
     <script src="app.js"></script>
 </body>
