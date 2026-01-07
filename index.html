@@ -5,81 +5,70 @@
     <title>LifeBand - المركز الإخباري الطبي</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="app-container">
-        <header class="main-navbar">
-            <div class="navbar-left">
-                <span class="brand-logo">LifeBand</span>
+    <div class="container">
+        <header class="navbar-modern">
+            <div class="nav-brand">
+                <span class="logo-icon"></span> LifeBand
             </div>
-            <nav class="navbar-nav">
+            <nav class="nav-links-wrapper">
                 <a href="index.html" class="nav-item active">الرئيسية</a>
                 <a href="register.html" class="nav-item">تسجيل مريض</a>
                 <a href="login.html" class="nav-item">دخول المرضى</a>
             </nav>
-            <div class="navbar-right">
-                <input type="search" placeholder="بحث..." class="search-input">
-                <button class="search-button">
-                    <svg fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" width="20" height="20">
-                        <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path>
-                    </svg>
-                </button>
+            <div class="nav-search">
+                <input type="text" placeholder="بحث...">
+                <button class="search-btn">🔍</button>
             </div>
         </header>
 
-        <main class="main-layout">
-            <section class="welcome-section">
-                <div class="welcome-text">
+        <main class="content-wrapper">
+            <section class="welcome-card">
+                <div class="welcome-info">
                     <h1>أهلاً بك في LifeBand</h1>
-                    <p>منصة متكاملة للوصول الفوري للمعلومات الطبية الحيوية، مدعومة بأحدث التقنيات لتقديم رعاية صحية ذكية.</p>
+                    <p>نظام الإنقاذ الطبي الذكي - الوصول الفوري للمعلومات الطبية وتحليلها بالذكاء الاصطناعي لتقديم رعاية صحية أسرع وأكثر أماناً.</p>
                 </div>
-                <div class="welcome-image">
-                    <img src="https://images.unsplash.com/photo-1579154247260-843826017f8a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NTQzNzZ8MHwxfHNlYXJjaHw0fHBoYXJtYWN5JTIwYWl8ZW58MHx8fHwxNzA2ODk5MDA2fDA&ixlib=rb-4.0.3&q=80&w=400" alt="طبيبة تستعرض بيانات طبية">
+                <div class="welcome-img">
+                    <img src="https://img.freepik.com/free-photo/female-doctor-hospital-with-stethoscope_23-2148827775.jpg" alt="Doctor">
                 </div>
             </section>
 
-            <section class="news-center-section">
-                <h2 class="section-title">مركز الأخبار الطبية</h2>
-                <div id="news-grid" class="news-grid-container">
-                    <p class="loading-message">جاري تحميل أحدث الأخبار الطبية...</p>
-                </div>
+            <section class="news-hub">
+                <h2 class="hub-title">News Hub - مركز الأخبار</h2>
+                <div id="news-grid" class="news-grid">
+                    </div>
             </section>
         </main>
     </div>
 
     <script>
-        async function fetchMedicalNews() {
-            const newsContainer = document.getElementById('news-grid');
-            newsContainer.innerHTML = '<p class="loading-message">جاري تحميل أحدث الأخبار الطبية...</p>'; // رسالة تحميل
+        // دالة لجلب أخبار طبية تلقائية مع صور
+        async function loadNews() {
+            const container = document.getElementById('news-grid');
             try {
-                // استخدام News API (مفتاح API خاص بك)
-                const apiKey = 'ضع_هنا_مفتاح_API_NewsAPI'; // تحتاج للحصول على مفتاح من https://newsapi.org/
-                const response = await fetch(`https://newsapi.org/v2/everything?q=medical%20health&language=ar&sortBy=publishedAt&pageSize=6&apiKey=${apiKey}`);
-                const data = await response.json();
-
-                if (data.status === 'ok' && data.articles.length > 0) {
-                    newsContainer.innerHTML = data.articles.map(article => `
-                        <div class="news-card">
-                            <img src="${article.urlToImage || 'https://via.placeholder.com/150/0d1127/f5f5ff?text=No+Image'}" alt="${article.title}" class="news-image">
-                            <div class="card-content">
-                                <span class="card-badge">${article.source.name || 'غير معروف'}</span>
-                                <h3>${article.title}</h3>
-                                <p>${article.description ? article.description.substring(0, 100) + '...' : 'لا يوجد وصف.'}</p>
-                                <a href="${article.url}" target="_blank" class="read-more">اقرأ المزيد &rarr;</a>
+                // استخدام مصدر RSS وتحويله لـ JSON لجلب أخبار حقيقية
+                const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https://www.medicalnewstoday.com/categories/medical-news/feed');
+                const data = await res.json();
+                
+                if (data.status === 'ok') {
+                    container.innerHTML = data.items.slice(0, 6).map(item => `
+                        <div class="info-card">
+                            <img src="${item.enclosure.link || 'https://via.placeholder.com/150/161b33/ffffff?text=LifeBand'}" class="card-img" alt="news">
+                            <div class="card-body">
+                                <span class="badge">معلومة طبية</span>
+                                <h3>${item.title}</h3>
+                                <p>${item.description.substring(0, 80).replace(/<[^>]*>?/gm, '')}...</p>
+                                <a href="${item.link}" target="_blank" class="read-btn">إقرأ المزيد</a>
                             </div>
                         </div>
                     `).join('');
-                } else {
-                    newsContainer.innerHTML = '<p class="error-message">لم نتمكن من جلب الأخبار حالياً. يرجى التأكد من مفتاح الـ API الخاص بك أو المحاولة لاحقاً.</p>';
                 }
-            } catch (error) {
-                console.error('Failed to fetch news:', error);
-                newsContainer.innerHTML = '<p class="error-message">حدث خطأ أثناء جلب الأخبار. الرجاء التحقق من الاتصال بالإنترنت.</p>';
+            } catch (e) {
+                container.innerHTML = '<p>حدث خطأ أثناء جلب الأخبار.</p>';
             }
         }
-
-        window.onload = fetchMedicalNews;
+        window.onload = loadNews;
     </script>
 </body>
 </html>
