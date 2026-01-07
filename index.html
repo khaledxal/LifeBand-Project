@@ -43,32 +43,42 @@
     </div>
 
     <script>
-        // دالة لجلب أخبار طبية تلقائية مع صور
-        async function loadNews() {
-            const container = document.getElementById('news-grid');
-            try {
-                // استخدام مصدر RSS وتحويله لـ JSON لجلب أخبار حقيقية
-                const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https://www.medicalnewstoday.com/categories/medical-news/feed');
-                const data = await res.json();
-                
-                if (data.status === 'ok') {
-                    container.innerHTML = data.items.slice(0, 6).map(item => `
+    async function fetchMedicalNews() {
+        const container = document.getElementById('news-grid');
+        // نستخدم خدمة rss2json مع رابط أخبار طبية موثوق
+        const rssUrl = 'https://www.medicalnewstoday.com/categories/medical-news/feed';
+        const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
+
+        try {
+            const response = await fetch(apiUrl);
+            const data = await response.json();
+
+            if (data.status === 'ok') {
+                container.innerHTML = data.items.slice(0, 6).map(item => {
+                    // استخراج الصورة من الخبر أو وضع صورة طبية افتراضية إذا لم توجد
+                    const imgSrc = item.enclosure.link || item.thumbnail || 'https://images.unsplash.com/photo-1505751172107-573225a9270e?w=500';
+                    
+                    return `
                         <div class="info-card">
-                            <img src="${item.enclosure.link || 'https://via.placeholder.com/150/161b33/ffffff?text=LifeBand'}" class="card-img" alt="news">
+                            <img src="${imgSrc}" class="card-img" alt="news">
                             <div class="card-body">
-                                <span class="badge">معلومة طبية</span>
+                                <span class="badge">تحديث طبي</span>
                                 <h3>${item.title}</h3>
-                                <p>${item.description.substring(0, 80).replace(/<[^>]*>?/gm, '')}...</p>
-                                <a href="${item.link}" target="_blank" class="read-btn">إقرأ المزيد</a>
+                                <p>${item.description.substring(0, 100).replace(/<[^>]*>?/gm, '')}...</p>
+                                <a href="${item.link}" target="_blank" class="read-btn">إقرأ التفاصيل ←</a>
                             </div>
                         </div>
-                    `).join('');
-                }
-            } catch (e) {
-                container.innerHTML = '<p>حدث خطأ أثناء جلب الأخبار.</p>';
+                    `;
+                }).join('');
+            } else {
+                container.innerHTML = '<p style="text-align:center;">تعذر تحميل الأخبار، حاول مرة أخرى.</p>';
             }
+        } catch (error) {
+            console.error("Error:", error);
+            container.innerHTML = '<p style="text-align:center;">تحقق من اتصال الإنترنت.</p>';
         }
-        window.onload = loadNews;
-    </script>
+    }
+    window.onload = fetchMedicalNews;
+</script>
 </body>
 </html>
