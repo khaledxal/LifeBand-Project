@@ -58,3 +58,29 @@ input {
 .primary-btn:hover { transform: translateY(-2px); }
 
 a { color: var(--text-soft); text-decoration: none; font-size: 14px; }
+/* تحسين شكل الروابط في القائمة العلوية */
+.nav-links {
+    display: flex;
+    gap: 15px;
+}
+
+.nav-btn {
+    text-decoration: none;
+    color: var(--text-soft);
+    font-size: 14px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: 0.3s;
+}
+
+.nav-btn:hover {
+    background: var(--accent-soft);
+    color: var(--accent-strong);
+}
+
+/* التأكد من أن الأزرار الكبيرة تظهر بشكل صحيح */
+.hero-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
