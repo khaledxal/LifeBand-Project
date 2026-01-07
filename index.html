@@ -1,18 +1,15 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8" />
-    <title>LifeBand – نظام الإنقاذ الذكي</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <title>LifeBand – الرئيسية</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="app">
         <header class="navbar">
-            <div class="logo">
-                <span class="logo-dot"></span>
-                <span class="logo-text">LifeBand</span>
-            </div>
+            <div class="logo">LifeBand</div>
             <nav class="nav-links">
                 <a href="index.html" class="nav-btn">الرئيسية</a>
                 <a href="register.html" class="nav-btn">تسجيل مريض</a>
@@ -21,14 +18,13 @@
         </header>
 
         <main class="main">
-            <section class="hero">
-                <div class="hero-text">
-                    <h1>LifeBand – نظام الإنقاذ الطبي الذكي</h1>
-                    <p>منصة تتيح للمسعفين الوصول الفوري للمعلومات الطبية وتحليلها بالذكاء الاصطناعي عبر NFC.</p>
-                    <div class="hero-actions">
-                        <button class="primary-btn" onclick="window.location.href='index.html#scan-section'">بدء فحص الطوارئ</button>
-                        <button class="ghost-btn" onclick="window.location.href='login.html'">دخول المريض</button>
-                    </div>
+            <section class="hero-section">
+                <h1>LifeBand – نظام الإنقاذ الطبي الذكي</h1>
+                <p>منصة تتيح للمسعفين الوصول الفوري للمعلومات الطبية وتحليلها بالذكاء الاصطناعي عبر NFC.</p>
+                
+                <div class="hero-actions">
+                    <button class="primary-btn" onclick="location.href='#scan-section'">بدء فحص الطوارئ</button>
+                    <button class="ghost-btn" onclick="location.href='login.html'">دخول المريض</button>
                 </div>
             </section>
 
@@ -38,17 +34,42 @@
                 <input type="text" id="tagIdInput" placeholder="أدخل معرف المريض (مثال: UserID123)">
                 <button onclick="goToProfile()" class="primary-btn">تحميل الملف الطبي</button>
             </section>
+
+            <section class="news-section">
+                <h2 style="color: var(--accent-strong);">نصائح ومعلومات طبية هامة</h2>
+                <div id="medical-news-container" class="news-grid">
+                    <p>جاري جلب أحدث المعلومات الطبية...</p>
+                </div>
+            </section>
         </main>
     </div>
 
-    <script>
-        function goToProfile() {
+    <script type="module">
+        // مصفوفة لنصائح طبية تظهر بشكل عشوائي (تلقائي) عند كل زيارة
+        const medicalTips = [
+            { title: "الإسعافات الأولية", content: "عند حدوث إغماء، تأكد من رفع قدمي المريض للأعلى لتحسين تدفق الدم للمخ." },
+            { title: "مرضى السكري", content: "احرص دائماً على حمل قطعة حلوى أو سكر في جيبك لمواجهة حالات الهبوط المفاجئ." },
+            { title: "صحة القلب", content: "ممارسة المشي لمدة 30 دقيقة يومياً تقلل من خطر الإصابة بأمراض الشرايين بنسبة 30%." },
+            { title: "ضربات الشمس", content: "في حالة الإجهاد الحراري، انقل المصاب لمكان بارد وقم بتبليل جسمه بالماء الفاتر." }
+        ];
+
+        function displayNews() {
+            const container = document.getElementById('medical-news-container');
+            container.innerHTML = '';
+            medicalTips.forEach(tip => {
+                const div = document.createElement('div');
+                div.className = 'card news-card';
+                div.innerHTML = `<h4>${tip.title}</h4><p class="small">${tip.content}</p>`;
+                container.appendChild(div);
+            });
+        }
+        
+        window.onload = displayNews;
+
+        window.goToProfile = function() {
             const id = document.getElementById('tagIdInput').value;
-            if(id) {
-                window.location.href = `profile.html?id=${id}`;
-            } else {
-                alert("يرجى إدخال المعرف أولاً");
-            }
+            if(id) window.location.href = `profile.html?id=${id}`;
+            else alert("يرجى إدخال المعرف أولاً");
         }
     </script>
 </body>
