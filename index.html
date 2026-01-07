@@ -1,40 +1,84 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <title>دخول المرضى - LifeBand</title>
-    <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8" />
+    <title>LifeBand – نظام الإنقاذ الطبي الذكي</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    <div class="card" style="margin: 50px auto; max-width: 400px;">
-        <h2>تسجيل الدخول</h2>
-        <div class="form-row">
-            <label>البريد الإلكتروني</label>
-            <input type="email" id="loginEmail" placeholder="example@mail.com">
-        </div>
-        <div class="form-row">
-            <label>كلمة المرور</label>
-            <input type="password" id="loginPass">
-        </div>
-        <button id="btnLogin" class="primary-btn" style="width: 100%; margin-top: 15px;">دخول</button>
-        <p id="loginStatus" class="status-text"></p>
-    </div>
-    
-    <script type="module">
-        import { auth } from './js/firebase-config.js';
-        import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    <div class="app">
+        <header class="navbar">
+            <div class="logo">
+                <span class="logo-dot"></span>
+                <span class="logo-text">LifeBand</span>
+            </div>
+            <nav class="nav-links">
+                <button class="nav-btn" data-view="landing">الرئيسية</button>
+                <button class="nav-btn" data-view="emergency">فحص الطوارئ</button>
+                <button class="nav-btn" data-view="patient">بوابة المريض</button>
+                <button class="nav-btn" data-view="hospital">لوحة المستشفى</button>
+            </nav>
+        </header>
 
-        document.getElementById('btnLogin').onclick = async () => {
-            const email = document.getElementById('loginEmail').value;
-            const pass = document.getElementById('loginPass').value;
-            try {
-                const userCredential = await signInWithEmailAndPassword(auth, email, pass);
-                // توجيه المستخدم لبروفايله الخاص
-                window.location.href = `profile.html?id=${userCredential.user.uid}`;
-            } catch (error) {
-                document.getElementById('loginStatus').innerText = "خطأ في الدخول: " + error.message;
-            }
-        };
-    </script>
+        <main class="main">
+            <section id="view-landing" class="view active">
+                <div class="hero">
+                    <div class="hero-text">
+                        <h1>نظام الإنقاذ الطبي الذكي (NFC)</h1>
+                        <p>
+                            منصة ذكية تتيح للمسعفين الوصول الفوري للمعلومات الطبية الحرجة، 
+                            تحليل الأعراض بالذكاء الاصطناعي، وإرسال تنبيهات تلقائية للمستشفيات والأهل.
+                        </p>
+                        <div class="hero-actions">
+                            <button class="primary-btn" data-view="emergency">بدء فحص طوارئ</button>
+                            <button class="ghost-btn" data-view="patient">دخول المريض</button>
+                        </div>
+                    </div>
+                    <div class="hero-card">
+                        <h2>ملخص النظام</h2>
+                        <ul>
+                            <li><strong>NFC:</strong> فحص وتوثيق الهوية</li>
+                            <li><strong>البيانات:</strong> استرجاع الملف الطبي فوراً</li>
+                            <li><strong>AI:</strong> تحليل حالة المريض ذكياً</li>
+                            <li><strong>التنبيهات:</strong> إرسال بلاغ فوري للمستشفى</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section id="view-emergency" class="view">
+                <h2>فحص الطوارئ واسترجاع البيانات</h2>
+                <div class="card">
+                    <h3>الخطوة 1 – مسح سوار NFC</h3>
+                    <div class="form-row">
+                        <label>معرف البطاقة (Tag ID)</label>
+                        <input id="tagIdInput" type="text" placeholder="مثال: TAG123" />
+                    </div>
+                    <button id="btnScanTag" class="primary-btn">قراءة البيانات</button>
+                    <p id="scanStatus" class="status-text"></p>
+                </div>
+
+                <div id="patientProfileCard" class="card hidden">
+                    <h3>الملف الطبي للمريض</h3>
+                    <div class="profile-grid">
+                        <div>
+                            <h4>معلومات أساسية</h4>
+                            <p><strong>الاسم:</strong> <span id="ppName"></span></p>
+                            <p><strong>الفصيلة:</strong> <span id="ppBlood"></span></p>
+                            <p><strong>الحالات المزمنة:</strong> <span id="ppConditions"></span></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            </main>
+
+        <footer class="footer">
+            <span>LifeBand – مشروع تخرج TM471</span>
+            <span>نظام مدعوم بالذكاء الاصطناعي وقاعدة بيانات فعلية</span>
+        </footer>
+    </div>
+    <script src="app.js"></script>
 </body>
 </html>
