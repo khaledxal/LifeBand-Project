@@ -1,0 +1,20 @@
+<script type="module">
+    import { db } from './js/firebase-config.js';
+    import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const params = new URLSearchParams(window.location.search);
+    const userId = params.get('id');
+
+    if (userId) {
+        const docRef = doc(db, "patients", userId);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+            const data = docSnap.data();
+            document.getElementById('ppName').innerText = data.name;
+            // عرض باقي البيانات...
+        } else {
+            alert("No profile found!");
+        }
+    }
+</script>
