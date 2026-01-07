@@ -2,37 +2,39 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>LifeBand – المركز الإخباري الطبي</title>
+    <title>LifeBand – المركز الإخباري الطبي الذكي</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
     <style>
-        /* إضافة لمسة خفيفة للوجو في الزاوية */
+        /* أنيميشن اللوجو النبضي في الزاوية */
         .corner-logo {
             position: fixed;
-            top: 20px;
-            right: 20px;
-            font-size: 18px;
-            font-weight: bold;
-            color: var(--accent);
-            opacity: 0.7;
-            z-index: 1001;
-            pointer-events: none;
+            top: 25px;
+            right: 25px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+            z-index: 2000;
         }
-        .logo-dot-small {
-            width: 8px;
-            height: 8px;
-            background: var(--accent);
+        .pulse-dot {
+            width: 10px;
+            height: 10px;
+            background: #3e8fff;
             border-radius: 50%;
+            animation: pulse 2s infinite;
         }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(62, 143, 255, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(62, 143, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(62, 143, 255, 0); }
+        }
+        .logo-text { font-weight: bold; color: #f5f5ff; font-size: 16px; letter-spacing: 1px; }
     </style>
 </head>
 <body>
     <div class="corner-logo">
-        <div class="logo-dot-small"></div>
-        LifeBand
+        <div class="pulse-dot"></div>
+        <span class="logo-text">LIFEBAND</span>
     </div>
 
     <div class="app">
@@ -47,41 +49,44 @@
 
         <main class="main-content">
             <section class="welcome-hero">
-                <h1>المركز الإخباري الطبي</h1>
-                <p>معلومات طبية سريعة ونصائح يومية لحياة صحية آمنة.</p>
+                <h1>المركز الطبي الذكي</h1>
+                <p>تغطية حية لأحدث الأخبار الطبية العالمية والمعلومات الصحية.</p>
             </section>
 
             <hr class="separator">
 
-            <section class="medical-news-hub">
+            <section class="news-hub">
+                <h2 style="margin-bottom: 25px; color: #3e8fff;">أخبار طبية عاجلة</h2>
                 <div id="news-container" class="news-grid">
-                    </div>
+                    <p style="grid-column: 1/-1; text-align: center;">جاري جلب الأخبار الحية...</p>
+                </div>
             </section>
         </main>
     </div>
 
     <script>
-        const healthNews = [
-            { title: "الإسعافات الأولية للحروق", content: "استخدم الماء الجاري الفاتر لمدة 20 دقيقة، وتجنب وضع الثلج أو المعجون على الحرق مباشرة.", category: "طوارئ" },
-            { title: "أهمية شرب الماء", content: "يساعد شرب الماء الكافي في تحسين كفاءة الكلى وتنظيم درجة حرارة الجسم والوقاية من الجفاف.", category: "نصيحة يومية" },
-            { title: "معدل ضربات القلب", content: "المعدل الطبيعي للبالغين وقت الراحة يتراوح بين 60 إلى 100 نبضة في الدقيقة.", category: "معلومة طبية" },
-            { title: "الوقاية من الإنفلونزا", content: "غسل اليدين باستمرار والحصول على لقاح الإنفلونزا الموسمي يقلل من احتمالية الإصابة بنسبة كبيرة.", category: "وقاية" },
-            { title: "التعامل مع الرعاف", content: "اجلس مستقيماً وأمل رأسك للأمام قليلاً واضغط على الجزء الناعم من الأنف لمدة 10 دقائق.", category: "إسعافات" },
-            { title: "فيتامين د", content: "التعرض لأشعة الشمس لمدة 15 دقيقة يومياً يساعد جسمك على تصنيع فيتامين د الضروري للعظام.", category: "تغذية" }
-        ];
-
-        function loadMedicalContent() {
+        // جلب أخبار طبية حقيقية تلقائياً من مصدر خارجي
+        async function fetchLiveNews() {
             const container = document.getElementById('news-container');
-            container.innerHTML = healthNews.map(item => `
-                <div class="info-card">
-                    <span class="badge">${item.category}</span>
-                    <h3>${item.title}</h3>
-                    <p>${item.content}</p>
-                </div>
-            `).join('');
+            try {
+                const response = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https://www.medicalnewstoday.com/categories/medical-news/feed');
+                const data = await response.json();
+                
+                if (data.status === 'ok') {
+                    container.innerHTML = data.items.slice(0, 6).map(item => `
+                        <div class="info-card">
+                            <span class="badge">تحديث عالمي</span>
+                            <h3>${item.title}</h3>
+                            <p>${item.description.substring(0, 150).replace(/<[^>]*>?/gm, '')}...</p>
+                            <a href="${item.link}" target="_blank" style="color: #3e8fff; font-size: 12px; text-decoration: none; font-weight: bold;">إقرأ المزيد ←</a>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                container.innerHTML = '<p>تعذر جلب الأخبار حالياً، يرجى التحقق من الاتصال.</p>';
+            }
         }
-
-        window.onload = loadMedicalContent;
+        window.onload = fetchLiveNews;
     </script>
 </body>
 </html>
