@@ -7,31 +7,41 @@
 </head>
 <body>
     <div class="card">
-        <h2 style="color: var(--accent-strong)">تسجيل مريض جديد</h2>
+        <h2 style="color: var(--accent-strong)">إنشاء ملف طبي جديد</h2>
         <input type="text" id="regName" placeholder="الاسم الكامل">
         <input type="email" id="regEmail" placeholder="البريد الإلكتروني">
         <input type="password" id="regPass" placeholder="كلمة المرور">
         <input type="text" id="regBlood" placeholder="فصيلة الدم">
-        <button id="btnRegister" class="primary-btn">إنشاء الملف الطبي</button>
+        <input type="text" id="regCondition" placeholder="الحالة الصحية (مثال: سكري)">
+        <button id="btnRegister" class="primary-btn">حفظ البيانات وإنشاء الحساب</button>
+        <p id="status"></p>
     </div>
 
     <script type="module">
         import { auth, db } from './js/firebase-config.js';
         import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { ref, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         document.getElementById('btnRegister').onclick = async () => {
+            const status = document.getElementById('status');
             try {
+                // 1. إنشاء الحساب في Authentication
                 const cred = await createUserWithEmailAndPassword(auth, regEmail.value, regPass.value);
-                await setDoc(doc(db, "patients", cred.user.uid), {
+                
+                // 2. حفظ البيانات في Realtime Database باستخدام UID
+                await set(ref(db, 'patients/' + cred.user.uid), {
                     name: regName.value,
                     bloodType: regBlood.value,
-                    conditions: "لم يتم التحديد",
-                    meds: "لا يوجد"
+                    conditions: regCondition.value,
+                    createdAt: new Date().toISOString()
                 });
-                alert("تم التسجيل! رابط بروفايلك سيتم توليده الآن");
-                window.location.href = "login.html";
-            } catch (e) { alert("خطأ في التسجيل: " + e.message); }
+
+                status.innerText = "تم التسجيل بنجاح! الرابط الخاص بك هو: " + window.location.origin + "/LifeBand-Project/profile.html?id=" + cred.user.uid;
+                status.style.color = "var(--success)";
+            } catch (e) {
+                status.innerText = "خطأ: " + e.message;
+                status.style.color = "var(--danger)";
+            }
         };
     </script>
 </body>
