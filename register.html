@@ -1,0 +1,37 @@
+<form id="regForm">
+    <input type="text" id="regName" placeholder="Full Name" required>
+    <input type="email" id="regEmail" placeholder="Email" required>
+    <input type="password" id="regPass" placeholder="Password" required>
+    <input type="text" id="regNfc" placeholder="NFC Tag ID" required>
+    <button type="submit">Create Account & Profile</button>
+</form>
+
+<script type="module">
+    import { auth, db } from './js/firebase-config.js';
+    import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    document.getElementById('regForm').onsubmit = async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('regEmail').value;
+        const pass = document.getElementById('regPass').value;
+        
+        try {
+            // 1. إنشاء الحساب
+            const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+            const user = userCredential.user;
+
+            // 2. حفظ البيانات في Firestore باستخدام UID كمعرف
+            await setDoc(doc(db, "patients", user.uid), {
+                name: document.getElementById('regName').value,
+                nfcId: document.getElementById('regNfc').value,
+                bloodType: "O+", // مثال
+                chronicConditions: [],
+                createdAt: new Date()
+            });
+
+            alert("Account created! Profile URL: " + window.location.origin + "/profile.html?id=" + user.uid);
+            window.location.href = 'login.html';
+        } catch (error) { alert(error.message); }
+    };
+</script>
