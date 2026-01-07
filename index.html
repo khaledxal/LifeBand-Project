@@ -2,91 +2,84 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>LifeBand – المركز الإخباري الطبي الذكي</title>
+    <title>LifeBand - المركز الإخباري الطبي</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
-    <style>
-        /* أنيميشن اللوجو النبضي في الزاوية */
-        .corner-logo {
-            position: fixed;
-            top: 25px;
-            right: 25px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            z-index: 2000;
-        }
-        .pulse-dot {
-            width: 10px;
-            height: 10px;
-            background: #3e8fff;
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(62, 143, 255, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(62, 143, 255, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(62, 143, 255, 0); }
-        }
-        .logo-text { font-weight: bold; color: #f5f5ff; font-size: 16px; letter-spacing: 1px; }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="corner-logo">
-        <div class="pulse-dot"></div>
-        <span class="logo-text">LIFEBAND</span>
-    </div>
-
-    <div class="app">
-        <header class="navbar main-header">
-            <div class="logo">LifeBand</div>
-            <nav class="nav-links">
-                <a href="index.html" class="nav-link active">الرئيسية</a>
-                <a href="register.html" class="nav-link">تسجيل مريض</a>
-                <a href="login.html" class="nav-link">دخول المرضى</a>
+    <div class="app-container">
+        <header class="main-navbar">
+            <div class="navbar-left">
+                <span class="brand-logo">LifeBand</span>
+            </div>
+            <nav class="navbar-nav">
+                <a href="index.html" class="nav-item active">الرئيسية</a>
+                <a href="register.html" class="nav-item">تسجيل مريض</a>
+                <a href="login.html" class="nav-item">دخول المرضى</a>
             </nav>
+            <div class="navbar-right">
+                <input type="search" placeholder="بحث..." class="search-input">
+                <button class="search-button">
+                    <svg fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" width="20" height="20">
+                        <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path>
+                    </svg>
+                </button>
+            </div>
         </header>
 
-        <main class="main-content">
-            <section class="welcome-hero">
-                <h1>المركز الطبي الذكي</h1>
-                <p>تغطية حية لأحدث الأخبار الطبية العالمية والمعلومات الصحية.</p>
+        <main class="main-layout">
+            <section class="welcome-section">
+                <div class="welcome-text">
+                    <h1>أهلاً بك في LifeBand</h1>
+                    <p>منصة متكاملة للوصول الفوري للمعلومات الطبية الحيوية، مدعومة بأحدث التقنيات لتقديم رعاية صحية ذكية.</p>
+                </div>
+                <div class="welcome-image">
+                    <img src="https://images.unsplash.com/photo-1579154247260-843826017f8a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NTQzNzZ8MHwxfHNlYXJjaHw0fHBoYXJtYWN5JTIwYWl8ZW58MHx8fHwxNzA2ODk5MDA2fDA&ixlib=rb-4.0.3&q=80&w=400" alt="طبيبة تستعرض بيانات طبية">
+                </div>
             </section>
 
-            <hr class="separator">
-
-            <section class="news-hub">
-                <h2 style="margin-bottom: 25px; color: #3e8fff;">أخبار طبية عاجلة</h2>
-                <div id="news-container" class="news-grid">
-                    <p style="grid-column: 1/-1; text-align: center;">جاري جلب الأخبار الحية...</p>
+            <section class="news-center-section">
+                <h2 class="section-title">مركز الأخبار الطبية</h2>
+                <div id="news-grid" class="news-grid-container">
+                    <p class="loading-message">جاري تحميل أحدث الأخبار الطبية...</p>
                 </div>
             </section>
         </main>
     </div>
 
     <script>
-        // جلب أخبار طبية حقيقية تلقائياً من مصدر خارجي
-        async function fetchLiveNews() {
-            const container = document.getElementById('news-container');
+        async function fetchMedicalNews() {
+            const newsContainer = document.getElementById('news-grid');
+            newsContainer.innerHTML = '<p class="loading-message">جاري تحميل أحدث الأخبار الطبية...</p>'; // رسالة تحميل
             try {
-                const response = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https://www.medicalnewstoday.com/categories/medical-news/feed');
+                // استخدام News API (مفتاح API خاص بك)
+                const apiKey = 'ضع_هنا_مفتاح_API_NewsAPI'; // تحتاج للحصول على مفتاح من https://newsapi.org/
+                const response = await fetch(`https://newsapi.org/v2/everything?q=medical%20health&language=ar&sortBy=publishedAt&pageSize=6&apiKey=${apiKey}`);
                 const data = await response.json();
-                
-                if (data.status === 'ok') {
-                    container.innerHTML = data.items.slice(0, 6).map(item => `
-                        <div class="info-card">
-                            <span class="badge">تحديث عالمي</span>
-                            <h3>${item.title}</h3>
-                            <p>${item.description.substring(0, 150).replace(/<[^>]*>?/gm, '')}...</p>
-                            <a href="${item.link}" target="_blank" style="color: #3e8fff; font-size: 12px; text-decoration: none; font-weight: bold;">إقرأ المزيد ←</a>
+
+                if (data.status === 'ok' && data.articles.length > 0) {
+                    newsContainer.innerHTML = data.articles.map(article => `
+                        <div class="news-card">
+                            <img src="${article.urlToImage || 'https://via.placeholder.com/150/0d1127/f5f5ff?text=No+Image'}" alt="${article.title}" class="news-image">
+                            <div class="card-content">
+                                <span class="card-badge">${article.source.name || 'غير معروف'}</span>
+                                <h3>${article.title}</h3>
+                                <p>${article.description ? article.description.substring(0, 100) + '...' : 'لا يوجد وصف.'}</p>
+                                <a href="${article.url}" target="_blank" class="read-more">اقرأ المزيد &rarr;</a>
+                            </div>
                         </div>
                     `).join('');
+                } else {
+                    newsContainer.innerHTML = '<p class="error-message">لم نتمكن من جلب الأخبار حالياً. يرجى التأكد من مفتاح الـ API الخاص بك أو المحاولة لاحقاً.</p>';
                 }
             } catch (error) {
-                container.innerHTML = '<p>تعذر جلب الأخبار حالياً، يرجى التحقق من الاتصال.</p>';
+                console.error('Failed to fetch news:', error);
+                newsContainer.innerHTML = '<p class="error-message">حدث خطأ أثناء جلب الأخبار. الرجاء التحقق من الاتصال بالإنترنت.</p>';
             }
         }
-        window.onload = fetchLiveNews;
+
+        window.onload = fetchMedicalNews;
     </script>
 </body>
 </html>
