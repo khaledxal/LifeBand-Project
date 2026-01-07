@@ -1,37 +1,38 @@
-<form id="regForm">
-    <input type="text" id="regName" placeholder="Full Name" required>
-    <input type="email" id="regEmail" placeholder="Email" required>
-    <input type="password" id="regPass" placeholder="Password" required>
-    <input type="text" id="regNfc" placeholder="NFC Tag ID" required>
-    <button type="submit">Create Account & Profile</button>
-</form>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>تسجيل مريض جديد - LifeBand</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="card">
+        <h2 style="color: var(--accent-strong)">تسجيل مريض جديد</h2>
+        <input type="text" id="regName" placeholder="الاسم الكامل">
+        <input type="email" id="regEmail" placeholder="البريد الإلكتروني">
+        <input type="password" id="regPass" placeholder="كلمة المرور">
+        <input type="text" id="regBlood" placeholder="فصيلة الدم">
+        <button id="btnRegister" class="primary-btn">إنشاء الملف الطبي</button>
+    </div>
 
-<script type="module">
-    import { auth, db } from './js/firebase-config.js';
-    import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    <script type="module">
+        import { auth, db } from './js/firebase-config.js';
+        import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    document.getElementById('regForm').onsubmit = async (e) => {
-        e.preventDefault();
-        const email = document.getElementById('regEmail').value;
-        const pass = document.getElementById('regPass').value;
-        
-        try {
-            // 1. إنشاء الحساب
-            const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
-            const user = userCredential.user;
-
-            // 2. حفظ البيانات في Firestore باستخدام UID كمعرف
-            await setDoc(doc(db, "patients", user.uid), {
-                name: document.getElementById('regName').value,
-                nfcId: document.getElementById('regNfc').value,
-                bloodType: "O+", // مثال
-                chronicConditions: [],
-                createdAt: new Date()
-            });
-
-            alert("Account created! Profile URL: " + window.location.origin + "/profile.html?id=" + user.uid);
-            window.location.href = 'login.html';
-        } catch (error) { alert(error.message); }
-    };
-</script>
+        document.getElementById('btnRegister').onclick = async () => {
+            try {
+                const cred = await createUserWithEmailAndPassword(auth, regEmail.value, regPass.value);
+                await setDoc(doc(db, "patients", cred.user.uid), {
+                    name: regName.value,
+                    bloodType: regBlood.value,
+                    conditions: "لم يتم التحديد",
+                    meds: "لا يوجد"
+                });
+                alert("تم التسجيل! رابط بروفايلك سيتم توليده الآن");
+                window.location.href = "login.html";
+            } catch (e) { alert("خطأ في التسجيل: " + e.message); }
+        };
+    </script>
+</body>
+</html>
