@@ -14,36 +14,42 @@
                 <span class="logo-text">LifeBand</span>
             </div>
             <nav class="nav-links">
-                <button class="nav-btn" data-view="landing">الرئيسية</button>
-                <button class="nav-btn" data-view="emergency">فحص الطوارئ</button>
-                <button class="nav-btn" data-view="patient">بوابة المريض</button>
-                <button class="nav-btn" data-view="hospital">لوحة المستشفى</button>
+                <a href="index.html" class="nav-btn">الرئيسية</a>
+                <a href="register.html" class="nav-btn">تسجيل مريض</a>
+                <a href="login.html" class="nav-btn">دخول المرضى</a>
             </nav>
         </header>
 
         <main class="main">
-            <section id="view-landing" class="view active">
-                <div class="hero">
-                    <div class="hero-text">
-                        <h1>LifeBand – نظام الإنقاذ الطبي الذكي</h1>
-                        <p>منصة ذكية تتيح للمسعفين الوصول الفوري للمعلومات الطبية عبر تقنية NFC وتحليلها بالذكاء الاصطناعي.</p>
-                        <div class="hero-actions">
-                            <button class="primary-btn" data-view="emergency">بدء فحص الطوارئ</button>
-                            <a href="login.html" class="ghost-btn">دخول المريض</a>
-                        </div>
+            <section class="hero">
+                <div class="hero-text">
+                    <h1>LifeBand – نظام الإنقاذ الطبي الذكي</h1>
+                    <p>منصة تتيح للمسعفين الوصول الفوري للمعلومات الطبية وتحليلها بالذكاء الاصطناعي عبر NFC.</p>
+                    <div class="hero-actions">
+                        <button class="primary-btn" onclick="window.location.href='index.html#scan-section'">بدء فحص الطوارئ</button>
+                        <button class="ghost-btn" onclick="window.location.href='login.html'">دخول المريض</button>
                     </div>
                 </div>
             </section>
 
-            <section id="view-emergency" class="view">
-                <div class="card">
-                    <h3>مسح سوار NFC</h3>
-                    <input type="text" id="tagIdInput" placeholder="أدخل معرف المريض (مثال: TAG123)" />
-                    <button id="btnScanTag" class="primary-btn">تحميل الملف الطبي</button>
-                </div>
+            <section id="scan-section" class="card">
+                <h3>خطوة 1: مسح سوار NFC</h3>
+                <p class="small">أدخل المعرف يدوياً للمحاكاة:</p>
+                <input type="text" id="tagIdInput" placeholder="أدخل معرف المريض (مثال: UserID123)">
+                <button onclick="goToProfile()" class="primary-btn">تحميل الملف الطبي</button>
             </section>
         </main>
     </div>
-    <script src="app.js"></script>
+
+    <script>
+        function goToProfile() {
+            const id = document.getElementById('tagIdInput').value;
+            if(id) {
+                window.location.href = `profile.html?id=${id}`;
+            } else {
+                alert("يرجى إدخال المعرف أولاً");
+            }
+        }
+    </script>
 </body>
 </html>
