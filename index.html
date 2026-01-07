@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>LifeBand - Smart NFC Rescue</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app">
+        <h1>LifeBand Smart Rescue</h1>
+        <div class="hero-card">
+            <p>Scan an NFC tag to view medical profiles and start AI analysis.</p>
+            <input type="text" id="tagInput" placeholder="Enter Tag ID (e.g. USER123)">
+            <button onclick="startScan()" class="primary-btn">Start Emergency Scan</button>
+        </div>
+    </div>
+
+    <script>
+        function startScan() {
+            const id = document.getElementById('tagInput').value;
+            if(id) {
+                // This redirects to your dynamic profile page
+                window.location.href = `profile.html?id=${id}`;
+            } else {
+                alert("Please enter a Tag ID");
+            }
+        }
+    </script>
+</body>
+</html>
