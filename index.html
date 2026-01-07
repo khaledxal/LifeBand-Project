@@ -2,75 +2,86 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>LifeBand – الرئيسية</title>
+    <title>LifeBand – المركز الإخباري الطبي</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* إضافة لمسة خفيفة للوجو في الزاوية */
+        .corner-logo {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--accent);
+            opacity: 0.7;
+            z-index: 1001;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .logo-dot-small {
+            width: 8px;
+            height: 8px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+    </style>
 </head>
 <body>
+    <div class="corner-logo">
+        <div class="logo-dot-small"></div>
+        LifeBand
+    </div>
+
     <div class="app">
-        <header class="navbar">
+        <header class="navbar main-header">
             <div class="logo">LifeBand</div>
             <nav class="nav-links">
-                <a href="index.html" class="nav-btn">الرئيسية</a>
-                <a href="register.html" class="nav-btn">تسجيل مريض</a>
-                <a href="login.html" class="nav-btn">دخول المرضى</a>
+                <a href="index.html" class="nav-link active">الرئيسية</a>
+                <a href="register.html" class="nav-link">تسجيل مريض</a>
+                <a href="login.html" class="nav-link">دخول المرضى</a>
             </nav>
         </header>
 
-        <main class="main">
-            <section class="hero-section">
-                <h1>LifeBand – نظام الإنقاذ الطبي الذكي</h1>
-                <p>منصة تتيح للمسعفين الوصول الفوري للمعلومات الطبية وتحليلها بالذكاء الاصطناعي عبر NFC.</p>
-                
-                <div class="hero-actions">
-                    <button class="primary-btn" onclick="location.href='#scan-section'">بدء فحص الطوارئ</button>
-                    <button class="ghost-btn" onclick="location.href='login.html'">دخول المريض</button>
-                </div>
+        <main class="main-content">
+            <section class="welcome-hero">
+                <h1>المركز الإخباري الطبي</h1>
+                <p>معلومات طبية سريعة ونصائح يومية لحياة صحية آمنة.</p>
             </section>
 
-            <section id="scan-section" class="card">
-                <h3>خطوة 1: مسح سوار NFC</h3>
-                <p class="small">أدخل المعرف يدوياً للمحاكاة:</p>
-                <input type="text" id="tagIdInput" placeholder="أدخل معرف المريض (مثال: UserID123)">
-                <button onclick="goToProfile()" class="primary-btn">تحميل الملف الطبي</button>
-            </section>
+            <hr class="separator">
 
-            <section class="news-section">
-                <h2 style="color: var(--accent-strong);">نصائح ومعلومات طبية هامة</h2>
-                <div id="medical-news-container" class="news-grid">
-                    <p>جاري جلب أحدث المعلومات الطبية...</p>
-                </div>
+            <section class="medical-news-hub">
+                <div id="news-container" class="news-grid">
+                    </div>
             </section>
         </main>
     </div>
 
-    <script type="module">
-        // مصفوفة لنصائح طبية تظهر بشكل عشوائي (تلقائي) عند كل زيارة
-        const medicalTips = [
-            { title: "الإسعافات الأولية", content: "عند حدوث إغماء، تأكد من رفع قدمي المريض للأعلى لتحسين تدفق الدم للمخ." },
-            { title: "مرضى السكري", content: "احرص دائماً على حمل قطعة حلوى أو سكر في جيبك لمواجهة حالات الهبوط المفاجئ." },
-            { title: "صحة القلب", content: "ممارسة المشي لمدة 30 دقيقة يومياً تقلل من خطر الإصابة بأمراض الشرايين بنسبة 30%." },
-            { title: "ضربات الشمس", content: "في حالة الإجهاد الحراري، انقل المصاب لمكان بارد وقم بتبليل جسمه بالماء الفاتر." }
+    <script>
+        const healthNews = [
+            { title: "الإسعافات الأولية للحروق", content: "استخدم الماء الجاري الفاتر لمدة 20 دقيقة، وتجنب وضع الثلج أو المعجون على الحرق مباشرة.", category: "طوارئ" },
+            { title: "أهمية شرب الماء", content: "يساعد شرب الماء الكافي في تحسين كفاءة الكلى وتنظيم درجة حرارة الجسم والوقاية من الجفاف.", category: "نصيحة يومية" },
+            { title: "معدل ضربات القلب", content: "المعدل الطبيعي للبالغين وقت الراحة يتراوح بين 60 إلى 100 نبضة في الدقيقة.", category: "معلومة طبية" },
+            { title: "الوقاية من الإنفلونزا", content: "غسل اليدين باستمرار والحصول على لقاح الإنفلونزا الموسمي يقلل من احتمالية الإصابة بنسبة كبيرة.", category: "وقاية" },
+            { title: "التعامل مع الرعاف", content: "اجلس مستقيماً وأمل رأسك للأمام قليلاً واضغط على الجزء الناعم من الأنف لمدة 10 دقائق.", category: "إسعافات" },
+            { title: "فيتامين د", content: "التعرض لأشعة الشمس لمدة 15 دقيقة يومياً يساعد جسمك على تصنيع فيتامين د الضروري للعظام.", category: "تغذية" }
         ];
 
-        function displayNews() {
-            const container = document.getElementById('medical-news-container');
-            container.innerHTML = '';
-            medicalTips.forEach(tip => {
-                const div = document.createElement('div');
-                div.className = 'card news-card';
-                div.innerHTML = `<h4>${tip.title}</h4><p class="small">${tip.content}</p>`;
-                container.appendChild(div);
-            });
+        function loadMedicalContent() {
+            const container = document.getElementById('news-container');
+            container.innerHTML = healthNews.map(item => `
+                <div class="info-card">
+                    <span class="badge">${item.category}</span>
+                    <h3>${item.title}</h3>
+                    <p>${item.content}</p>
+                </div>
+            `).join('');
         }
-        
-        window.onload = displayNews;
 
-        window.goToProfile = function() {
-            const id = document.getElementById('tagIdInput').value;
-            if(id) window.location.href = `profile.html?id=${id}`;
-            else alert("يرجى إدخال المعرف أولاً");
-        }
+        window.onload = loadMedicalContent;
     </script>
 </body>
 </html>
