@@ -80,3 +80,40 @@ body {
     .welcome-card { flex-direction: column; text-align: center; }
     .welcome-image img { width: 100%; }
 }
+
+
+/* تنسيق موحد لبطاقات التسجيل والدخول */
+.auth-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 70vh;
+    padding: 20px;
+}
+
+.auth-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border);
+    padding: 40px;
+    border-radius: 25px;
+    width: 100%;
+    max-width: 450px; /* عرض مناسب جداً للكمبيوتر والجوال */
+    box-shadow: 0 15px 35px rgba(0,0,0,0.05);
+    text-align: center;
+}
+
+.input-group {
+    text-align: right;
+    margin-bottom: 20px;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 12px;
+    margin-top: 8px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: white;
+    color: var(--text-main);
+}
