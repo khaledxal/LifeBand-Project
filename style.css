@@ -1,5 +1,4 @@
 :root {
-    /* ألوان التدرج للوضع الفاتح - مريحة جداً للعين */
     --bg-gradient: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%);
     --card-bg: rgba(255, 255, 255, 0.9);
     --text-main: #2d3748;
@@ -9,7 +8,6 @@
 }
 
 [data-theme="dark"] {
-    /* ألوان التدرج للوضع الداكن */
     --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
     --card-bg: rgba(30, 41, 59, 0.9);
     --text-main: #f1f5f9;
@@ -19,21 +17,20 @@
 
 body {
     direction: rtl;
-    background: var(--bg-gradient); /* خلفية متدرجة بدلاً من الأبيض الصريح */
+    background: var(--bg-gradient);
     background-attachment: fixed;
     color: var(--text-main);
     font-family: 'Segoe UI', sans-serif;
     margin: 0;
     min-height: 100vh;
-    transition: background 0.5s ease;
+    transition: 0.5s;
 }
 
 .container { width: 92%; max-width: 1200px; margin: 0 auto; padding: 20px 0; }
 
-/* شريط التنقل المرتب بظل ناعم */
 .navbar-modern {
     background: var(--card-bg);
-    backdrop-filter: blur(10px); /* تأثير زجاجي */
+    backdrop-filter: blur(10px);
     padding: 15px 30px;
     border-radius: 20px;
     display: flex;
@@ -45,22 +42,19 @@ body {
 }
 
 .nav-links { display: flex; align-items: center; gap: 20px; }
-.nav-item { text-decoration: none; color: var(--text-main); font-weight: 600; font-size: 15px; transition: 0.3s; }
-.nav-item:hover, .nav-item.active { color: var(--accent); }
+.nav-item { text-decoration: none; color: var(--text-main); font-weight: 600; transition: 0.3s; }
+.nav-item.active { color: var(--accent); }
 
 .theme-btn {
     background: var(--accent);
     color: white;
     border: none;
-    padding: 10px 20px;
+    padding: 8px 15px;
     border-radius: 50px;
     cursor: pointer;
-    font-size: 13px;
-    font-weight: bold;
-    box-shadow: 0 4px 12px rgba(62, 143, 255, 0.3);
+    font-size: 12px;
 }
 
-/* قسم الترحيب بتنسيق الصور */
 .welcome-card {
     background: var(--card-bg);
     border-radius: 25px;
@@ -68,74 +62,21 @@ body {
     display: flex;
     align-items: center;
     border: 1px solid var(--border);
-    margin-bottom: 50px;
-    gap: 40px;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.05);
+    margin-bottom: 40px;
+    gap: 30px;
 }
 
-.welcome-info { flex: 1; }
-.welcome-info h1 { font-size: 36px; margin-bottom: 20px; color: var(--accent); }
-.welcome-image img { width: 450px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+.welcome-image img { width: 400px; border-radius: 20px; }
 
-/* تنسيق الجوال */
+.news-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; }
+
+.info-card { background: var(--card-bg); border-radius: 20px; border: 1px solid var(--border); overflow: hidden; transition: 0.3s; }
+.card-img { width: 100%; height: 200px; object-fit: cover; }
+.card-body { padding: 20px; }
+
+/* استجابة الجوال */
 @media (max-width: 768px) {
-    .navbar-modern { flex-direction: column-reverse; gap: 20px; padding: 20px; }
-    .nav-links { flex-wrap: wrap; justify-content: center; }
-    .welcome-card { flex-direction: column; text-align: center; padding: 25px; }
+    .navbar-modern { flex-direction: column-reverse; gap: 15px; text-align: center; }
+    .welcome-card { flex-direction: column; text-align: center; }
     .welcome-image img { width: 100%; }
-}
-
-/* تنسيق صفحات الدخول والتسجيل */
-.auth-wrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 40px 0;
-}
-
-.auth-card {
-    background: var(--card-bg);
-    backdrop-filter: blur(10px);
-    border: 1px solid var(--border);
-    padding: 40px;
-    border-radius: 25px;
-    width: 100%;
-    max-width: 450px;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.1);
-    text-align: center;
-}
-
-.auth-subtitle { color: var(--text-muted); margin-bottom: 30px; font-size: 14px; }
-
-.input-group { text-align: right; margin-bottom: 20px; }
-.input-group label { display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-main); }
-.input-group input {
-    width: 100%;
-    padding: 12px 15px;
-    border-radius: 12px;
-    border: 1px solid var(--border);
-    background: var(--bg-color);
-    color: var(--text-main);
-    box-sizing: border-box;
-}
-
-.primary-btn {
-    width: 100%;
-    padding: 15px;
-    background: var(--accent);
-    color: white;
-    border: none;
-    border-radius: 12px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-.primary-btn:hover { opacity: 0.9; transform: scale(1.02); }
-.auth-footer { margin-top: 25px; font-size: 14px; color: var(--text-muted); }
-.auth-footer a { color: var(--accent); text-decoration: none; font-weight: bold; }
-
-/* استجابة الجوال لصفحات الدخول */
-@media (max-width: 768px) {
-    .auth-card { padding: 25px; border-radius: 20px; }
 }
