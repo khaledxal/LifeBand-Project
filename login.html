@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LifeBand - تسجيل الدخول</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 </head>
 <body>
     <div class="container">
@@ -18,7 +20,7 @@
 
         <main class="auth-wrapper">
             <div class="auth-card">
-                <h2>تسجيل الدخول</h2>
+                <h2 style="color: var(--accent); margin-bottom: 10px;">تسجيل الدخول</h2>
                 <p class="auth-subtitle">مرحباً بعودتك! أدخل بياناتك للوصول لملفك الطبي</p>
                 
                 <form id="loginForm" class="auth-form">
@@ -32,9 +34,28 @@
                     </div>
                     <button type="submit" class="primary-btn">دخول</button>
                 </form>
+                
                 <p class="auth-footer">ليس لديك حساب؟ <a href="register.html">اضغط هنا للتسجيل</a></p>
             </div>
         </main>
     </div>
+
+    <script src="js/firebase-config.js"></script>
+    <script>
+        document.getElementById('loginForm').onsubmit = (e) => {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const pass = document.getElementById('loginPassword').value;
+
+            firebase.auth().signInWithEmailAndPassword(email, pass)
+                .then(() => {
+                    alert("مرحباً بك مجدداً!");
+                    window.location.href = "index.html"; 
+                })
+                .catch((error) => {
+                    alert("خطأ في تسجيل الدخول: " + error.message);
+                });
+        };
+    </script>
 </body>
 </html>
