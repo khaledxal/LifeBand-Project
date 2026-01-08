@@ -1,5 +1,4 @@
 :root {
-    /* الألوان للوضع الفاتح (الأساسي) */
     --bg-color: #f8faff;
     --card-bg: #ffffff;
     --text-main: #1a1c27;
@@ -9,7 +8,6 @@
 }
 
 [data-theme="dark"] {
-    /* الألوان للوضع الداكن */
     --bg-color: #0d0f17;
     --card-bg: #1a1c27;
     --text-main: #f5f5ff;
@@ -21,73 +19,77 @@ body {
     direction: rtl;
     background-color: var(--bg-color);
     color: var(--text-main);
-    font-family: 'Segoe UI', Tahoma, sans-serif;
+    font-family: sans-serif;
     margin: 0;
-    transition: all 0.3s ease;
+    transition: 0.3s;
 }
 
 .container { width: 90%; max-width: 1200px; margin: 0 auto; padding: 20px 0; }
 
-/* شريط التنقل العلوي */
+/* شريط التنقل المرتب */
 .navbar-modern {
     background-color: var(--card-bg);
-    padding: 15px 30px;
+    padding: 15px 25px;
     border-radius: 15px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     border: 1px solid var(--border);
     margin-bottom: 30px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
 }
 
-.theme-toggle-btn {
+.nav-right-group { display: flex; align-items: center; gap: 20px; }
+.nav-links { display: flex; gap: 15px; }
+.nav-item { text-decoration: none; color: var(--text-main); font-weight: bold; font-size: 14px; }
+.nav-item.active { color: var(--accent); }
+
+.theme-btn {
     background: var(--accent);
     color: white;
     border: none;
     padding: 8px 15px;
     border-radius: 20px;
     cursor: pointer;
-    font-weight: bold;
+    font-size: 12px;
 }
 
-/* قسم الترحيب */
+/* قسم الترحيب المتجاوب */
 .welcome-card {
     background: var(--card-bg);
     border-radius: 20px;
-    padding: 40px;
+    padding: 30px;
     display: flex;
-    justify-content: space-between;
     align-items: center;
     border: 1px solid var(--border);
     margin-bottom: 40px;
-    gap: 20px;
+    gap: 30px;
 }
 
-.welcome-img img { width: 350px; border-radius: 15px; }
+.welcome-image img { width: 400px; border-radius: 10px; }
+.welcome-info h1 { font-size: 28px; color: var(--text-main); }
 
-/* شبكة الأخبار */
+/* شبكة المعلومات */
 .news-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 25px;
+    gap: 20px;
 }
 
 .info-card {
     background: var(--card-bg);
     border-radius: 15px;
-    overflow: hidden;
     border: 1px solid var(--border);
-    transition: 0.3s;
+    overflow: hidden;
 }
 
-.card-img { width: 100%; height: 200px; object-fit: cover; }
-.card-body { padding: 20px; }
+.card-img { width: 100%; height: 180px; object-fit: cover; }
+.card-body { padding: 15px; }
+.badge { color: var(--accent); font-size: 11px; font-weight: bold; }
 
-/* --- استجابة الجوال --- */
+/* استجابة الجوال */
 @media (max-width: 768px) {
-    .navbar-modern { flex-direction: column; gap: 15px; text-align: center; }
-    .welcome-card { flex-direction: column-reverse; text-align: center; padding: 20px; }
-    .welcome-img img { width: 100%; max-width: 250px; }
+    .navbar-modern { flex-direction: column-reverse; gap: 15px; }
+    .welcome-card { flex-direction: column; text-align: center; }
+    .welcome-image img { width: 100%; }
     .news-grid { grid-template-columns: 1fr; }
 }
