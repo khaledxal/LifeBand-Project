@@ -2,75 +2,61 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>LifeBand - المركز الطبي الذكي</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LifeBand - المركز الطبي</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
         <header class="navbar-modern">
-            <div class="nav-brand">
-                <span class="logo-icon"></span> LifeBand
-            </div>
+            <div class="nav-brand">LifeBand</div>
             <nav class="nav-links-wrapper">
                 <a href="index.html" class="nav-item active">الرئيسية</a>
-                <a href="register.html" class="nav-item">تسجيل مريض</a>
-                <a href="login.html" class="nav-item">دخول المرضى</a>
+                <button id="theme-toggle" class="theme-toggle-btn">تبديل الوضع 🌙</button>
             </nav>
-            <div class="nav-search">
-                <input type="text" placeholder="بحث طبي...">
-            </div>
         </header>
 
-        <main class="content-wrapper">
+        <main>
             <section class="welcome-card">
                 <div class="welcome-info">
-                    <h1>أهلاً بك في LifeBand</h1>
-                    <p>نظام الإنقاذ الطبي الذكي - نحن هنا لنقدم لك أدق المعلومات الصحية وإمكانية الوصول لبياناتك الطبية في حالات الطوارئ عبر تقنية NFC.</p>
+                    <h1>مرحباً بك في LifeBand</h1>
+                    <p>نظام صحي ذكي يتنفس معك، يوفر لك المعلومة والإنقاذ في آن واحد.</p>
                 </div>
-                <div class="welcome-img">
-                    <img src="https://img.freepik.com/free-photo/female-doctor-hospital-with-stethoscope_23-2148827775.jpg" alt="Doctor">
-                </div>
+                <div class="welcome-image"><img src="https://img.freepik.com/free-photo/female-doctor-hospital-with-stethoscope_23-2148827775.jpg"></div>
             </section>
 
-            <section class="news-hub">
-                <h2 class="hub-title">نصائح ومعلومات طبية هامة</h2>
-                <div id="medical-info-grid" class="news-grid">
-                    </div>
-            </section>
+            <div id="medical-info-grid" class="news-grid"></div>
         </main>
     </div>
 
     <script>
-        // مصفوفة تحتوي على 10 معلومات طبية احترافية مع صورها
+        // كود تبديل الوضع (Dark/Light Mode)
+        const toggleBtn = document.getElementById('theme-toggle');
+        const body = document.documentElement;
+
+        toggleBtn.addEventListener('click', () => {
+            if (body.getAttribute('data-theme') === 'dark') {
+                body.removeAttribute('data-theme');
+                toggleBtn.innerText = 'تبديل الوضع 🌙';
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                toggleBtn.innerText = 'تبديل الوضع ☀️';
+            }
+        });
+
+        // نفس دالة عرض المعلومات السابقة
         const medicalData = [
-            { title: "شرب الماء والكلى", content: "شرب 8 أكواب ماء يومياً يساعد الكلى على تنقية السموم من الدم بفعالية.", img: "https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=400" },
-            { title: "أهمية النوم العميق", content: "النوم لمدة 7-8 ساعات يعزز جهاز المناعة ويساعد في إصلاح الأنسجة المتضررة.", img: "https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=400" },
-            { title: "إسعاف الحروق البسيطة", content: "ضع الحرق تحت ماء جارٍ فاتر لمدة 15 دقيقة، وتجنب وضع الثلج أو معجون الأسنان.", img: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400" },
-            { title: "صحة القلب والمشي", content: "المشي السريع لمدة 30 دقيقة يومياً يقلل خطر الإصابة بالنوبات القلبية بنسبة 40%.", img: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400" },
-            { title: "التعامل مع الرعاف", content: "أمل رأسك للأمام قليلاً واضغط على الجزء اللين من الأنف لمدة 10 دقائق متواصلة.", img: "https://images.unsplash.com/photo-1628595351029-c2bf17511435?w=400" },
-            { title: "أعراض نقص فيتامين D", content: "الشعور بالتعب المستمر وآلام العظام قد يكون دليلاً على نقص فيتامين الشمس.", img: "https://images.unsplash.com/photo-1550573105-df26742510f2?w=400" },
-            { title: "ضغط الدم الطبيعي", content: "المعدل المثالي لضغط الدم هو 120/80؛ الفحص الدوري يجنبك مخاطر الصمت القاتل.", img: "https://images.unsplash.com/photo-1615461066841-6116ecaabb04?w=400" },
-            { title: "السكري والحلويات", content: "استبدال السكر المكرر بالفاكهة الطبيعية يمنع الارتفاع المفاجئ في إنسولين الدم.", img: "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=400" },
-            { title: "الوقاية من الإنفلونزا", content: "غسل اليدين المتكرر بالصابون لمدة 20 ثانية هو خط الدفاع الأول ضد الفيروسات.", img: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=400" },
-            { title: "وضعية الجلوس الصحيحة", content: "حافظ على ظهرك مستقيماً أثناء العمل المكتبي لتجنب آلام العمود الفقري المزمنة.", img: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=400" }
+            { title: "شرب الماء", content: "8 أكواب يومياً تحافظ على نشاطك.", img: "https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=400" },
+            { title: "النوم الصحي", content: "النوم ليلاً يجدد خلايا الدماغ.", img: "https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=400" },
+            { title: "المشي", content: "30 دقيقة مشي تقوي قلبك.", img: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400" }
         ];
 
-        function displayMedicalInfo() {
-            const grid = document.getElementById('medical-info-grid');
-            grid.innerHTML = medicalData.map(item => `
-                <div class="info-card">
-                    <img src="${item.img}" class="card-img" alt="${item.title}">
-                    <div class="card-body">
-                        <span class="badge">نصيحة طبية</span>
-                        <h3>${item.title}</h3>
-                        <p>${item.content}</p>
-                        <a href="#" class="read-btn">تفاصيل أكثر</a>
-                    </div>
-                </div>
-            `).join('');
-        }
-        window.onload = displayMedicalInfo;
+        document.getElementById('medical-info-grid').innerHTML = medicalData.map(item => `
+            <div class="info-card">
+                <img src="${item.img}" class="card-img">
+                <div class="card-body"><h3>${item.title}</h3><p>${item.content}</p></div>
+            </div>
+        `).join('');
     </script>
 </body>
 </html>
