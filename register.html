@@ -2,47 +2,43 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>تسجيل مريض جديد - LifeBand</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LifeBand - إنشاء حساب</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="card">
-        <h2 style="color: var(--accent-strong)">إنشاء ملف طبي جديد</h2>
-        <input type="text" id="regName" placeholder="الاسم الكامل">
-        <input type="email" id="regEmail" placeholder="البريد الإلكتروني">
-        <input type="password" id="regPass" placeholder="كلمة المرور">
-        <input type="text" id="regBlood" placeholder="فصيلة الدم">
-        <input type="text" id="regCondition" placeholder="الحالة الصحية (مثال: سكري)">
-        <button id="btnRegister" class="primary-btn">حفظ البيانات وإنشاء الحساب</button>
-        <p id="status"></p>
-    </div>
+    <div class="container">
+        <header class="navbar-modern">
+            <div class="nav-links">
+                <a href="index.html" class="nav-item">الرئيسية</a>
+                <a href="login.html" class="nav-item">تسجيل دخول</a>
+            </div>
+            <div class="nav-brand">LifeBand</div>
+        </header>
 
-    <script type="module">
-        import { auth, db } from './js/firebase-config.js';
-        import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { ref, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-        document.getElementById('btnRegister').onclick = async () => {
-            const status = document.getElementById('status');
-            try {
-                // 1. إنشاء الحساب في Authentication
-                const cred = await createUserWithEmailAndPassword(auth, regEmail.value, regPass.value);
+        <main class="auth-wrapper">
+            <div class="auth-card">
+                <h2>إنشاء حساب مريض جديد</h2>
+                <p class="auth-subtitle">سجل بياناتك لتتمكن من استخدام سوار LifeBand الذكي</p>
                 
-                // 2. حفظ البيانات في Realtime Database باستخدام UID
-                await set(ref(db, 'patients/' + cred.user.uid), {
-                    name: regName.value,
-                    bloodType: regBlood.value,
-                    conditions: regCondition.value,
-                    createdAt: new Date().toISOString()
-                });
-
-                status.innerText = "تم التسجيل بنجاح! الرابط الخاص بك هو: " + window.location.origin + "/LifeBand-Project/profile.html?id=" + cred.user.uid;
-                status.style.color = "var(--success)";
-            } catch (e) {
-                status.innerText = "خطأ: " + e.message;
-                status.style.color = "var(--danger)";
-            }
-        };
-    </script>
+                <form id="registerForm" class="auth-form">
+                    <div class="input-group">
+                        <label>الاسم الكامل</label>
+                        <input type="text" id="regName" placeholder="أدخل اسمك الثلاثي" required>
+                    </div>
+                    <div class="input-group">
+                        <label>البريد الإلكتروني</label>
+                        <input type="email" id="regEmail" placeholder="example@mail.com" required>
+                    </div>
+                    <div class="input-group">
+                        <label>كلمة المرور</label>
+                        <input type="password" id="regPassword" placeholder="••••••••" required>
+                    </div>
+                    <button type="submit" class="primary-btn">إنشاء الحساب</button>
+                </form>
+                <p class="auth-footer">لديك حساب بالفعل؟ <a href="login.html">سجل دخولك هنا</a></p>
+            </div>
+        </main>
+    </div>
 </body>
 </html>
