@@ -45,10 +45,10 @@
 
             try {
                 const userCredential = await signInWithEmailAndPassword(auth, email, pass);
-                alert("مرحباً بك مجدداً!");
+                // توجيه المستخدم لصفحته الخاصة مباشرة بعد الدخول
                 window.location.href = `profile.html?id=${userCredential.user.uid}`;
             } catch (error) {
-                alert("خطأ في تسجيل الدخول: " + error.message);
+                alert("خطأ: " + error.message);
             }
         };
     </script>

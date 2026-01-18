@@ -22,7 +22,7 @@
                 <form id="regForm">
                     <div class="input-group">
                         <label>الاسم الكامل</label>
-                        <input type="text" id="userNameInput" placeholder="خالد البغدادي" required>
+                        <input type="text" id="userNameInput" placeholder="ادخل اسمك" required>
                     </div>
                     <div class="input-group">
                         <label>البريد الإلكتروني</label>
@@ -32,7 +32,7 @@
                         <label>كلمة المرور</label>
                         <input type="password" id="pass" placeholder="••••••••" required>
                     </div>
-                    <button type="submit" class="theme-btn" style="width: 100%; padding: 12px; font-size: 16px;">إنشاء الحساب</button>
+                    <button type="submit" class="theme-btn" style="width: 100%; padding: 12px;">إنشاء الحساب</button>
                 </form>
             </div>
         </div>
@@ -50,23 +50,20 @@
             const pass = document.getElementById('pass').value;
 
             try {
-                // إنشاء الحساب في Authentication
                 const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
                 const user = userCredential.user;
                 
-                // حفظ بيانات المريض في Realtime Database باستخدام الـ UID كعنوان فريد
+                // تخزين البيانات في قاعدة البيانات تحت المعرف الفريد الخاص بالمستخدم
                 await set(ref(db, 'patients/' + user.uid), {
                     name: name,
-                    bloodType: "لم يحدد",
+                    bloodType: "غير محدد",
                     conditions: "لا توجد ملاحظات",
                     email: email
                 });
 
-                alert("تم إنشاء حسابك بنجاح!");
-                // التوجه للرابط الخاص بالمستخدم
+                alert("تم التسجيل! رابط ملفك هو: profile.html?id=" + user.uid);
                 window.location.href = `profile.html?id=${user.uid}`;
             } catch (err) {
-                console.error(err);
                 alert("خطأ: " + err.message);
             }
         };

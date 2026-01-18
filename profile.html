@@ -2,35 +2,20 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>الملف الطبي - LifeBand</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        .profile-container { display: flex; justify-content: center; align-items: center; min-height: 80vh; }
-        .medical-card { background: var(--card-bg); padding: 30px; border-radius: 25px; border: 1px solid var(--border); width: 100%; max-width: 400px; text-align: center; }
-        .blood-tag { background: #ff4757; color: white; padding: 5px 15px; border-radius: 10px; font-weight: bold; }
-    </style>
 </head>
 <body>
-    <div class="container">
-        <header class="navbar-modern">
-            <div class="nav-links"><a href="index.html" class="nav-item">الرئيسية</a></div>
-            <div class="nav-brand">LifeBand</div>
-        </header>
-
-        <main class="profile-container">
-            <div class="medical-card">
-                <img src="https://cdn-icons-png.flaticon.com/512/3774/3774299.png" width="80" alt="user">
-                <h2 id="userName" style="color: var(--accent); margin-top: 15px;">جاري التحميل...</h2>
-                <hr style="border: 0.5px solid var(--border); margin: 20px 0;">
-                <div style="text-align: right;">
-                    <p><strong>🩸 فصيلة الدم:</strong> <span id="userBlood" class="blood-tag">--</span></p>
-                    <p><strong>📋 الحالة الصحية:</strong></p>
-                    <p id="userCondition" style="color: var(--text-muted); background: rgba(0,0,0,0.05); padding: 10px; border-radius: 10px;">--</p>
-                </div>
-                <p style="font-size: 11px; color: var(--accent); margin-top: 20px;">هذا الملف مرتبط بتقنية NFC الخاصة بـ LifeBand</p>
+    <div class="container" style="display: flex; justify-content: center; padding-top: 50px;">
+        <div class="auth-card" style="max-width: 400px;">
+            <h2 id="userName" style="color: var(--accent)">جاري التحميل...</h2>
+            <div style="text-align: right; margin-top: 20px;">
+                <p><strong>فصيلة الدم:</strong> <span id="userBlood">--</span></p>
+                <p><strong>الحالة الصحية:</strong> <span id="userCondition">--</span></p>
             </div>
-        </main>
+            <hr style="border: 0.5px solid var(--border); margin: 20px 0;">
+            <p style="font-size: 12px; color: var(--text-muted);">رابط الملف: <span id="currentUrl" style="word-break: break-all; color: var(--accent);"></span></p>
+        </div>
     </div>
 
     <script type="module">
@@ -39,6 +24,7 @@
 
         const params = new URLSearchParams(window.location.search);
         const userId = params.get('id');
+        document.getElementById('currentUrl').innerText = window.location.href;
 
         if (userId) {
             const dbRef = ref(db);
@@ -49,14 +35,9 @@
                     document.getElementById('userBlood').innerText = data.bloodType;
                     document.getElementById('userCondition').innerText = data.conditions;
                 } else {
-                    document.getElementById('userName').innerText = "المريض غير موجود";
+                    document.getElementById('userName').innerText = "المريض غير مسجل";
                 }
-            }).catch((error) => {
-                console.error(error);
-                document.getElementById('userName').innerText = "خطأ في الاتصال";
-            });
-        } else {
-            document.getElementById('userName').innerText = "رابط غير صالح";
+            }).catch((err) => console.error(err));
         }
     </script>
 </body>
