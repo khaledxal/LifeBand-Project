@@ -2,43 +2,110 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>الملف الطبي - LifeBand</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الملف الطبي الشامل - LifeBand</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        .medical-form { background: var(--card-bg); padding: 25px; border-radius: 20px; border: 1px solid var(--border); max-width: 500px; margin: 20px auto; }
+        .input-field { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid var(--border); background: rgba(255,255,255,0.1); color: var(--text-main); font-size: 16px; }
+        .save-btn { width: 100%; padding: 15px; background: #2ecc71; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; display: none; }
+        .label-text { font-weight: bold; color: var(--accent); display: block; margin-top: 10px; }
+    </style>
 </head>
 <body>
-    <div class="container" style="display: flex; justify-content: center; padding-top: 50px;">
-        <div class="auth-card" style="max-width: 400px;">
-            <h2 id="userName" style="color: var(--accent)">جاري التحميل...</h2>
-            <div style="text-align: right; margin-top: 20px;">
-                <p><strong>فصيلة الدم:</strong> <span id="userBlood">--</span></p>
-                <p><strong>الحالة الصحية:</strong> <span id="userCondition">--</span></p>
-            </div>
-            <hr style="border: 0.5px solid var(--border); margin: 20px 0;">
-            <p style="font-size: 12px; color: var(--text-muted);">رابط الملف: <span id="currentUrl" style="word-break: break-all; color: var(--accent);"></span></p>
-        </div>
+    <div class="container">
+        <header class="navbar-modern">
+            <div class="nav-links"><a href="index.html" class="nav-item">الرئيسية</a></div>
+            <div class="nav-brand">LifeBand</div>
+        </header>
+
+        <main class="medical-form">
+            <h2 id="statusTitle" style="text-align: center; color: var(--accent);">الملف الطبي</h2>
+            <p id="editNote" style="text-align: center; font-size: 12px; color: var(--text-muted); display: none;">يمكنك تعديل بياناتك والضغط على حفظ</p>
+            
+            <label class="label-text">الاسم الكامل:</label>
+            <input type="text" id="userName" class="input-field" readonly>
+
+            <label class="label-text">رقم الهوية / الإقامة:</label>
+            <input type="text" id="userIdNo" class="input-field" placeholder="أدخل رقم الهوية" readonly>
+
+            <label class="label-text">فصيلة الدم:</label>
+            <select id="userBlood" class="input-field" disabled>
+                <option value="غير محدد">اختر الفصيلة</option>
+                <option value="A+">A+</option>
+                <option value="A-">A-</option>
+                <option value="B+">B+</option>
+                <option value="B-">B-</option>
+                <option value="O+">O+</option>
+                <option value="O-">O-</option>
+                <option value="AB+">AB+</option>
+                <option value="AB-">AB-</option>
+            </select>
+
+            <label class="label-text">الأمراض السابقة والحساسية:</label>
+            <textarea id="userCondition" class="input-field" rows="4" placeholder="مثال: حساسية من البنسلين، ضغط دم..." readonly></textarea>
+
+            <label class="label-text">رقم الطوارئ:</label>
+            <input type="tel" id="emergencyContact" class="input-field" placeholder="رقم قريب للتواصل" readonly>
+
+            <button id="saveBtn" class="save-btn">حفظ التغييرات ✅</button>
+        </main>
     </div>
 
     <script type="module">
-        import { db } from './js/firebase-config.js';
-        import { ref, get, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { db, auth } from './js/firebase-config.js';
+        import { ref, get, set, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const params = new URLSearchParams(window.location.search);
-        const userId = params.get('id');
-        document.getElementById('currentUrl').innerText = window.location.href;
+        const profileId = params.get('id'); // المعرف من الرابط
 
-        if (userId) {
+        // 1. جلب البيانات وعرضها
+        if (profileId) {
             const dbRef = ref(db);
-            get(child(dbRef, `patients/${userId}`)).then((snapshot) => {
+            get(child(dbRef, `patients/${profileId}`)).then((snapshot) => {
                 if (snapshot.exists()) {
                     const data = snapshot.val();
-                    document.getElementById('userName').innerText = data.name;
-                    document.getElementById('userBlood').innerText = data.bloodType;
-                    document.getElementById('userCondition').innerText = data.conditions;
-                } else {
-                    document.getElementById('userName').innerText = "المريض غير مسجل";
+                    document.getElementById('userName').value = data.name || "";
+                    document.getElementById('userIdNo').value = data.idNo || "";
+                    document.getElementById('userBlood').value = data.bloodType || "غير محدد";
+                    document.getElementById('userCondition').value = data.conditions || "";
+                    document.getElementById('emergencyContact').value = data.emergency || "";
                 }
-            }).catch((err) => console.error(err));
+            });
         }
+
+        // 2. التحقق: هل الزائر هو صاحب الحساب؟
+        onAuthStateChanged(auth, (user) => {
+            if (user && user.uid === profileId) {
+                // تفعيل وضع التعديل
+                document.getElementById('editNote').style.display = "block";
+                document.getElementById('saveBtn').style.display = "block";
+                document.querySelectorAll('.input-field').forEach(input => {
+                    input.removeAttribute('readonly');
+                    input.removeAttribute('disabled');
+                });
+
+                // وظيفة الحفظ
+                document.getElementById('saveBtn').onclick = async () => {
+                    const updatedData = {
+                        name: document.getElementById('userName').value,
+                        idNo: document.getElementById('userIdNo').value,
+                        bloodType: document.getElementById('userBlood').value,
+                        conditions: document.getElementById('userCondition').value,
+                        emergency: document.getElementById('emergencyContact').value,
+                        email: user.email
+                    };
+
+                    try {
+                        await set(ref(db, 'patients/' + user.uid), updatedData);
+                        alert("تم تحديث ملفك الطبي بنجاح!");
+                    } catch (err) {
+                        alert("خطأ أثناء الحفظ: " + err.message);
+                    }
+                };
+            }
+        });
     </script>
 </body>
 </html>

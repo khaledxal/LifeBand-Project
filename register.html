@@ -43,30 +43,32 @@
         import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { ref, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        document.getElementById('regForm').onsubmit = async (e) => {
-            e.preventDefault();
-            const name = document.getElementById('userNameInput').value;
-            const email = document.getElementById('email').value;
-            const pass = document.getElementById('pass').value;
+        // استبدل الجزء الخاص بالـ Submit في صفحة register.html بهذا:
+document.getElementById('regForm').onsubmit = async (e) => {
+    e.preventDefault();
+    const name = document.getElementById('userNameInput').value;
+    const email = document.getElementById('email').value;
+    const pass = document.getElementById('pass').value;
 
-            try {
-                const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
-                const user = userCredential.user;
-                
-                // تخزين البيانات في قاعدة البيانات تحت المعرف الفريد الخاص بالمستخدم
-                await set(ref(db, 'patients/' + user.uid), {
-                    name: name,
-                    bloodType: "غير محدد",
-                    conditions: "لا توجد ملاحظات",
-                    email: email
-                });
+    try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+        const user = userCredential.user;
+        
+        // إنشاء السجل فارغاً في البداية مع الاسم فقط
+        await set(ref(db, 'patients/' + user.uid), {
+            name: name,
+            idNo: "",
+            bloodType: "غير محدد",
+            conditions: "",
+            emergency: "",
+            email: email
+        });
 
-                alert("تم التسجيل! رابط ملفك هو: profile.html?id=" + user.uid);
-                window.location.href = `profile.html?id=${user.uid}`;
-            } catch (err) {
-                alert("خطأ: " + err.message);
-            }
-        };
+        window.location.href = `profile.html?id=${user.uid}`;
+    } catch (err) {
+        alert("خطأ: " + err.message);
+    }
+};
     </script>
 </body>
 </html>
