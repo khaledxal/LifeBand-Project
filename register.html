@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LifeBand - إنشاء حساب</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 </head>
 <body>
     <div class="container">
@@ -21,25 +19,43 @@
         <div class="welcome-card" style="justify-content: center; max-width: 500px; margin: 0 auto; flex-direction: column;">
             <h2 style="color: var(--accent);">إنشاء حساب جديد</h2>
             <form id="regForm" style="width: 100%;">
-                <input type="email" id="email" placeholder="البريد الإلكتروني" style="width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid var(--border);">
-                <input type="password" id="pass" placeholder="كلمة المرور" style="width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid var(--border);">
+                <input type="text" id="userNameInput" placeholder="الاسم الكامل" required style="width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid var(--border);">
+                <input type="email" id="email" placeholder="البريد الإلكتروني" required style="width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid var(--border);">
+                <input type="password" id="pass" placeholder="كلمة المرور" required style="width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid var(--border);">
                 <button type="submit" style="width: 100%; padding: 12px; background: var(--accent); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">إنشاء الحساب</button>
             </form>
         </div>
     </div>
 
-    <script src="js/firebase-config.js"></script>
-    <script>
-        document.getElementById('regForm').onsubmit = (e) => {
+    <script type="module">
+        import { auth, db } from './js/firebase-config.js';
+        import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { ref, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        document.getElementById('regForm').onsubmit = async (e) => {
             e.preventDefault();
+            const name = document.getElementById('userNameInput').value;
             const email = document.getElementById('email').value;
             const pass = document.getElementById('pass').value;
-            firebase.auth().createUserWithEmailAndPassword(email, pass)
-                .then(() => { alert("تم التسجيل بنجاح!"); window.location.href="index.html"; })
-                .catch(err => alert("خطأ: " + err.message));
+
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+                const user = userCredential.user;
+                
+                // حفظ البيانات الأولية في قاعدة البيانات
+                await set(ref(db, 'patients/' + user.uid), {
+                    name: name,
+                    bloodType: "لم يحدد",
+                    conditions: "لا يوجد ملاحظات حالياً",
+                    email: email
+                });
+
+                alert("تم التسجيل بنجاح!");
+                window.location.href = `profile.html?id=${user.uid}`;
+            } catch (err) {
+                alert("خطأ: " + err.message);
+            }
         };
     </script>
 </body>
 </html>
-
-

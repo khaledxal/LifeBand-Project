@@ -1,13 +1,11 @@
-// استيراد المكتبات اللازمة من Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getDatabase } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-// إعدادات تطبيقك التي حصلت عليها
 const firebaseConfig = {
   apiKey: "AIzaSyDY65kaF-DfYWkxoMZOAxlnwGj6y_MpM7I",
   authDomain: "lifeband-affa0.firebaseapp.com",
-  databaseURL: "https://lifeband-affa0-default-rtdb.firebaseio.com", // هذا الرابط هو الأهم لعمل الداتابيز
+  databaseURL: "https://lifeband-affa0-default-rtdb.firebaseio.com",
   projectId: "lifeband-affa0",
   storageBucket: "lifeband-affa0.firebasestorage.app",
   messagingSenderId: "615316480384",
@@ -15,7 +13,6 @@ const firebaseConfig = {
   measurementId: "G-1PL4ZTZ1N3"
 };
 
-// تشغيل Firebase وتصدير الأدوات لاستخدامها في الملفات الأخرى
 const app = initializeApp(firebaseConfig);
-export const db = getDatabase(app); // قاعدة البيانات الحقيقية
-export const auth = getAuth(app);    // نظام تسجيل الدخول
+export const db = getDatabase(app);
+export const auth = getAuth(app);
