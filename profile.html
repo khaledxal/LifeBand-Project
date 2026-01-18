@@ -8,8 +8,15 @@
     <style>
         .medical-form { background: var(--card-bg); padding: 25px; border-radius: 20px; border: 1px solid var(--border); max-width: 500px; margin: 20px auto; }
         .input-field { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid var(--border); background: rgba(255,255,255,0.1); color: var(--text-main); font-size: 16px; }
-        .save-btn { width: 100%; padding: 15px; background: #2ecc71; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; display: none; }
-        .label-text { font-weight: bold; color: var(--accent); display: block; margin-top: 10px; }
+        .label-text { font-weight: bold; color: var(--accent); display: block; margin-top: 15px; }
+        
+        /* تنسيق مربعات الأمراض */
+        .disease-item { background: rgba(62, 143, 255, 0.1); border: 1px solid var(--accent); padding: 8px 15px; border-radius: 8px; display: inline-flex; align-items: center; gap: 10px; margin: 5px; font-size: 14px; }
+        .remove-disease { color: #ff4757; cursor: pointer; font-weight: bold; display: none; } /* تظهر فقط لصاحب الحساب */
+        .add-disease-container { display: flex; gap: 5px; margin-top: 10px; }
+        .add-btn { background: var(--accent); color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; }
+        
+        .save-btn { width: 100%; padding: 15px; background: #2ecc71; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 20px; display: none; }
     </style>
 </head>
 <body>
@@ -20,35 +27,35 @@
         </header>
 
         <main class="medical-form">
-            <h2 id="statusTitle" style="text-align: center; color: var(--accent);">الملف الطبي</h2>
-            <p id="editNote" style="text-align: center; font-size: 12px; color: var(--text-muted); display: none;">يمكنك تعديل بياناتك والضغط على حفظ</p>
+            <h2 style="text-align: center; color: var(--accent);">الملف الطبي الذكي</h2>
             
             <label class="label-text">الاسم الكامل:</label>
             <input type="text" id="userName" class="input-field" readonly>
 
-            <label class="label-text">رقم الهوية / الإقامة:</label>
+            <label class="label-text">رقم الهوية:</label>
             <input type="text" id="userIdNo" class="input-field" placeholder="أدخل رقم الهوية" readonly>
 
             <label class="label-text">فصيلة الدم:</label>
             <select id="userBlood" class="input-field" disabled>
                 <option value="غير محدد">اختر الفصيلة</option>
-                <option value="A+">A+</option>
-                <option value="A-">A-</option>
-                <option value="B+">B+</option>
-                <option value="B-">B-</option>
-                <option value="O+">O+</option>
-                <option value="O-">O-</option>
-                <option value="AB+">AB+</option>
-                <option value="AB-">AB-</option>
+                <option value="A+">A+</option><option value="A-">A-</option>
+                <option value="B+">B+</option><option value="B-">B-</option>
+                <option value="O+">O+</option><option value="O-">O-</option>
+                <option value="AB+">AB+</option><option value="AB-">AB-</option>
             </select>
 
-            <label class="label-text">الأمراض السابقة والحساسية:</label>
-            <textarea id="userCondition" class="input-field" rows="4" placeholder="مثال: حساسية من البنسلين، ضغط دم..." readonly></textarea>
+            <label class="label-text">الأمراض والحساسية:</label>
+            <div id="diseasesList" style="margin-top: 10px;">
+                </div>
+            <div id="addDiseaseSection" class="add-disease-container" style="display: none;">
+                <input type="text" id="diseaseInput" class="input-field" style="margin:0" placeholder="أضف مرض أو حساسية...">
+                <button type="button" class="add-btn" id="addBtn">إضافة</button>
+            </div>
 
             <label class="label-text">رقم الطوارئ:</label>
             <input type="tel" id="emergencyContact" class="input-field" placeholder="رقم قريب للتواصل" readonly>
 
-            <button id="saveBtn" class="save-btn">حفظ التغييرات ✅</button>
+            <button id="saveBtn" class="save-btn">حفظ الملف بالكامل ✅</button>
         </main>
     </div>
 
@@ -58,51 +65,73 @@
         import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const params = new URLSearchParams(window.location.search);
-        const profileId = params.get('id'); // المعرف من الرابط
+        const profileId = params.get('id');
+        let diseases = [];
 
-        // 1. جلب البيانات وعرضها
+        // دالة لعرض المربعات
+        function renderDiseases(isOwner) {
+            const list = document.getElementById('diseasesList');
+            list.innerHTML = diseases.length === 0 ? '<p style="font-size:12px; color:gray;">لا توجد أمراض مسجلة</p>' : '';
+            diseases.forEach((d, index) => {
+                const item = document.createElement('div');
+                item.className = 'disease-item';
+                item.innerHTML = `
+                    <span>${d}</span>
+                    <span class="remove-disease" style="display: ${isOwner ? 'inline' : 'none'}" data-index="${index}">✖</span>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        // 1. جلب البيانات
         if (profileId) {
-            const dbRef = ref(db);
-            get(child(dbRef, `patients/${profileId}`)).then((snapshot) => {
+            get(child(ref(db), `patients/${profileId}`)).then((snapshot) => {
                 if (snapshot.exists()) {
                     const data = snapshot.val();
                     document.getElementById('userName').value = data.name || "";
                     document.getElementById('userIdNo').value = data.idNo || "";
                     document.getElementById('userBlood').value = data.bloodType || "غير محدد";
-                    document.getElementById('userCondition').value = data.conditions || "";
                     document.getElementById('emergencyContact').value = data.emergency || "";
+                    diseases = data.diseases || []; // جلب المصفوفة
+                    renderDiseases(false);
                 }
             });
         }
 
-        // 2. التحقق: هل الزائر هو صاحب الحساب؟
+        // 2. التحقق من صاحب الحساب
         onAuthStateChanged(auth, (user) => {
             if (user && user.uid === profileId) {
-                // تفعيل وضع التعديل
-                document.getElementById('editNote').style.display = "block";
                 document.getElementById('saveBtn').style.display = "block";
-                document.querySelectorAll('.input-field').forEach(input => {
-                    input.removeAttribute('readonly');
-                    input.removeAttribute('disabled');
-                });
+                document.getElementById('addDiseaseSection').style.display = "flex";
+                document.querySelectorAll('.input-field').forEach(i => { i.removeAttribute('readonly'); i.removeAttribute('disabled'); });
+                renderDiseases(true);
 
-                // وظيفة الحفظ
+                // إضافة مرض جديد
+                document.getElementById('addBtn').onclick = () => {
+                    const val = document.getElementById('diseaseInput').value.trim();
+                    if (val) { diseases.push(val); document.getElementById('diseaseInput').value = ''; renderDiseases(true); }
+                };
+
+                // حذف مرض
+                document.getElementById('diseasesList').onclick = (e) => {
+                    if (e.target.classList.contains('remove-disease')) {
+                        const idx = e.target.getAttribute('data-index');
+                        diseases.splice(idx, 1); renderDiseases(true);
+                    }
+                };
+
+                // حفظ الكل
                 document.getElementById('saveBtn').onclick = async () => {
                     const updatedData = {
                         name: document.getElementById('userName').value,
                         idNo: document.getElementById('userIdNo').value,
                         bloodType: document.getElementById('userBlood').value,
-                        conditions: document.getElementById('userCondition').value,
                         emergency: document.getElementById('emergencyContact').value,
+                        diseases: diseases, // حفظ المصفوفة
                         email: user.email
                     };
-
-                    try {
-                        await set(ref(db, 'patients/' + user.uid), updatedData);
-                        alert("تم تحديث ملفك الطبي بنجاح!");
-                    } catch (err) {
-                        alert("خطأ أثناء الحفظ: " + err.message);
-                    }
+                    await set(ref(db, 'patients/' + user.uid), updatedData);
+                    alert("تم حفظ الملف الطبي!");
                 };
             }
         });
