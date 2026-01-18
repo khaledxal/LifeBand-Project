@@ -16,14 +16,25 @@
             <div class="nav-brand">LifeBand</div>
         </header>
 
-        <div class="welcome-card" style="justify-content: center; max-width: 500px; margin: 0 auto; flex-direction: column;">
-            <h2 style="color: var(--accent);">إنشاء حساب جديد</h2>
-            <form id="regForm" style="width: 100%;">
-                <input type="text" id="userNameInput" placeholder="الاسم الكامل" required style="width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid var(--border);">
-                <input type="email" id="email" placeholder="البريد الإلكتروني" required style="width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid var(--border);">
-                <input type="password" id="pass" placeholder="كلمة المرور" required style="width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid var(--border);">
-                <button type="submit" style="width: 100%; padding: 12px; background: var(--accent); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">إنشاء الحساب</button>
-            </form>
+        <div class="auth-wrapper">
+            <div class="auth-card">
+                <h2 style="color: var(--accent);">إنشاء حساب جديد</h2>
+                <form id="regForm">
+                    <div class="input-group">
+                        <label>الاسم الكامل</label>
+                        <input type="text" id="userNameInput" placeholder="خالد البغدادي" required>
+                    </div>
+                    <div class="input-group">
+                        <label>البريد الإلكتروني</label>
+                        <input type="email" id="email" placeholder="mail@example.com" required>
+                    </div>
+                    <div class="input-group">
+                        <label>كلمة المرور</label>
+                        <input type="password" id="pass" placeholder="••••••••" required>
+                    </div>
+                    <button type="submit" class="theme-btn" style="width: 100%; padding: 12px; font-size: 16px;">إنشاء الحساب</button>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -39,20 +50,23 @@
             const pass = document.getElementById('pass').value;
 
             try {
+                // إنشاء الحساب في Authentication
                 const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
                 const user = userCredential.user;
                 
-                // حفظ البيانات الأولية في قاعدة البيانات
+                // حفظ بيانات المريض في Realtime Database باستخدام الـ UID كعنوان فريد
                 await set(ref(db, 'patients/' + user.uid), {
                     name: name,
                     bloodType: "لم يحدد",
-                    conditions: "لا يوجد ملاحظات حالياً",
+                    conditions: "لا توجد ملاحظات",
                     email: email
                 });
 
-                alert("تم التسجيل بنجاح!");
+                alert("تم إنشاء حسابك بنجاح!");
+                // التوجه للرابط الخاص بالمستخدم
                 window.location.href = `profile.html?id=${user.uid}`;
             } catch (err) {
+                console.error(err);
                 alert("خطأ: " + err.message);
             }
         };
