@@ -1,119 +1,119 @@
 :root {
-    --bg-gradient: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%);
-    --card-bg: rgba(255, 255, 255, 0.9);
-    --text-main: #2d3748;
-    --text-muted: #4a5568;
-    --accent: #3e8fff;
-    --border: #cbd5e0;
+    --primary: #6366f1;
+    --secondary: #a855f7;
+    --accent: #22d3ee;
+    --bg-dark: #0f172a;
+    --glass: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --text-main: #f8fafc;
 }
 
-[data-theme="dark"] {
-    --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-    --card-bg: rgba(30, 41, 59, 0.9);
-    --text-main: #f1f5f9;
-    --text-muted: #94a3b8;
-    --border: #334155;
-}
+* { margin: 0; padding: 0; box-box-sizing: border-box; }
 
 body {
     direction: rtl;
-    background: var(--bg-gradient);
-    background-attachment: fixed;
+    background: radial-gradient(circle at top right, #1e1b4b, #0f172a);
     color: var(--text-main);
-    font-family: 'Segoe UI', sans-serif;
-    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     min-height: 100vh;
-    transition: 0.5s;
+    overflow-x: hidden;
 }
 
-.container { width: 92%; max-width: 1200px; margin: 0 auto; padding: 20px 0; }
+/* انميشن دخول الصفحة */
+.page-fade {
+    animation: fadeIn 0.8s ease-out;
+}
 
-.navbar-modern {
-    background: var(--card-bg);
-    backdrop-filter: blur(10px);
-    padding: 15px 30px;
-    border-radius: 20px;
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.container { width: 90%; max-width: 1100px; margin: 0 auto; padding: 20px; }
+
+/* الهيدر العصري */
+.navbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border: 1px solid var(--border);
+    padding: 20px 0;
     margin-bottom: 30px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
 }
 
-.nav-links { display: flex; align-items: center; gap: 20px; }
-.nav-item { text-decoration: none; color: var(--text-main); font-weight: 600; transition: 0.3s; }
-.nav-item.active { color: var(--accent); }
+.nav-brand {
+    font-size: 28px;
+    font-weight: 800;
+    background: linear-gradient(to left, var(--accent), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
 
-.theme-btn {
-    background: var(--accent);
-    color: white;
-    border: none;
+.nav-links { display: flex; gap: 15px; }
+
+.nav-item {
+    text-decoration: none;
+    color: #94a3b8;
+    font-weight: 500;
+    transition: 0.3s;
     padding: 8px 15px;
-    border-radius: 50px;
-    cursor: pointer;
-    font-size: 12px;
+    border-radius: 8px;
 }
 
-.welcome-card {
-    background: var(--card-bg);
-    border-radius: 25px;
+.nav-item:hover, .nav-item.active {
+    color: white;
+    background: var(--glass);
+}
+
+/* بطاقات التصميم الزجاجي */
+.glass-card {
+    background: var(--glass);
+    backdrop-filter: blur(15px);
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
     padding: 40px;
-    display: flex;
-    align-items: center;
-    border: 1px solid var(--border);
-    margin-bottom: 40px;
-    gap: 30px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
 
-.welcome-image img { width: 400px; border-radius: 20px; }
-
-.news-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; }
-
-.info-card { background: var(--card-bg); border-radius: 20px; border: 1px solid var(--border); overflow: hidden; transition: 0.3s; }
-.card-img { width: 100%; height: 200px; object-fit: cover; }
-.card-body { padding: 20px; }
-
-/* استجابة الجوال */
-@media (max-width: 768px) {
-    .navbar-modern { flex-direction: column-reverse; gap: 15px; text-align: center; }
-    .welcome-card { flex-direction: column; text-align: center; }
-    .welcome-image img { width: 100%; }
-}
-
-
-/* تنسيق موحد لبطاقات التسجيل والدخول */
-.auth-wrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 70vh;
-    padding: 20px;
-}
-
-.auth-card {
-    background: var(--card-bg);
-    backdrop-filter: blur(10px);
-    border: 1px solid var(--border);
-    padding: 40px;
-    border-radius: 25px;
+/* المدخلات والأزرار */
+.input-group { margin-bottom: 20px; }
+.input-group label { display: block; margin-bottom: 8px; color: #94a3b8; }
+.input-style {
     width: 100%;
-    max-width: 450px; /* عرض مناسب جداً للكمبيوتر والجوال */
-    box-shadow: 0 15px 35px rgba(0,0,0,0.05);
-    text-align: center;
-}
-
-.input-group {
-    text-align: right;
-    margin-bottom: 20px;
-}
-
-.input-group input {
-    width: 100%;
-    padding: 12px;
-    margin-top: 8px;
+    padding: 14px;
+    background: rgba(0,0,0,0.2);
+    border: 1px solid var(--glass-border);
     border-radius: 12px;
-    border: 1px solid var(--border);
-    background: white;
-    color: var(--text-main);
+    color: white;
+    outline: none;
+    transition: 0.3s;
 }
+.input-style:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.2); }
+
+.main-btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+.main-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(99, 102, 241, 0.4); }
+
+/* مربعات الأمراض */
+.disease-tag {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(168, 85, 247, 0.2);
+    border: 1px solid var(--secondary);
+    padding: 6px 12px;
+    border-radius: 10px;
+    margin: 5px;
+    font-size: 14px;
+    animation: pop 0.3s ease;
+}
+@keyframes pop { from { scale: 0.8; opacity: 0; } to { scale: 1; opacity: 1; } }
+
+.remove-btn { margin-right: 8px; cursor: pointer; color: #ef4444; font-weight: bold; }
