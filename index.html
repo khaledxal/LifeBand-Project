@@ -23,13 +23,13 @@
                 <h1 style="font-size: clamp(2.5rem, 5vw, 4rem); line-height: 1.1; margin-bottom: 20px;">
                     أمانك الصحي.. <br><span style="color: var(--accent);">في معصمك.</span>
                 </h1>
-                <p style="color: #94a3b8; font-size: 1.1rem; margin-bottom: 35px; max-width: 500px;">
+                <p style="color: var(--text-main); opacity: 0.8; font-size: 1.1rem; margin-bottom: 35px; max-width: 500px;">
                     نظام LifeBand المتطور يربط ملفك الطبي بتقنية NFC لضمان وصول الرعاية والبيانات للمسعفين فوراً عند الطوارئ.
                 </p>
-                <a href="register.html" class="main-btn" style="width: auto; padding: 18px 45px; display: inline-block;">ابدأ رحلتك الآن</a>
+                <a href="register.html" class="main-btn" style="width: auto; padding: 18px 45px; display: inline-block; text-decoration: none;">ابدأ رحلتك الآن</a>
             </div>
             <div style="flex: 1; min-width: 300px; text-align: center;">
-                <img src="https://cdn-icons-png.flaticon.com/512/2864/2864350.png" style="width: 70%; filter: drop-shadow(0 0 40px var(--primary));" alt="Hero">
+                <img src="https://cdn-icons-png.flaticon.com/512/2864/2864350.png" style="width: 75%; filter: drop-shadow(0 0 40px var(--primary));" alt="Hero Image">
             </div>
         </main>
     </div>
@@ -38,16 +38,10 @@
         import { auth } from './js/firebase-config.js';
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        // كود تبديل الوضع (Theme Toggle)
         const themeBtn = document.getElementById('themeBtn');
-        
-        // التحقق من الوضع المفضل المخزن مسبقاً
-        if (localStorage.getItem('theme') === 'dark') {
-            document.body.setAttribute('data-theme', 'dark');
-            themeBtn.innerText = '☀️';
-        }
 
-        themeBtn.onclick = () => {
+        // وظيفة تبديل الثيم وحفظ الخيار في المتصفح
+        function toggleTheme() {
             const isDark = document.body.getAttribute('data-theme') === 'dark';
             if (isDark) {
                 document.body.removeAttribute('data-theme');
@@ -58,25 +52,30 @@
                 themeBtn.innerText = '☀️';
                 localStorage.setItem('theme', 'dark');
             }
-        };
+        }
 
-        // إدارة القائمة بناءً على حالة تسجيل الدخول
+        // استعادة الثيم المفضل عند تحميل الصفحة
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.setAttribute('data-theme', 'dark');
+            themeBtn.innerText = '☀️';
+        }
+
+        themeBtn.onclick = toggleTheme;
+
+        // تحديث القائمة العلوية بناءً على حالة تسجيل الدخول
         onAuthStateChanged(auth, (user) => {
             const navLinks = document.getElementById('dynamic-nav');
             if (user) {
+                const currentThemeIcon = document.body.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
                 navLinks.innerHTML = `
                     <a href="tips.html" class="nav-item">نصائح طبية</a>
                     <a href="profile.html?id=${user.uid}" class="nav-item active">ملفي الطبي</a>
                     <button id="logoutBtn" class="nav-item" style="background:none; border:none; cursor:pointer;">خروج</button>
-                    <button id="themeBtn" class="theme-toggle">${document.body.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙'}</button>
+                    <button id="themeBtnDynamic" class="theme-toggle">${currentThemeIcon}</button>
                 `;
                 
-                // إعادة ربط حدث الضغط للزر بعد تحديث الـ HTML
-                document.getElementById('themeBtn').onclick = themeBtn.onclick;
-
-                document.getElementById('logoutBtn').onclick = () => {
-                    signOut(auth).then(() => location.reload());
-                };
+                document.getElementById('themeBtnDynamic').onclick = toggleTheme;
+                document.getElementById('logoutBtn').onclick = () => signOut(auth).then(() => location.reload());
             }
         });
     </script>
