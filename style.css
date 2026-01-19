@@ -3,7 +3,7 @@
     --secondary: #a855f7;
     --accent: #00d4ff;
     /* ألوان الوضع الصباحي المعززة للوضوح */
-    --bg-main: radial-gradient(circle at top right, #4b4b4b, #575757); 
+    --bg-main: radial-gradient(circle at top right, #3b3b3b, #383838); 
     --glass: rgba(255, 255, 255, 0.85);
     --glass-border: rgba(99, 99, 99, 0.103);
     --text-main: #0f172a;
