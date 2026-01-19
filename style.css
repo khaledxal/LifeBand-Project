@@ -4,7 +4,7 @@
     --accent: #00d4ff;
     /* تحسين وضوح الخلفية والأنميشن في الوضع الصباحي */
     --bg-main: radial-gradient(circle at top right, #d8d8d8, #fffafa); 
-    --glass: rgba(255, 255, 255, 0.85);
+    --glass: rgba(70, 70, 70, 0.85);
     --glass-border: rgba(99, 99, 99, 0.103);
     --text-main: #0f172a;
     --input-bg: #ffffff;
