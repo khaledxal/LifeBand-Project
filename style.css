@@ -115,3 +115,16 @@ body {
 }
 @keyframes pop { from { scale: 0.8; opacity: 0; } to { scale: 1; opacity: 1; } }
 .remove-btn { margin-right: 8px; cursor: pointer; color: #ef4444; font-weight: bold; }
+
+
+/* تحسين شكل بطاقات النصائح */
+.glass-card:hover {
+    border-color: var(--accent);
+    box-shadow: 0 0 20px rgba(34, 211, 238, 0.2);
+}
+
+/* تعديل الهيدر ليكون متجاوباً أكثر */
+@media (max-width: 768px) {
+    .navbar { flex-direction: column; gap: 15px; }
+    .nav-links { font-size: 14px; }
+}

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LifeBand - نصائح طبية</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="page-fade">
+    <div class="container">
+        <header class="navbar">
+            <a href="index.html" class="nav-brand">LifeBand</a>
+            <div class="nav-links">
+                <a href="index.html" class="nav-item">الرئيسية</a>
+                <a href="tips.html" class="nav-item active">نصائح طبية</a>
+            </div>
+        </header>
+
+        <main>
+            <div style="text-align: center; margin-bottom: 50px;">
+                <h1 style="color: var(--accent); margin-bottom: 15px;">دليلك لحياة صحية</h1>
+                <p style="color: #94a3b8;">نصائح طبية سريعة لتعزيز نشاطك اليومي وحمايتك.</p>
+            </div>
+
+            <div id="tipsGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px;">
+                </div>
+        </main>
+    </div>
+
+    <script>
+        const tips = [
+            { 
+                title: "شرب الماء", 
+                content: "شرب 8 أكواب يومياً يحسن وظائف الكلى وينظف الجسم من السموم.", 
+                icon: "💧", 
+                img: "https://images.pexels.com/photos/1452115/pexels-photo-1452115.jpeg?auto=compress&cs=tinysrgb&w=400" 
+            },
+            { 
+                title: "النوم العميق", 
+                content: "النوم لـ 7-8 ساعات يعزز المناعة ويقوي الذاكرة والقدرة الذهنية.", 
+                icon: "🌙", 
+                img: "https://images.pexels.com/photos/3771069/pexels-photo-3771069.jpeg?auto=compress&cs=tinysrgb&w=400" 
+            },
+            { 
+                title: "النشاط البدني", 
+                content: "المشي لمدة 30 دقيقة يقلل مخاطر أمراض القلب بنسبة كبيرة.", 
+                icon: "🏃‍♂️", 
+                img: "https://images.pexels.com/photos/601177/pexels-photo-601177.jpeg?auto=compress&cs=tinysrgb&w=400" 
+            },
+            { 
+                title: "الخضروات الورقية", 
+                content: "غنية بالألياف والفيتامينات التي تدعم صحة الجهاز الهضمي.", 
+                icon: "🥗", 
+                img: "https://images.pexels.com/photos/1143754/pexels-photo-1143754.jpeg?auto=compress&cs=tinysrgb&w=400" 
+            }
+        ];
+
+        document.getElementById('tipsGrid').innerHTML = tips.map(tip => `
+            <div class="glass-card" style="padding: 0; overflow: hidden; transition: 0.4s; cursor: pointer;" onmouseover="this.style.transform='translateY(-10px)'" onmouseout="this.style.transform='translateY(0)'">
+                <img src="${tip.img}" style="width: 100%; height: 180px; object-fit: cover; opacity: 0.8;" alt="${tip.title}">
+                <div style="padding: 20px;">
+                    <div style="font-size: 24px; margin-bottom: 10px;">${tip.icon}</div>
+                    <h3 style="color: var(--accent); margin-bottom: 10px;">${tip.title}</h3>
+                    <p style="color: #94a3b8; font-size: 14px; line-height: 1.6;">${tip.content}</p>
+                </div>
+            </div>
+        `).join('');
+    </script>
+</body>
+</html>
