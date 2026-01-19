@@ -3,147 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>الملف الطبي الشامل - LifeBand</title>
+    <title>الملف الطبي - LifeBand</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="page-fade">
+    <div class="bg-animation"></div>
+
     <div class="container">
-    <header class="navbar">
-    <a href="index.html" class="nav-brand">LifeBand</a>
-    <div class="nav-links">
-        <a href="tips.html" class="nav-item">نصائح طبية</a> <button id="showUrlBtn" class="nav-item" style="background: var(--glass); border: none; cursor: pointer; color: var(--accent); font-weight: bold; display:none;">🔗 رابط السوار</button>
-    </div>
-</header>
-        <main class="glass-card" style="max-width: 650px; margin: 0 auto;">
-            <div id="loader" style="text-align: center; padding: 40px;">
-                <div style="border: 4px solid var(--glass); border-top: 4px solid var(--accent); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px;"></div>
-                <p>جاري مزامنة بياناتك الآمنة...</p>
+        <header class="navbar">
+            <a href="index.html" class="nav-brand">LifeBand</a>
+            <div class="nav-links">
+                <a href="index.html" class="nav-item">الرئيسية</a>
+                <a href="tips.html" class="nav-item">نصائح طبية</a>
+                <button id="themeBtn" class="theme-toggle">🌙</button>
             </div>
-            
-            <div id="profile-content" style="display: none;">
-                <div style="text-align: center; margin-bottom: 30px;">
-                    <h2 id="viewName" style="font-size: 28px; color: var(--accent);">اسم المستخدم</h2>
-                    <p style="color: #64748b; font-size: 13px; margin-top: 5px;">رقم الملف الرقمي: <span id="userIdDisplay"></span></p>
-                </div>
+        </header>
 
-                <div class="input-group">
-                    <label>رقم الهوية / الإقامة</label>
-                    <input type="text" id="idNo" class="input-style" readonly placeholder="لم يتم الإدخال">
-                </div>
+        <main style="display: flex; justify-content: center; padding-top: 20px;">
+            <div class="glass-card" style="width: 100%; max-width: 500px;">
+                <h2 style="color: var(--primary); margin-bottom: 20px; text-align: center;">الملف الطبي الشخصي</h2>
+                
+                <div id="profileContent">
+                    <div class="input-group" style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: bold;">الاسم الكامل:</label>
+                        <input type="text" id="userName" class="input-style">
+                    </div>
 
-                <div class="input-group">
-                    <label>فصيلة الدم</label>
-                    <select id="blood" class="input-style" disabled>
-                        <option value="غير محدد">اختر الفصيلة</option>
-                        <option value="A+">A+</option><option value="O+">O+</option><option value="B+">B+</option><option value="AB+">AB+</option>
-                        <option value="A-">A-</option><option value="O-">O-</option><option value="B-">B-</option><option value="AB-">AB-</option>
-                    </select>
-                </div>
+                    <div class="input-group" style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: bold;">فصيلة الدم:</label>
+                        <select id="userBlood" class="input-style">
+                            <option value="A+">A+</option>
+                            <option value="A-">A-</option>
+                            <option value="B+">B+</option>
+                            <option value="B-">B-</option>
+                            <option value="O+">O+</option>
+                            <option value="O-">O-</option>
+                            <option value="AB+">AB+</option>
+                            <option value="AB-">AB-</option>
+                        </select>
+                    </div>
 
-                <div class="input-group">
-                    <label>الأمراض والحساسية (المسجلة)</label>
-                    <div id="diseaseContainer" style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 12px; min-height: 60px; margin-bottom: 10px;"></div>
-                    <div id="addArea" style="display: none; gap: 10px;">
-                        <input type="text" id="diseaseInput" class="input-style" style="flex: 1;" placeholder="أضف مرض أو حساسية...">
-                        <button id="addBtn" class="main-btn" style="width: auto; padding: 10px 20px;">إضافة</button>
+                    <div class="input-group" style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: bold;">الحالة الصحية / الحساسية:</label>
+                        <textarea id="userCondition" class="input-style" style="height: 100px; resize: none;"></textarea>
+                    </div>
+
+                    <div style="display: flex; gap: 10px;">
+                        <button id="saveBtn" class="main-btn">حفظ التغييرات</button>
+                        <button id="exportBtn" class="main-btn" style="background: var(--accent);">استخراج البيانات</button>
                     </div>
                 </div>
-
-                <div class="input-group">
-                    <label>رقم الطوارئ للتواصل</label>
-                    <input type="tel" id="emergency" class="input-style" readonly placeholder="أدخل رقم شخص قريب">
-                </div>
-
-                <button id="saveBtn" class="main-btn" style="display: none; margin-top: 30px;">حفظ التغييرات بالملف ✅</button>
             </div>
         </main>
     </div>
-
-    <div id="urlModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); z-index: 1000; align-items: center; justify-content: center;">
-        <div class="glass-card" style="width: 90%; max-width: 450px; text-align: center;">
-            <h3 style="color: var(--accent);">رابط سوار LifeBand</h3>
-            <p style="font-size: 14px; color: #94a3b8; margin: 15px 0;">انسخ هذا الرابط وقم ببرمجته داخل شريحة NFC السوار الخاص بك.</p>
-            <div id="copyArea" style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 12px; word-break: break-all; margin-bottom: 25px; color: white; border: 1px dashed var(--accent); font-family: monospace;"></div>
-            <button onclick="copyLink()" class="main-btn">نسخ الرابط الآن</button>
-            <button onclick="document.getElementById('urlModal').style.display='none'" style="margin-top: 15px; background: none; border: none; color: #ef4444; cursor: pointer;">إغلاق النافذة</button>
-        </div>
-    </div>
-
-    <style> @keyframes spin { 100% { transform: rotate(360deg); } } </style>
 
     <script type="module">
         import { db, auth } from './js/firebase-config.js';
         import { ref, get, set, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
         import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        const urlParams = new URLSearchParams(window.location.search);
-        const pid = urlParams.get('id');
-        let diseaseList = [];
-
-        function renderDiseases(editable) {
-            const container = document.getElementById('diseaseContainer');
-            container.innerHTML = diseaseList.length === 0 ? '<p style="color:#64748b; font-size:13px; text-align:center;">لا توجد بيانات مسجلة حالياً</p>' : '';
-            diseaseList.forEach((d, i) => {
-                const tag = document.createElement('div');
-                tag.className = 'disease-tag';
-                tag.innerHTML = `<span>${d}</span> ${editable ? `<span class="remove-btn" onclick="window.delD(${i})">×</span>` : ''}`;
-                container.appendChild(tag);
-            });
+        // --- 1. نظام تبديل المود ---
+        const themeBtn = document.getElementById('themeBtn');
+        function applyTheme(theme) {
+            if (theme === 'dark') {
+                document.body.setAttribute('data-theme', 'dark');
+                themeBtn.innerText = '☀️';
+            } else {
+                document.body.removeAttribute('data-theme');
+                themeBtn.innerText = '🌙';
+            }
         }
-
-        window.delD = (i) => { diseaseList.splice(i, 1); renderDiseases(true); };
-
-        if (pid) {
-            document.getElementById('userIdDisplay').innerText = pid.substring(0, 8) + "...";
-            get(child(ref(db), `patients/${pid}`)).then((snap) => {
-                document.getElementById('loader').style.display = 'none';
-                document.getElementById('profile-content').style.display = 'block';
-                if (snap.exists()) {
-                    const d = snap.val();
-                    document.getElementById('viewName').innerText = d.name;
-                    document.getElementById('idNo').value = d.idNo || '';
-                    document.getElementById('blood').value = d.bloodType || 'غير محدد';
-                    document.getElementById('emergency').value = d.emergency || '';
-                    diseaseList = d.diseases || [];
-                    renderDiseases(false);
-                }
-            });
-
-            onAuthStateChanged(auth, (user) => {
-                if (user && user.uid === pid) {
-                    document.getElementById('owner-tools').style.display = 'block';
-                    document.getElementById('saveBtn').style.display = 'block';
-                    document.getElementById('addArea').style.display = 'flex';
-                    document.querySelectorAll('.input-style').forEach(el => { el.removeAttribute('readonly'); el.removeAttribute('disabled'); });
-                    renderDiseases(true);
-                    
-                    document.getElementById('showUrlBtn').onclick = () => {
-                        document.getElementById('copyArea').innerText = window.location.href;
-                        document.getElementById('urlModal').style.display = 'flex';
-                    };
-                }
-            });
-        }
-
-        document.getElementById('addBtn').onclick = () => {
-            const val = document.getElementById('diseaseInput').value.trim();
-            if(val) { diseaseList.push(val); document.getElementById('diseaseInput').value=''; renderDiseases(true); }
+        applyTheme(localStorage.getItem('theme') || 'light');
+        themeBtn.onclick = () => {
+            const newTheme = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('theme', newTheme);
+            applyTheme(newTheme);
         };
 
-        document.getElementById('saveBtn').onclick = async () => {
-            await set(ref(db, 'patients/' + pid), {
-                name: document.getElementById('viewName').innerText,
-                idNo: document.getElementById('idNo').value,
-                bloodType: document.getElementById('blood').value,
-                emergency: document.getElementById('emergency').value,
-                diseases: diseaseList
-            });
-            alert("تم حفظ ملفك بنجاح! الرابط جاهز للبرمجة الآن ✅");
+        // --- 2. جلب البيانات من Firebase ---
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                const dbRef = ref(db);
+                get(child(dbRef, `patients/${user.uid}`)).then((snapshot) => {
+                    if (snapshot.exists()) {
+                        const data = snapshot.val();
+                        document.getElementById('userName').value = data.name || "";
+                        document.getElementById('userBlood').value = data.bloodType || "O+";
+                        document.getElementById('userCondition').value = data.conditions || "";
+                    }
+                });
+            } else {
+                window.location.href = "login.html";
+            }
+        });
+
+        // --- 3. حفظ البيانات المحدثة ---
+        document.getElementById('saveBtn').onclick = () => {
+            const user = auth.currentUser;
+            if (user) {
+                const newData = {
+                    name: document.getElementById('userName').value,
+                    bloodType: document.getElementById('userBlood').value,
+                    conditions: document.getElementById('userCondition').value
+                };
+                set(ref(db, 'patients/' + user.uid), newData)
+                    .then(() => alert("تم حفظ البيانات بنجاح!"))
+                    .catch(() => alert("فشل في الحفظ، حاول مجدداً."));
+            }
         };
 
-        window.copyLink = () => {
-            navigator.clipboard.writeText(window.location.href);
-            alert("تم نسخ الرابط! يمكنك لصقه في تطبيق برمجة السوار.");
+        // --- 4. استخراج البيانات كملف نصي ---
+        document.getElementById('exportBtn').onclick = () => {
+            const name = document.getElementById('userName').value;
+            const blood = document.getElementById('userBlood').value;
+            const conditions = document.getElementById('userCondition').value;
+            
+            const content = `الملف الطبي - LifeBand\n------------------\nالاسم: ${name}\nفصيلة الدم: ${blood}\nالحالة الصحية: ${conditions}`;
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Medical_Profile_${name}.txt`;
+            a.click();
         };
     </script>
 </body>
