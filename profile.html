@@ -3,79 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>الملف الطبي الشامل - LifeBand</title>
+    <title>ملفك الطبي - LifeBand</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        .medical-form { background: var(--card-bg); padding: 25px; border-radius: 20px; border: 1px solid var(--border); max-width: 500px; margin: 20px auto; position: relative; }
-        .input-field { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid var(--border); background: rgba(255,255,255,0.1); color: var(--text-main); font-size: 16px; }
-        .label-text { font-weight: bold; color: var(--accent); display: block; margin-top: 15px; }
-        
-        /* تنسيق مربعات الأمراض */
-        .disease-item { background: rgba(62, 143, 255, 0.1); border: 1px solid var(--accent); padding: 8px 15px; border-radius: 8px; display: inline-flex; align-items: center; gap: 10px; margin: 5px; font-size: 14px; }
-        .remove-disease { color: #ff4757; cursor: pointer; font-weight: bold; display: none; }
-        .add-disease-container { display: flex; gap: 5px; margin-top: 10px; }
-        .add-btn { background: var(--accent); color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; }
-        
-        /* أزرار الإجراءات */
-        .action-btns { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
-        .save-btn { width: 100%; padding: 15px; background: #2ecc71; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; display: none; }
-        .share-link-btn { width: 100%; padding: 12px; background: #3498db; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; display: none; }
-
-        /* نافذة عرض الرابط */
-        #linkModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center; }
-        .modal-content { background: var(--card-bg); padding: 30px; border-radius: 20px; text-align: center; max-width: 90%; width: 400px; border: 1px solid var(--border); }
-        .url-box { background: #f0f0f0; padding: 10px; border-radius: 8px; word-break: break-all; margin: 15px 0; border: 1px dashed #3498db; color: #333; font-size: 14px; }
-    </style>
 </head>
-<body>
+<body class="page-fade">
     <div class="container">
-        <header class="navbar-modern">
-            <div class="nav-links"><a href="index.html" class="nav-item">الرئيسية</a></div>
-            <div class="nav-brand">LifeBand</div>
+        <header class="navbar">
+            <a href="index.html" class="nav-brand" style="text-decoration: none;">LifeBand</a>
+            <div id="owner-tools" style="display: none;">
+                <button id="showUrlBtn" class="nav-item" style="background: var(--glass); border: none; cursor: pointer; color: var(--accent);">🔗 رابط السوار</button>
+            </div>
         </header>
 
-        <main class="medical-form">
-            <h2 style="text-align: center; color: var(--accent);">الملف الطبي الذكي</h2>
+        <main class="glass-card" style="max-width: 600px; margin: 0 auto;">
+            <div id="loader" style="text-align: center;">جاري مزامنة بياناتك الآمنة...</div>
             
-            <label class="label-text">الاسم الكامل:</label>
-            <input type="text" id="userName" class="input-field" readonly>
+            <div id="profile-content" style="display: none;">
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <h2 id="viewName" style="font-size: 24px;">اسم المستخدم</h2>
+                    <span id="viewId" style="color: var(--accent); font-size: 14px;"></span>
+                </div>
 
-            <label class="label-text">رقم الهوية:</label>
-            <input type="text" id="userIdNo" class="input-field" placeholder="أدخل رقم الهوية" readonly>
+                <div class="input-group">
+                    <label>رقم الهوية / الإقامة</label>
+                    <input type="text" id="idNo" class="input-style" readonly>
+                </div>
 
-            <label class="label-text">فصيلة الدم:</label>
-            <select id="userBlood" class="input-field" disabled>
-                <option value="غير محدد">اختر الفصيلة</option>
-                <option value="A+">A+</option><option value="A-">A-</option>
-                <option value="B+">B+</option><option value="B-">B-</option>
-                <option value="O+">O+</option><option value="O-">O-</option>
-                <option value="AB+">AB+</option><option value="AB-">AB-</option>
-            </select>
+                <div class="input-group">
+                    <label>فصيلة الدم</label>
+                    <select id="blood" class="input-style" disabled>
+                        <option value="A+">A+</option><option value="O+">O+</option>
+                        <option value="B+">B+</option><option value="AB+">AB+</option>
+                        <option value="A-">A-</option><option value="O-">O-</option>
+                        <option value="B-">B-</option><option value="AB-">AB-</option>
+                    </select>
+                </div>
 
-            <label class="label-text">الأمراض والحساسية:</label>
-            <div id="diseasesList"></div>
-            <div id="addDiseaseSection" class="add-disease-container" style="display: none;">
-                <input type="text" id="diseaseInput" class="input-field" style="margin:0" placeholder="أضف مرض...">
-                <button type="button" class="add-btn" id="addBtn">إضافة</button>
-            </div>
+                <div class="input-group">
+                    <label>الأمراض والحساسية</label>
+                    <div id="diseaseContainer" style="margin-bottom: 10px;"></div>
+                    <div id="addArea" style="display: none; gap: 8px;">
+                        <input type="text" id="diseaseInput" class="input-style" style="flex: 1;" placeholder="مثال: حساسية قمح">
+                        <button id="addBtn" class="main-btn" style="width: auto; padding: 10px 20px;">إضافة</button>
+                    </div>
+                </div>
 
-            <label class="label-text">رقم الطوارئ:</label>
-            <input type="tel" id="emergencyContact" class="input-field" placeholder="رقم قريب للتواصل" readonly>
+                <div class="input-group">
+                    <label>رقم الطوارئ</label>
+                    <input type="tel" id="emergency" class="input-style" readonly>
+                </div>
 
-            <div class="action-btns">
-                <button id="saveBtn" class="save-btn">حفظ الملف بالكامل ✅</button>
-                <button id="shareLinkBtn" class="share-link-btn">عرض رابط ملفي الخاص 🔗</button>
+                <button id="saveBtn" class="main-btn" style="display: none; margin-top: 20px;">حفظ التغييرات ✅</button>
             </div>
         </main>
     </div>
 
-    <div id="linkModal">
-        <div class="modal-content">
-            <h3>رابط ملفك الطبي</h3>
-            <p>استخدم هذا الرابط لبرمجة شريحة الـ NFC الخاصة بك:</p>
-            <div id="profileUrl" class="url-box"></div>
-            <button class="add-btn" onclick="copyLink()">نسخ الرابط</button>
-            <button class="add-btn" style="background:#e74c3c; margin-top:10px;" onclick="closeModal()">إغلاق</button>
+    <div id="urlModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 100; align-items: center; justify-content: center;">
+        <div class="glass-card" style="width: 90%; max-width: 400px; text-align: center;">
+            <h3>رابط ملفك للسوار</h3>
+            <p style="font-size: 13px; color: #94a3b8; margin: 15px 0;">انسخ الرابط وبرمجه في شريحة NFC</p>
+            <div id="copyArea" style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; word-break: break-all; margin-bottom: 20px; color: var(--accent); font-family: monospace;"></div>
+            <button onclick="copyLink()" class="main-btn">نسخ الرابط</button>
+            <button onclick="document.getElementById('urlModal').style.display='none'" class="nav-item" style="margin-top: 10px; border: none; background: none; cursor: pointer;">إغلاق</button>
         </div>
     </div>
 
@@ -84,78 +73,73 @@
         import { ref, get, set, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
         import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        const params = new URLSearchParams(window.location.search);
-        const profileId = params.get('id');
-        let diseases = [];
+        const urlParams = new URLSearchParams(window.location.search);
+        const pid = urlParams.get('id');
+        let diseaseList = [];
 
-        function renderDiseases(isOwner) {
-            const list = document.getElementById('diseasesList');
-            list.innerHTML = diseases.length === 0 ? '<p style="font-size:12px; color:gray;">لا يوجد</p>' : '';
-            diseases.forEach((d, index) => {
-                const item = document.createElement('div');
-                item.className = 'disease-item';
-                item.innerHTML = `<span>${d}</span><span class="remove-disease" style="display: ${isOwner ? 'inline' : 'none'}" onclick="window.removeD(${index})">✖</span>`;
-                list.appendChild(item);
+        function renderDiseases(editable) {
+            const container = document.getElementById('diseaseContainer');
+            container.innerHTML = diseaseList.length === 0 ? '<p style="color:#64748b; font-size:13px;">لا يوجد أمراض مسجلة</p>' : '';
+            diseaseList.forEach((d, i) => {
+                const tag = document.createElement('div');
+                tag.className = 'disease-tag';
+                tag.innerHTML = `${d} ${editable ? `<span class="remove-btn" onclick="window.delD(${i})">×</span>` : ''}`;
+                container.appendChild(tag);
             });
         }
 
-        window.removeD = (idx) => { diseases.splice(idx, 1); renderDiseases(true); };
+        window.delD = (i) => { diseaseList.splice(i, 1); renderDiseases(true); };
 
-        if (profileId) {
-            get(child(ref(db), `patients/${profileId}`)).then((snapshot) => {
-                if (snapshot.exists()) {
-                    const data = snapshot.val();
-                    document.getElementById('userName').value = data.name || "";
-                    document.getElementById('userIdNo').value = data.idNo || "";
-                    document.getElementById('userBlood').value = data.bloodType || "غير محدد";
-                    document.getElementById('emergencyContact').value = data.emergency || "";
-                    diseases = data.diseases || [];
+        if (pid) {
+            get(child(ref(db), `patients/${pid}`)).then((snap) => {
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('profile-content').style.display = 'block';
+                if (snap.exists()) {
+                    const d = snap.val();
+                    document.getElementById('viewName').innerText = d.name;
+                    document.getElementById('idNo').value = d.idNo || '';
+                    document.getElementById('blood').value = d.bloodType || 'A+';
+                    document.getElementById('emergency').value = d.emergency || '';
+                    diseaseList = d.diseases || [];
                     renderDiseases(false);
+                }
+            });
+
+            onAuthStateChanged(auth, (user) => {
+                if (user && user.uid === pid) {
+                    document.getElementById('owner-tools').style.display = 'block';
+                    document.getElementById('saveBtn').style.display = 'block';
+                    document.getElementById('addArea').style.display = 'flex';
+                    document.querySelectorAll('.input-style').forEach(el => { el.removeAttribute('readonly'); el.removeAttribute('disabled'); });
+                    renderDiseases(true);
+                    
+                    document.getElementById('showUrlBtn').onclick = () => {
+                        document.getElementById('copyArea').innerText = window.location.href;
+                        document.getElementById('urlModal').style.display = 'flex';
+                    };
                 }
             });
         }
 
-        onAuthStateChanged(auth, (user) => {
-            if (user && user.uid === profileId) {
-                document.getElementById('saveBtn').style.display = "block";
-                document.getElementById('shareLinkBtn').style.display = "block";
-                document.getElementById('addDiseaseSection').style.display = "flex";
-                document.querySelectorAll('.input-field').forEach(i => { i.removeAttribute('readonly'); i.removeAttribute('disabled'); });
-                renderDiseases(true);
+        document.getElementById('addBtn').onclick = () => {
+            const val = document.getElementById('diseaseInput').value.trim();
+            if(val) { diseaseList.push(val); document.getElementById('diseaseInput').value=''; renderDiseases(true); }
+        };
 
-                document.getElementById('addBtn').onclick = () => {
-                    const val = document.getElementById('diseaseInput').value.trim();
-                    if (val) { diseases.push(val); document.getElementById('diseaseInput').value = ''; renderDiseases(true); }
-                };
+        document.getElementById('saveBtn').onclick = async () => {
+            await set(ref(db, 'patients/' + pid), {
+                name: document.getElementById('viewName').innerText,
+                idNo: document.getElementById('idNo').value,
+                bloodType: document.getElementById('blood').value,
+                emergency: document.getElementById('emergency').value,
+                diseases: diseaseList
+            });
+            alert("تم تحديث ملفك بنجاح ✅");
+        };
 
-                document.getElementById('saveBtn').onclick = async () => {
-                    const updatedData = {
-                        name: document.getElementById('userName').value,
-                        idNo: document.getElementById('userIdNo').value,
-                        bloodType: document.getElementById('userBlood').value,
-                        emergency: document.getElementById('emergencyContact').value,
-                        diseases: diseases,
-                        email: user.email
-                    };
-                    await set(ref(db, 'patients/' + user.uid), updatedData);
-                    alert("تم حفظ الملف! يمكنك الآن الضغط على زر عرض الرابط.");
-                };
-
-                // فتح نافذة الرابط
-                document.getElementById('shareLinkBtn').onclick = () => {
-                    const fullUrl = window.location.href;
-                    document.getElementById('profileUrl').innerText = fullUrl;
-                    document.getElementById('linkModal').style.display = "flex";
-                };
-            }
-        });
-
-        // دوال النافذة
-        window.closeModal = () => document.getElementById('linkModal').style.display = "none";
         window.copyLink = () => {
-            const url = document.getElementById('profileUrl').innerText;
-            navigator.clipboard.writeText(url);
-            alert("تم نسخ الرابط بنجاح!");
+            navigator.clipboard.writeText(window.location.href);
+            alert("تم النسخ!");
         };
     </script>
 </body>
