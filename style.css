@@ -4,10 +4,10 @@
     --accent: #00d4ff;
     /* تحسين وضوح الخلفية والأنميشن في الوضع الصباحي */
     --bg-main: radial-gradient(circle at top right, #ffffff, #dbeafe); 
-    --glass: rgba(255, 255, 255, 0.85);
+    --glass: rgba(0, 0, 0, 0.85);
     --glass-border: rgba(99, 102, 241, 0.2);
     --text-main: #0f172a;
-    --input-bg: #ffffff;
+    --input-bg: #000000;
 }
 
 [data-theme="dark"] {
