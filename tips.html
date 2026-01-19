@@ -59,9 +59,9 @@
             }
         ];
 
-        // عرض النصائح في الصفحة
+        // عرض النصائح في الصفحة مع تأثيرات Glassmorphism
         document.getElementById('tipsGrid').innerHTML = tips.map(tip => `
-            <div class="glass-card" style="padding: 0; overflow: hidden; transition: 0.4s;">
+            <div class="glass-card" style="padding: 0; overflow: hidden; transition: 0.4s; border: 1px solid var(--glass-border);">
                 <img src="${tip.img}" style="width: 100%; height: 180px; object-fit: cover; opacity: 0.9;" alt="${tip.title}">
                 <div style="padding: 20px;">
                     <div style="font-size: 24px; margin-bottom: 10px;">${tip.icon}</div>
@@ -71,30 +71,28 @@
             </div>
         `).join('');
 
-        // كود تبديل المود (Theme Toggle) الموحد
+        // كود تبديل المود (Theme Toggle) الموحد والفعال
         const themeBtn = document.getElementById('themeBtn');
 
-        function updateBtnIcon() {
-            const isDark = document.body.getAttribute('data-theme') === 'dark';
-            themeBtn.innerText = isDark ? '☀️' : '🌙';
+        function applyTheme(theme) {
+            if (theme === 'dark') {
+                document.body.setAttribute('data-theme', 'dark');
+                themeBtn.innerText = '☀️';
+            } else {
+                document.body.removeAttribute('data-theme');
+                themeBtn.innerText = '🌙';
+            }
         }
 
-        // استعادة الوضع المفضل
-        if (localStorage.getItem('theme') === 'dark') {
-            document.body.setAttribute('data-theme', 'dark');
-            updateBtnIcon();
-        }
+        // استعادة الوضع المفضل من ذاكرة المتصفح فور التحميل
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        applyTheme(savedTheme);
 
         themeBtn.onclick = () => {
             const isDark = document.body.getAttribute('data-theme') === 'dark';
-            if (isDark) {
-                document.body.removeAttribute('data-theme');
-                localStorage.setItem('theme', 'light');
-            } else {
-                document.body.setAttribute('data-theme', 'dark');
-                localStorage.setItem('theme', 'dark');
-            }
-            updateBtnIcon();
+            const newTheme = isDark ? 'light' : 'dark';
+            localStorage.setItem('theme', newTheme);
+            applyTheme(newTheme);
         };
     </script>
 </body>
