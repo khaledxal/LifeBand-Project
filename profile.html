@@ -3,70 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ملفك الطبي - LifeBand</title>
+    <title>الملف الطبي الشامل - LifeBand</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="page-fade">
     <div class="container">
         <header class="navbar">
-            <a href="index.html" class="nav-brand" style="text-decoration: none;">LifeBand</a>
+            <a href="index.html" class="nav-brand">LifeBand</a>
             <div id="owner-tools" style="display: none;">
-                <button id="showUrlBtn" class="nav-item" style="background: var(--glass); border: none; cursor: pointer; color: var(--accent);">🔗 رابط السوار</button>
+                <button id="showUrlBtn" class="nav-item" style="background: var(--glass); border: none; cursor: pointer; color: var(--accent); font-weight: bold;">🔗 رابط السوار</button>
             </div>
         </header>
 
-        <main class="glass-card" style="max-width: 600px; margin: 0 auto;">
-            <div id="loader" style="text-align: center;">جاري مزامنة بياناتك الآمنة...</div>
+        <main class="glass-card" style="max-width: 650px; margin: 0 auto;">
+            <div id="loader" style="text-align: center; padding: 40px;">
+                <div style="border: 4px solid var(--glass); border-top: 4px solid var(--accent); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px;"></div>
+                <p>جاري مزامنة بياناتك الآمنة...</p>
+            </div>
             
             <div id="profile-content" style="display: none;">
                 <div style="text-align: center; margin-bottom: 30px;">
-                    <h2 id="viewName" style="font-size: 24px;">اسم المستخدم</h2>
-                    <span id="viewId" style="color: var(--accent); font-size: 14px;"></span>
+                    <h2 id="viewName" style="font-size: 28px; color: var(--accent);">اسم المستخدم</h2>
+                    <p style="color: #64748b; font-size: 13px; margin-top: 5px;">رقم الملف الرقمي: <span id="userIdDisplay"></span></p>
                 </div>
 
                 <div class="input-group">
                     <label>رقم الهوية / الإقامة</label>
-                    <input type="text" id="idNo" class="input-style" readonly>
+                    <input type="text" id="idNo" class="input-style" readonly placeholder="لم يتم الإدخال">
                 </div>
 
                 <div class="input-group">
                     <label>فصيلة الدم</label>
                     <select id="blood" class="input-style" disabled>
-                        <option value="A+">A+</option><option value="O+">O+</option>
-                        <option value="B+">B+</option><option value="AB+">AB+</option>
-                        <option value="A-">A-</option><option value="O-">O-</option>
-                        <option value="B-">B-</option><option value="AB-">AB-</option>
+                        <option value="غير محدد">اختر الفصيلة</option>
+                        <option value="A+">A+</option><option value="O+">O+</option><option value="B+">B+</option><option value="AB+">AB+</option>
+                        <option value="A-">A-</option><option value="O-">O-</option><option value="B-">B-</option><option value="AB-">AB-</option>
                     </select>
                 </div>
 
                 <div class="input-group">
-                    <label>الأمراض والحساسية</label>
-                    <div id="diseaseContainer" style="margin-bottom: 10px;"></div>
-                    <div id="addArea" style="display: none; gap: 8px;">
-                        <input type="text" id="diseaseInput" class="input-style" style="flex: 1;" placeholder="مثال: حساسية قمح">
+                    <label>الأمراض والحساسية (المسجلة)</label>
+                    <div id="diseaseContainer" style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 12px; min-height: 60px; margin-bottom: 10px;"></div>
+                    <div id="addArea" style="display: none; gap: 10px;">
+                        <input type="text" id="diseaseInput" class="input-style" style="flex: 1;" placeholder="أضف مرض أو حساسية...">
                         <button id="addBtn" class="main-btn" style="width: auto; padding: 10px 20px;">إضافة</button>
                     </div>
                 </div>
 
                 <div class="input-group">
-                    <label>رقم الطوارئ</label>
-                    <input type="tel" id="emergency" class="input-style" readonly>
+                    <label>رقم الطوارئ للتواصل</label>
+                    <input type="tel" id="emergency" class="input-style" readonly placeholder="أدخل رقم شخص قريب">
                 </div>
 
-                <button id="saveBtn" class="main-btn" style="display: none; margin-top: 20px;">حفظ التغييرات ✅</button>
+                <button id="saveBtn" class="main-btn" style="display: none; margin-top: 30px;">حفظ التغييرات بالملف ✅</button>
             </div>
         </main>
     </div>
 
-    <div id="urlModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 100; align-items: center; justify-content: center;">
-        <div class="glass-card" style="width: 90%; max-width: 400px; text-align: center;">
-            <h3>رابط ملفك للسوار</h3>
-            <p style="font-size: 13px; color: #94a3b8; margin: 15px 0;">انسخ الرابط وبرمجه في شريحة NFC</p>
-            <div id="copyArea" style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; word-break: break-all; margin-bottom: 20px; color: var(--accent); font-family: monospace;"></div>
-            <button onclick="copyLink()" class="main-btn">نسخ الرابط</button>
-            <button onclick="document.getElementById('urlModal').style.display='none'" class="nav-item" style="margin-top: 10px; border: none; background: none; cursor: pointer;">إغلاق</button>
+    <div id="urlModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); z-index: 1000; align-items: center; justify-content: center;">
+        <div class="glass-card" style="width: 90%; max-width: 450px; text-align: center;">
+            <h3 style="color: var(--accent);">رابط سوار LifeBand</h3>
+            <p style="font-size: 14px; color: #94a3b8; margin: 15px 0;">انسخ هذا الرابط وقم ببرمجته داخل شريحة NFC السوار الخاص بك.</p>
+            <div id="copyArea" style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 12px; word-break: break-all; margin-bottom: 25px; color: white; border: 1px dashed var(--accent); font-family: monospace;"></div>
+            <button onclick="copyLink()" class="main-btn">نسخ الرابط الآن</button>
+            <button onclick="document.getElementById('urlModal').style.display='none'" style="margin-top: 15px; background: none; border: none; color: #ef4444; cursor: pointer;">إغلاق النافذة</button>
         </div>
     </div>
+
+    <style> @keyframes spin { 100% { transform: rotate(360deg); } } </style>
 
     <script type="module">
         import { db, auth } from './js/firebase-config.js';
@@ -79,11 +83,11 @@
 
         function renderDiseases(editable) {
             const container = document.getElementById('diseaseContainer');
-            container.innerHTML = diseaseList.length === 0 ? '<p style="color:#64748b; font-size:13px;">لا يوجد أمراض مسجلة</p>' : '';
+            container.innerHTML = diseaseList.length === 0 ? '<p style="color:#64748b; font-size:13px; text-align:center;">لا توجد بيانات مسجلة حالياً</p>' : '';
             diseaseList.forEach((d, i) => {
                 const tag = document.createElement('div');
                 tag.className = 'disease-tag';
-                tag.innerHTML = `${d} ${editable ? `<span class="remove-btn" onclick="window.delD(${i})">×</span>` : ''}`;
+                tag.innerHTML = `<span>${d}</span> ${editable ? `<span class="remove-btn" onclick="window.delD(${i})">×</span>` : ''}`;
                 container.appendChild(tag);
             });
         }
@@ -91,6 +95,7 @@
         window.delD = (i) => { diseaseList.splice(i, 1); renderDiseases(true); };
 
         if (pid) {
+            document.getElementById('userIdDisplay').innerText = pid.substring(0, 8) + "...";
             get(child(ref(db), `patients/${pid}`)).then((snap) => {
                 document.getElementById('loader').style.display = 'none';
                 document.getElementById('profile-content').style.display = 'block';
@@ -98,7 +103,7 @@
                     const d = snap.val();
                     document.getElementById('viewName').innerText = d.name;
                     document.getElementById('idNo').value = d.idNo || '';
-                    document.getElementById('blood').value = d.bloodType || 'A+';
+                    document.getElementById('blood').value = d.bloodType || 'غير محدد';
                     document.getElementById('emergency').value = d.emergency || '';
                     diseaseList = d.diseases || [];
                     renderDiseases(false);
@@ -134,12 +139,12 @@
                 emergency: document.getElementById('emergency').value,
                 diseases: diseaseList
             });
-            alert("تم تحديث ملفك بنجاح ✅");
+            alert("تم حفظ ملفك بنجاح! الرابط جاهز للبرمجة الآن ✅");
         };
 
         window.copyLink = () => {
             navigator.clipboard.writeText(window.location.href);
-            alert("تم النسخ!");
+            alert("تم نسخ الرابط! يمكنك لصقه في تطبيق برمجة السوار.");
         };
     </script>
 </body>

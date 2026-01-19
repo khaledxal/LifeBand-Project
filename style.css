@@ -8,11 +8,12 @@
     --text-main: #f8fafc;
 }
 
-* { margin: 0; padding: 0; box-box-sizing: border-box; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
     direction: rtl;
     background: radial-gradient(circle at top right, #1e1b4b, #0f172a);
+    background-attachment: fixed;
     color: var(--text-main);
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     min-height: 100vh;
@@ -20,10 +21,7 @@ body {
 }
 
 /* انميشن دخول الصفحة */
-.page-fade {
-    animation: fadeIn 0.8s ease-out;
-}
-
+.page-fade { animation: fadeIn 0.8s ease-out; }
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(15px); }
     to { opacity: 1; transform: translateY(0); }
@@ -46,9 +44,10 @@ body {
     background: linear-gradient(to left, var(--accent), var(--secondary));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    text-decoration: none;
 }
 
-.nav-links { display: flex; gap: 15px; }
+.nav-links { display: flex; gap: 15px; align-items: center; }
 
 .nav-item {
     text-decoration: none;
@@ -56,13 +55,10 @@ body {
     font-weight: 500;
     transition: 0.3s;
     padding: 8px 15px;
-    border-radius: 8px;
+    border-radius: 12px;
 }
 
-.nav-item:hover, .nav-item.active {
-    color: white;
-    background: var(--glass);
-}
+.nav-item:hover, .nav-item.active { color: white; background: var(--glass); }
 
 /* بطاقات التصميم الزجاجي */
 .glass-card {
@@ -70,13 +66,13 @@ body {
     backdrop-filter: blur(15px);
     border: 1px solid var(--glass-border);
     border-radius: 24px;
-    padding: 40px;
+    padding: 30px;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
 
 /* المدخلات والأزرار */
 .input-group { margin-bottom: 20px; }
-.input-group label { display: block; margin-bottom: 8px; color: #94a3b8; }
+.input-group label { display: block; margin-bottom: 8px; color: #94a3b8; font-size: 14px; }
 .input-style {
     width: 100%;
     padding: 14px;
@@ -87,7 +83,7 @@ body {
     outline: none;
     transition: 0.3s;
 }
-.input-style:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.2); }
+.input-style:focus { border-color: var(--accent); }
 
 .main-btn {
     width: 100%;
@@ -99,6 +95,9 @@ body {
     font-weight: bold;
     cursor: pointer;
     transition: 0.3s;
+    text-align: center;
+    text-decoration: none;
+    display: block;
 }
 .main-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(99, 102, 241, 0.4); }
 
@@ -115,5 +114,4 @@ body {
     animation: pop 0.3s ease;
 }
 @keyframes pop { from { scale: 0.8; opacity: 0; } to { scale: 1; opacity: 1; } }
-
 .remove-btn { margin-right: 8px; cursor: pointer; color: #ef4444; font-weight: bold; }

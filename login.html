@@ -3,35 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LifeBand - تسجيل الدخول</title>
+    <title>LifeBand - دخول</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
-    <div class="container">
-        <header class="navbar-modern">
-            <div class="nav-links">
-                <a href="index.html" class="nav-item">الرئيسية</a>
-                <a href="register.html" class="nav-item">إنشاء حساب</a>
+<body class="page-fade">
+    <div class="container" style="display: flex; align-items: center; justify-content: center; min-height: 90vh;">
+        <div class="glass-card" style="width: 100%; max-width: 400px;">
+            <div style="text-align: center; margin-bottom: 30px;">
+                <h2 style="color: var(--accent);">مرحباً بعودتك</h2>
+                <p style="color: #94a3b8; font-size: 14px;">أدخل بياناتك للوصول لملفك الطبي</p>
             </div>
-            <div class="nav-brand">LifeBand</div>
-        </header>
-
-        <main class="auth-wrapper">
-            <div class="auth-card">
-                <h2 style="color: var(--accent);">تسجيل الدخول</h2>
-                <form id="loginForm">
-                    <div class="input-group">
-                        <label>البريد الإلكتروني</label>
-                        <input type="email" id="loginEmail" required>
-                    </div>
-                    <div class="input-group">
-                        <label>كلمة المرور</label>
-                        <input type="password" id="loginPassword" required>
-                    </div>
-                    <button type="submit" class="theme-btn" style="width: 100%; padding: 12px;">دخول</button>
-                </form>
-            </div>
-        </main>
+            
+            <form id="loginForm">
+                <div class="input-group">
+                    <label>البريد الإلكتروني</label>
+                    <input type="email" id="loginEmail" class="input-style" placeholder="mail@example.com" required>
+                </div>
+                <div class="input-group">
+                    <label>كلمة المرور</label>
+                    <input type="password" id="loginPassword" class="input-style" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="main-btn">تسجيل الدخول</button>
+            </form>
+            <p style="text-align: center; margin-top: 20px; font-size: 14px; color: #94a3b8;">
+                ليس لديك حساب؟ <a href="register.html" style="color: var(--accent); text-decoration: none;">سجل الآن</a>
+            </p>
+        </div>
     </div>
 
     <script type="module">
@@ -45,7 +42,6 @@
 
             try {
                 const userCredential = await signInWithEmailAndPassword(auth, email, pass);
-                // توجيه المستخدم لصفحته الخاصة مباشرة بعد الدخول
                 window.location.href = `profile.html?id=${userCredential.user.uid}`;
             } catch (error) {
                 alert("خطأ: " + error.message);
