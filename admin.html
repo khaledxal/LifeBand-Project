@@ -8,13 +8,17 @@
         .admin-layout { display: flex; min-height: 100vh; gap: 20px; padding: 20px; }
         .sidebar { width: 250px; background: var(--glass); backdrop-filter: blur(10px); border-radius: 20px; padding: 20px; border: 1px solid var(--glass-border); }
         .main-content { flex: 1; }
-        .report-card { background: var(--glass); padding: 20px; border-radius: 15px; margin-bottom: 15px; border-right: 5px solid var(--primary); }
+        .report-card { background: var(--glass); padding: 20px; border-radius: 15px; margin-bottom: 15px; border-right: 5px solid var(--primary); transition: 0.3s; }
         .status-done { color: #10b981; font-weight: bold; }
         .status-pending { color: #f59e0b; font-weight: bold; }
+        .btn-delete { background: #ef4444; margin-right: 10px; width: auto; padding: 8px 15px; }
     </style>
 </head>
 <body class="page-fade">
     <div class="bg-animation"></div>
+    
+    <audio id="emergencySound" src="https://assets.mixkit.co/active_storage/sfx/951/951-preview.mp3" preload="auto"></audio>
+
     <div class="admin-layout">
         <aside class="sidebar">
             <h2 style="color: var(--primary); margin-bottom: 30px;">لوحة الإدارة</h2>
@@ -33,18 +37,30 @@
     </div>
 
     <script type="module">
-        import { db, auth } from './js/firebase-config.js';
-        import { ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { db } from './js/firebase-config.js';
+        import { ref, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const reportsList = document.getElementById('reportsList');
+        const alertAudio = document.getElementById('emergencySound');
+        let firstLoad = true;
+        let lastReportCount = 0;
 
-        // جلب البلاغات من Firebase
         const reportsRef = ref(db, 'reports');
         onValue(reportsRef, (snapshot) => {
             reportsList.innerHTML = "";
             if (snapshot.exists()) {
                 const data = snapshot.val();
-                Object.keys(data).reverse().forEach(key => {
+                const keys = Object.keys(data);
+                
+                // تشغيل صوت التنبيه عند وصول بلاغ جديد فقط (ليس عند التحميل الأول)
+                if (!firstLoad && keys.length > lastReportCount) {
+                    alertAudio.play().catch(e => console.log("تفاعل مع الصفحة لتفعيل الصوت"));
+                }
+                
+                lastReportCount = keys.length;
+                firstLoad = false;
+
+                keys.reverse().forEach(key => {
                     const report = data[key];
                     const date = new Date(report.timestamp).toLocaleString('ar-SA');
                     
@@ -58,14 +74,19 @@
                                 <p style="margin-top: 10px;"><b>التشخيص:</b> ${report.diagnosis}</p>
                                 <p>الحالة: <span class="${report.status === 'تم الإجراء' ? 'status-done' : 'status-pending'}">${report.status}</span></p>
                             </div>
-                            ${report.status === 'قيد الانتظار' ? 
-                                `<button onclick="markAsDone('${key}')" class="main-btn" style="width: auto; padding: 8px 15px; background: #10b981;">تأكيد الإجراء</button>` : ''}
+                            <div style="display: flex; gap: 10px;">
+                                ${report.status === 'قيد الانتظار' ? 
+                                    `<button onclick="markAsDone('${key}')" class="main-btn" style="width: auto; padding: 8px 15px; background: #10b981;">تأكيد الإجراء</button>` : ''}
+                                <button onclick="deleteReport('${key}')" class="main-btn btn-delete">حذف</button>
+                            </div>
                         </div>
                     `;
                     reportsList.appendChild(card);
                 });
             } else {
                 reportsList.innerHTML = "<p>لا توجد بلاغات حالياً.</p>";
+                lastReportCount = 0;
+                firstLoad = false;
             }
         });
 
@@ -73,6 +94,17 @@
         window.markAsDone = async (reportId) => {
             if(confirm("هل تم اتخاذ الإجراء الطبي اللازم؟")) {
                 await update(ref(db, `reports/${reportId}`), { status: "تم الإجراء" });
+            }
+        };
+
+        // دالة حذف البلاغ (الجديدة)
+        window.deleteReport = async (reportId) => {
+            if(confirm("هل أنت متأكد من حذف هذا البلاغ نهائياً؟")) {
+                try {
+                    await remove(ref(db, `reports/${reportId}`));
+                } catch (err) {
+                    alert("فشل الحذف: " + err.message);
+                }
             }
         };
     </script>
