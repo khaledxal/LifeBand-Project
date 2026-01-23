@@ -21,10 +21,10 @@
             <div class="glass-card" style="width: 100%; max-width: 400px;">
                 <h2 style="text-align: center; color: var(--primary); margin-bottom: 20px;">مرحباً بعودتك</h2>
                 <form id="loginForm">
-          <div class="input-group" style="margin-bottom: 15px;">
-    <label>الاسم أو البريد الإلكتروني</label>
-    <input type="text" id="loginEmail" class="input-style" placeholder="أدخل admin أو بريدك الإلكتروني" required>
-</div>
+                    <div class="input-group" style="margin-bottom: 15px;">
+                        <label>الاسم أو البريد الإلكتروني</label>
+                        <input type="text" id="loginEmail" class="input-style" placeholder="أدخل admin أو بريدك الإلكتروني" required>
+                    </div>
                     <div class="input-group" style="margin-bottom: 25px;">
                         <label>كلمة المرور</label>
                         <input type="password" id="loginPassword" class="input-style" placeholder="••••••••" required>
@@ -54,33 +54,28 @@
         };
 
         // منطق تسجيل الدخول المطور
-        document.getElementById('loginForm').onsubmit = async (e) => {
-            e.preventDefault();
-            
-            let userInput = document.getElementById('loginEmail').value;
-            let passInput = document.getElementById('loginPassword').value;
+  // منطق تسجيل الدخول المطور
+document.getElementById('loginForm').onsubmit = async (e) => {
+    e.preventDefault();
+    
+    let userInput = document.getElementById('loginEmail').value;
+    let passInput = document.getElementById('loginPassword').value;
 
-            // التحقق إذا كان المستخدم يحاول الدخول كأدمن بكلمة admin
-            if (userInput.toLowerCase() === "admin" && passInput === "admin") {
-                userInput = "admin@lifeband.com";
-                passInput = "adminadmin"; // كلمة المرور الافتراضية للأدمن في Firebase
-            }
-
-            try {
-                const userCredential = await signInWithEmailAndPassword(auth, userInput, passInput);
-                const user = userCredential.user;
-                
-                // التوجيه بناءً على نوع المستخدم
-                if (user.email === "admin@lifeband.com") {
-                    window.location.href = "admin.html"; // توجيه مباشر للأدمن
-                } else {
-                    window.location.href = `profile.html?id=${user.uid}`; // توجيه المستخدم العادي لملفه
-                }
-            } catch (err) { 
-                alert("خطأ في الدخول: تأكد من اسم المستخدم أو كلمة المرور");
-                console.error(err.message);
-            }
-        };
+    try {
+        const userCredential = await signInWithEmailAndPassword(auth, userInput, passInput);
+        const user = userCredential.user;
+        
+        // التحقق من البريد الإلكتروني الخاص بك كأدمن
+        if (user.email === "khaledxalbughdadi@gmail.com") {
+            window.location.href = "admin.html"; // توجيه خالد للوحة الإدارة
+        } else {
+            window.location.href = `profile.html?id=${user.uid}`; // توجيه بقية المستخدمين لملفاتهم
+        }
+    } catch (err) { 
+        alert("خطأ في الدخول: تأكد من البريد الإلكتروني أو كلمة المرور");
+        console.error(err.message);
+    }
+};
     </script>
 </body>
 </html>

@@ -64,29 +64,29 @@
         themeBtn.onclick = toggleTheme;
 
         // تحديث القائمة العلوية بناءً على حالة تسجيل الدخول
-        onAuthStateChanged(auth, (user) => {
-            const navLinks = document.getElementById('dynamic-nav');
-            if (user) {
-                const currentThemeIcon = document.body.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
-                
-                // التحقق من حساب الأدمن لظهور الرابط
-                let adminLink = '';
-                if (user.email === "admin@lifeband.com") {
-                    adminLink = `<a href="admin.html" class="nav-item" style="color: var(--accent); font-weight: bold;">⚙️ لوحة الإدارة</a>`;
-                }
+    onAuthStateChanged(auth, (user) => {
+    const navLinks = document.getElementById('dynamic-nav');
+    if (user) {
+        const currentThemeIcon = document.body.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+        
+        // إظهار رابط الإدارة فقط إذا كان الإيميل هو إيميل خالد
+        let adminLink = '';
+        if (user.email === "khaledxalbughdadi@gmail.com") {
+            adminLink = `<a href="admin.html" class="nav-item" style="color: var(--accent); font-weight: bold;">⚙️ لوحة الإدارة</a>`;
+        }
 
-                navLinks.innerHTML = `
-                    <a href="tips.html" class="nav-item">نصائح طبية</a>
-                    ${adminLink}
-                    <a href="profile.html?id=${user.uid}" class="nav-item">ملفي الطبي</a>
-                    <button id="logoutBtn" class="nav-item" style="background:none; border:none; cursor:pointer;">خروج</button>
-                    <button id="themeBtnDynamic" class="theme-toggle">${currentThemeIcon}</button>
-                `;
-                
-                document.getElementById('themeBtnDynamic').onclick = toggleTheme;
-                document.getElementById('logoutBtn').onclick = () => signOut(auth).then(() => location.reload());
-            }
-        });
+        navLinks.innerHTML = `
+            <a href="tips.html" class="nav-item">نصائح طبية</a>
+            ${adminLink}
+            <a href="profile.html?id=${user.uid}" class="nav-item">ملفي الطبي</a>
+            <button id="logoutBtn" class="nav-item" style="background:none; border:none; cursor:pointer;">خروج</button>
+            <button id="themeBtnDynamic" class="theme-toggle">${currentThemeIcon}</button>
+        `;
+        
+        document.getElementById('themeBtnDynamic').onclick = toggleTheme;
+        document.getElementById('logoutBtn').onclick = () => signOut(auth).then(() => location.reload());
+    }
+});
     </script>
 </body>
 </html>
