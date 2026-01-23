@@ -19,7 +19,6 @@
 </head>
 <body class="page-fade">
     <div class="bg-animation"></div>
-    
     <div class="emergency-container">
         <div id="triggerSection" class="glass-card" style="text-align: center; max-width: 400px; width: 100%;">
             <h2 style="margin-bottom: 30px;">نظام LifeBand للطوارئ</h2>
@@ -29,20 +28,18 @@
                     <circle id="progressCircle" class="progress-ring__circle" stroke="#ef4444" stroke-width="10" fill="transparent" r="90" cx="95" cy="95"/>
                 </svg>
             </div>
-            <p style="margin-top: 20px; font-size: 14px; opacity: 0.7;">سيتم إرسال تنبيهات فورية للمسعفين والأهل</p>
         </div>
 
         <div id="infoSection" class="glass-card" style="display: none; width: 100%; max-width: 550px; text-align: center;">
-            <span id="stepCounter" style="font-size: 12px; opacity: 0.6;">السؤال رقم: 1</span>
             <h3 id="patientNameDisplay" style="color: var(--primary); margin: 10px 0;"></h3>
             <p id="activeQuestion" style="font-size: 1.2rem; margin: 20px 0;">جاري بدء الجلسة...</p>
             <div id="loader" class="loader"></div>
             <div id="optionsContainer" class="options-grid"></div>
 
-            <div id="finalResult" style="display: none; margin-top: 20px;">
+            <div id="finalResult" style="display: none;">
                 <div style="background: rgba(16, 185, 129, 0.1); padding: 20px; border-radius: 15px; border-right: 5px solid #10b981; text-align: right;">
                     <h4 style="color: #10b981;">التعامل المقترح:</h4>
-                    <p id="resultText" style="line-height: 1.6;"></p>
+                    <p id="resultText"></p>
                 </div>
                 <button onclick="saveAndExit()" class="main-btn" style="margin-top: 20px;">حفظ التقرير وإنهاء</button>
             </div>
@@ -50,39 +47,33 @@
     </div>
 
     <script type="module">
-        // روابط المكتبات المصلحة لتجنب أخطاء Module Specifier
         import { db } from './js/firebase-config.js';
         import { ref, get, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        const API_KEY = "AIzaSyBfaNgh-JQX25tK-6HMm9KDeXud5RhOnwg"; 
+        // المفتاح الذي استخرجته من Google AI Studio
+        const API_KEY = "AIzaSyBfANgh-JQX25tK-6HMm9KDeXud5RhOnwg"; 
         const urlParams = new URLSearchParams(window.location.search);
         const userId = urlParams.get('id');
 
         let history = [];
-        let step = 1;
-        let patientName = "المريض";
+        let patientName = "جاري التحميل...";
 
-        // --- كود زر الـ 3 ثواني المصلح ---
-        let holdTimer;
+        // منطق الزر (3 ثواني)
         let progress = 0;
+        let holdTimer;
         const circle = document.getElementById('progressCircle');
-        const offset = 565.48;
         const holdBtn = document.getElementById('holdBtn');
 
         const startHold = (e) => {
             e.preventDefault();
             holdTimer = setInterval(() => {
                 progress += 2;
-                circle.style.strokeDashoffset = offset - (progress / 100) * offset;
-                if (progress >= 100) {
-                    clearInterval(holdTimer);
-                    activateEmergency();
-                }
+                circle.style.strokeDashoffset = 565.48 - (progress / 100) * 565.48;
+                if (progress >= 100) { clearInterval(holdTimer); activateEmergency(); }
             }, 30);
         };
-
-        const cancelHold = () => { clearInterval(holdTimer); progress = 0; circle.style.strokeDashoffset = offset; };
-
+        const cancelHold = () => { clearInterval(holdTimer); progress = 0; circle.style.strokeDashoffset = 565.48; };
+        
         holdBtn.addEventListener('mousedown', startHold);
         holdBtn.addEventListener('touchstart', startHold);
         window.addEventListener('mouseup', cancelHold);
@@ -93,25 +84,30 @@
             document.getElementById('infoSection').style.display = 'block';
             
             if (userId) {
-                const s = await get(ref(db, `patients/${userId}`));
-                if(s.exists()) {
-                    patientName = s.val().name;
-                    document.getElementById('patientNameDisplay').innerText = patientName;
-                }
+                try {
+                    const s = await get(ref(db, `patients/${userId}`));
+                    if(s.exists()) {
+                        patientName = s.val().name;
+                        document.getElementById('patientNameDisplay').innerText = patientName;
+                    }
+                } catch (err) { console.error("Firebase Error:", err); }
             }
             fetchNextStep();
         }
 
-        // --- كود AI التفاعلي المصلح لتجنب خطأ 404 ---
         async function fetchNextStep() {
             document.getElementById('loader').style.display = 'block';
-            document.getElementById('optionsContainer').style.opacity = '0.3';
-
+            document.getElementById('optionsContainer').innerHTML = "";
+            
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
             
-            const prompt = `أنت مساعد طبي طارئ. المريض هو ${patientName}. 
-            يجب أن يكون ردك JSON فقط وبدون علامات markdown:
-            {"question": "نص السؤال هنا", "options": ["خيار1", "خيار2"], "isFinal": false}
+            const prompt = `أنت مساعد طبي طارئ ذكي. المريض هو ${patientName}. 
+            يجب أن يكون ردك بصيغة JSON فقط كالتالي:
+            {"question": "نص السؤال هنا", "options": ["خيار1", "خيار2", "خيار3", "خيار4"], "isFinal": false}
+            
+            إذا وصلت للنتيجة النهائية:
+            {"question": "الإرشادات النهائية والتعامل هنا", "options": [], "isFinal": true}
+
             سجل الجلسة: ${JSON.stringify(history)}`;
 
             try {
@@ -127,44 +123,34 @@
                 
                 const result = JSON.parse(rawText);
                 renderStep(result);
-            } catch (e) { 
-                console.error("API/Parsing Error:", e);
-                document.getElementById('activeQuestion').innerText = "خطأ في الاتصال بالذكاء الاصطناعي. تأكد من مفتاح الـ API.";
+            } catch (e) {
+                document.getElementById('activeQuestion').innerText = "حدث خطأ في الاتصال، تأكد من مفتاح الـ API وتوفر الإنترنت.";
+                console.error(e);
             }
             document.getElementById('loader').style.display = 'none';
-            document.getElementById('optionsContainer').style.opacity = '1';
         }
 
         function renderStep(data) {
             if (data.isFinal) {
                 document.getElementById('optionsContainer').style.display = 'none';
-                document.getElementById('activeQuestion').style.display = 'none';
                 document.getElementById('finalResult').style.display = 'block';
                 document.getElementById('resultText').innerText = data.question;
+                document.getElementById('activeQuestion').style.display = 'none';
                 return;
             }
-
             document.getElementById('activeQuestion').innerText = data.question;
-            document.getElementById('stepCounter').innerText = `السؤال رقم: ${step}`;
-            const container = document.getElementById('optionsContainer');
-            container.innerHTML = "";
-
             data.options.forEach(opt => {
                 const btn = document.createElement('button');
                 btn.className = 'option-btn';
                 btn.innerText = opt;
-                btn.onclick = () => {
-                    history.push({ question: data.question, answer: opt });
-                    step++;
-                    fetchNextStep();
-                };
-                container.appendChild(btn);
+                btn.onclick = () => { history.push({q: data.question, a: opt}); fetchNextStep(); };
+                document.getElementById('optionsContainer').appendChild(btn);
             });
         }
 
         window.saveAndExit = async () => {
             await push(ref(db, 'reports'), {
-                patientId: userId,
+                patientId: userId || "unknown",
                 patientName: patientName,
                 diagnosis: document.getElementById('resultText').innerText,
                 timestamp: new Date().toISOString(),
