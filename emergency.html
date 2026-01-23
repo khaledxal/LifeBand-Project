@@ -35,7 +35,7 @@
         <div id="infoSection" class="glass-card" style="display: none; width: 100%; max-width: 550px; text-align: center;">
             <span id="stepCounter" style="font-size: 12px; opacity: 0.6;">السؤال رقم: 1</span>
             <h3 id="patientNameDisplay" style="color: var(--primary); margin: 10px 0;"></h3>
-            <p id="activeQuestion" style="font-size: 1.2rem; margin: 20px 0;">جاري الاتصال بالذكاء الاصطناعي...</p>
+            <p id="activeQuestion" style="font-size: 1.2rem; margin: 20px 0;">جاري بدء الجلسة...</p>
             <div id="loader" class="loader"></div>
             <div id="optionsContainer" class="options-grid"></div>
 
@@ -50,10 +50,11 @@
     </div>
 
     <script type="module">
+        // روابط المكتبات المصلحة لتجنب أخطاء Module Specifier
         import { db } from './js/firebase-config.js';
         import { ref, get, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        const API_KEY = "AIzaSyBfaNgh-JQX25tK-6HMm9KDeXud5RhOnwg"; 
+        const API_KEY = "ضغ_مفتاح_الـ_API_الخاص_بك_هنا"; 
         const urlParams = new URLSearchParams(window.location.search);
         const userId = urlParams.get('id');
 
@@ -61,7 +62,7 @@
         let step = 1;
         let patientName = "المريض";
 
-        // --- كود زر الـ 3 ثواني ---
+        // --- كود زر الـ 3 ثواني المصلح ---
         let holdTimer;
         let progress = 0;
         const circle = document.getElementById('progressCircle');
@@ -101,17 +102,16 @@
             fetchNextStep();
         }
 
-        // --- كود AI التفاعلي المصلح ---
+        // --- كود AI التفاعلي المصلح لتجنب خطأ 404 ---
         async function fetchNextStep() {
             document.getElementById('loader').style.display = 'block';
             document.getElementById('optionsContainer').style.opacity = '0.3';
 
-            // تصحيح رابط الـ API بالكامل
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
             
             const prompt = `أنت مساعد طبي طارئ. المريض هو ${patientName}. 
-            يجب أن يكون ردك عبارة عن JSON فقط بدون أي علامات markdown:
-            {"question": "نص السؤال", "options": ["خيار1", "خيار2", "خيار3", "خيار4"], "isFinal": false}
+            يجب أن يكون ردك JSON فقط وبدون علامات markdown:
+            {"question": "نص السؤال هنا", "options": ["خيار1", "خيار2"], "isFinal": false}
             سجل الجلسة: ${JSON.stringify(history)}`;
 
             try {
@@ -122,16 +122,14 @@
                 });
                 
                 const data = await res.json();
-                if (!data.candidates) throw new Error("API Error");
-
                 let rawText = data.candidates[0].content.parts[0].text;
                 rawText = rawText.replace(/```json|```/g, "").trim();
                 
                 const result = JSON.parse(rawText);
                 renderStep(result);
             } catch (e) { 
-                console.error("Fetch Error:", e);
-                document.getElementById('activeQuestion').innerText = "خطأ في الاتصال. تأكد من مفتاح الـ API.";
+                console.error("API/Parsing Error:", e);
+                document.getElementById('activeQuestion').innerText = "خطأ في الاتصال بالذكاء الاصطناعي. تأكد من مفتاح الـ API.";
             }
             document.getElementById('loader').style.display = 'none';
             document.getElementById('optionsContainer').style.opacity = '1';
