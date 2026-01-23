@@ -7,61 +7,33 @@
     <link rel="stylesheet" href="style.css">
     <style>
         .emergency-container { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
-        .hold-circle { position: relative; width: 180px; height: 180px; cursor: pointer; display: flex; align-items: center; justify-content: center; text-align: center; background: var(--glass); border-radius: 50%; border: 2px solid var(--glass-border); transition: transform 0.2s; }
-        .progress-ring { position: absolute; top: -5px; left: -5px; transform: rotate(-90deg); }
-        .progress-ring__circle { stroke-dasharray: 565.48; stroke-dashoffset: 565.48; transition: stroke-dashoffset 0.1s linear; }
-        .alert-card { background: rgba(16, 185, 129, 0.1); border-right: 5px solid #10b981; padding: 15px; margin-bottom: 10px; border-radius: 10px; animation: slideIn 0.5s ease forwards; opacity: 0; }
-        @keyframes slideIn { from { transform: translateX(30px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        .diag-btn { flex: 1; padding: 15px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.3s; }
+        .ai-input-area { width: 100%; max-width: 500px; text-align: center; }
+        .textarea-style { width: 100%; height: 120px; padding: 15px; border-radius: 15px; border: 1px solid var(--glass-border); background: var(--input-bg); color: var(--text-main); font-family: inherit; margin-bottom: 15px; resize: none; }
+        .loading-spinner { border: 4px solid rgba(255,255,255,0.3); border-top: 4px solid var(--primary); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 10px auto; display: none; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="page-fade">
     <div class="bg-animation"></div>
-    
     <div class="emergency-container">
-        <div id="triggerSection" class="glass-card" style="text-align: center; max-width: 400px; width: 100%;">
-            <h2 style="margin-bottom: 30px;">نظام LifeBand للطوارئ</h2>
-            <div id="holdBtn" class="hold-circle" style="margin: 0 auto;">
-                <span id="holdText" style="font-weight: bold; color: var(--text-main);">اضغط مطولاً<br>لفتح الملف</span>
-                <svg class="progress-ring" width="190" height="190">
-                    <circle class="progress-ring__circle" stroke="#ef4444" stroke-width="10" fill="transparent" r="90" cx="95" cy="95"/>
-                </svg>
-            </div>
-            <p style="margin-top: 20px; font-size: 14px; opacity: 0.7;">سيتم إرسال تنبيهات فورية للمسعفين والأهل</p>
-        </div>
-
-        <div id="infoSection" class="glass-card" style="display: none; width: 100%; max-width: 600px;">
-            <div style="text-align: center; margin-bottom: 20px;">
-                <h1 id="patientName" style="color: #ef4444;">تحميل...</h1>
-                <span id="patientBlood" style="background: #ef4444; color: white; padding: 5px 15px; border-radius: 20px;">--</span>
+        <div class="glass-card ai-input-area" id="mainBox">
+            <h2 id="patientName" style="color: var(--primary); margin-bottom: 10px;">تحميل بيانات المريض...</h2>
+            <p id="medicalSummary" style="font-size: 14px; opacity: 0.8; margin-bottom: 20px;"></p>
+            
+            <div id="inputSection">
+                <p style="margin-bottom: 10px;">ما هي الأعراض أو الحالة الحالية؟</p>
+                <textarea id="symptomInput" class="textarea-style" placeholder="مثلاً: المريض يشعر بضيق تنفس وتنميل في اليد اليسرى..."></textarea>
+                <button id="analyzeBtn" class="main-btn">تحليل الحالة بواسطة AI</button>
+                <div id="loader" class="loading-spinner"></div>
             </div>
 
-            <div id="alertsContainer">
-                <div class="alert-card" style="animation-delay: 0.2s;">✅ تم إرسال الموقع الجغرافي للإسعاف.</div>
-                <div class="alert-card" style="animation-delay: 1s;">✅ تم إشعار جهات الاتصال المسجلة (الأهل).</div>
-            </div>
-
-            <div id="aiAssistant" style="background: var(--primary); color: white; padding: 25px; border-radius: 20px; margin-top: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
-                <h3 style="margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
-                    <span>🚑</span> المساعد الطبي التفاعلي
-                </h3>
-                
-                <div id="questionBox">
-                    <p id="activeQuestion" style="font-size: 1.2rem; margin-bottom: 20px; line-height: 1.5; font-weight: 500;"></p>
-                    <div style="display: flex; gap: 15px;">
-                        <button id="btnYes" class="diag-btn" style="background: #10b981; color: white;">نعم</button>
-                        <button id="btnNo" class="diag-btn" style="background: #ef4444; color: white;">لا</button>
-                    </div>
+            <div id="resultSection" style="display: none;">
+                <div style="background: rgba(16, 185, 129, 0.1); padding: 20px; border-radius: 15px; border-right: 5px solid #10b981; text-align: right;">
+                    <h4 style="color: #10b981; margin-bottom: 10px;">إرشادات الذكاء الاصطناعي:</h4>
+                    <p id="aiAdviceText" style="line-height: 1.6;"></p>
                 </div>
-
-                <div id="finalActionBox" style="display: none;">
-                    <div style="background: rgba(255,255,255,0.15); padding: 20px; border-radius: 15px; border-right: 4px solid #fff;">
-                        <strong style="font-size: 1.1rem;">إجراء عاجل مقترح:</strong>
-                        <p id="finalActionText" style="margin-top: 10px; font-size: 1.1rem; line-height: 1.6;"></p>
-                    </div>
-                    <p id="dbStatus" style="margin-top: 15px; font-size: 0.9rem; text-align: center; opacity: 0.9;">جاري مزامنة البلاغ مع لوحة التحكم...</p>
-                    <button onclick="location.reload()" class="main-btn" style="margin-top: 20px; background: white; color: var(--primary);">إعادة التقييم</button>
-                </div>
+                <p id="dbStatus" style="margin-top: 15px; font-weight: bold; color: var(--accent);"></p>
+                <button onclick="location.reload()" class="main-btn" style="margin-top: 15px; background: var(--secondary);">حالة جديدة</button>
             </div>
         </div>
     </div>
@@ -70,122 +42,66 @@
         import { db } from './js/firebase-config.js';
         import { ref, get, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
+        const GEMINI_API_KEY = "AIzaSyBfaNgh-JQX25tK-6HMm9KDeXud5RhOnwg";
         const urlParams = new URLSearchParams(window.location.search);
         const userId = urlParams.get('id');
 
-        if (!userId) {
-            document.body.innerHTML = "<h1 style='text-align:center; margin-top:50px;'>عذراً، الرابط غير صحيح</h1>";
-        }
+        let patientData = null;
 
-        // --- منطق الضغط المطول ---
-        let holdTimer;
-        let progress = 0;
-        const circle = document.querySelector('.progress-ring__circle');
-        const offset = 565.48;
-        const holdBtn = document.getElementById('holdBtn');
-
-        const startHold = (e) => {
-            e.preventDefault();
-            holdTimer = setInterval(() => {
-                progress += 2;
-                circle.style.strokeDashoffset = offset - (progress / 100) * offset;
-                if (progress >= 100) {
-                    clearInterval(holdTimer);
-                    activateEmergency();
-                }
-            }, 30);
-        };
-
-        const cancelHold = () => { clearInterval(holdTimer); progress = 0; circle.style.strokeDashoffset = offset; };
-
-        holdBtn.addEventListener('mousedown', startHold);
-        holdBtn.addEventListener('touchstart', startHold);
-        window.addEventListener('mouseup', cancelHold);
-        window.addEventListener('touchend', cancelHold);
-
-        // --- منطق التشخيص التفاعلي والبيانات ---
-        let patientDiseases = [];
-
-        async function activateEmergency() {
-            document.getElementById('triggerSection').style.display = 'none';
-            document.getElementById('infoSection').style.display = 'block';
-            
-            try {
-                const snapshot = await get(ref(db, 'patients/' + userId));
+        if (userId) {
+            get(ref(db, `patients/${userId}`)).then((snapshot) => {
                 if (snapshot.exists()) {
-                    const data = snapshot.val();
-                    patientDiseases = data.diseases || [];
-                    document.getElementById('patientName').innerText = data.name;
-                    document.getElementById('patientBlood').innerText = "فصيلة: " + data.bloodType;
-                    startDiagnostic();
+                    patientData = snapshot.val();
+                    document.getElementById('patientName').innerText = patientData.name;
+                    document.getElementById('medicalSummary').innerText = `التاريخ الطبي: ${patientData.diseases?.join('، ') || 'لا يوجد'}`;
                 }
-            } catch (error) { console.error("Error:", error); }
+            });
         }
 
-        function startDiagnostic() {
-            askQuestion("هل المريض واعي ويستجيب لك؟", 
-                () => checkDiseasesLogic(), 
-                "ضع المريض في وضعية الإفاقة (على جنبه)، تأكد من تنفسه، وابدأ بالإنعاش القلبي (CPR) فوراً إذا توقف النبض."
-            );
+        async function getAiDiagnosis(symptoms) {
+            const prompt = `أنت مساعد طبي طارئ ذكي. المريض: ${patientData.name}. 
+            تاريخه الطبي: ${patientData.diseases?.join('، ')}. 
+            الأعراض الحالية: ${symptoms}. 
+            حلل الحالة وقدم إرشادات إسعافية فورية باللغة العربية واذكر إذا كانت الحالة تستدعي نقله للمستشفى فوراً.`;
+
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+            });
+            const data = await response.json();
+            return data.candidates[0].content.parts[0].text;
         }
 
-        function checkDiseasesLogic() {
-            if (patientDiseases.includes("السكري")) {
-                askQuestion("هل تلاحظ تعرقاً بارداً أو شحوباً أو ارتعاشاً؟", 
-                    "اشتباه هبوط سكر حاد: إذا كان واعياً، أعطه عصير محلى أو ملعقة عسل فوراً. لا تعطِ شيئاً في حال فقدان الوعي الجزئي.",
-                    () => checkNextDisease("السكري")
-                );
-            } else if (patientDiseases.includes("الربو")) {
-                askQuestion("هل يعاني المريض من صفير في الصدر أو صعوبة بالغة في التنفس؟", 
-                    "نوبة ربو حادة: ساعده على الجلوس بوضعية قائمة واستخدام بخاخ الطوارئ (Ventalin) إذا كان متوفراً.", 
-                    () => checkNextDisease("الربو")
-                );
-            } else {
-                showFinalResult("المريض واعي ومستقر حالياً. ابقَ بجانبه، راقب تنفسه، وانتظر وصول فرق الإسعاف.");
-            }
-        }
+        document.getElementById('analyzeBtn').onclick = async () => {
+            const symptoms = document.getElementById('symptomInput').value;
+            if (!symptoms) return alert("يرجى وصف الحالة أولاً");
 
-        function checkNextDisease(lastChecked) {
-            const remaining = patientDiseases.filter(d => d !== lastChecked);
-            if (remaining.length > 0) {
-                showFinalResult("المريض مستقر حالياً. يرجى توخي الحذر ومراقبة العلامات الحيوية بناءً على تاريخه الطبي.");
-            } else {
-                showFinalResult("لا توجد أعراض طارئة واضحة مرتبطة بالأمراض المزمنة حالياً. انتظر الإسعاف.");
-            }
-        }
-
-        function askQuestion(text, yesAction, noAction) {
-            document.getElementById('activeQuestion').innerText = text;
-            document.getElementById('btnYes').onclick = () => {
-                if (typeof yesAction === "function") yesAction();
-                else showFinalResult(yesAction);
-            };
-            document.getElementById('btnNo').onclick = () => {
-                if (typeof noAction === "function") noAction();
-                else showFinalResult(noAction);
-            };
-        }
-
-        // --- إرسال البلاغ لقاعدة البيانات ---
-        async function showFinalResult(text) {
-            document.getElementById('questionBox').style.display = 'none';
-            document.getElementById('finalActionBox').style.display = 'block';
-            document.getElementById('finalActionText').innerText = text;
+            document.getElementById('analyzeBtn').style.display = 'none';
+            document.getElementById('loader').style.display = 'block';
 
             try {
-                const reportsRef = ref(db, 'reports');
-                await push(reportsRef, {
+                const advice = await getAiDiagnosis(symptoms);
+                
+                await push(ref(db, 'reports'), {
                     patientId: userId,
-                    patientName: document.getElementById('patientName').innerText,
-                    diagnosis: text,
+                    patientName: patientData.name,
+                    diagnosis: advice,
+                    symptoms: symptoms,
                     timestamp: new Date().toISOString(),
                     status: "قيد الانتظار"
                 });
-                document.getElementById('dbStatus').innerText = "✅ تم تسجيل البلاغ وإبلاغ لوحة الإدارة";
+
+                document.getElementById('inputSection').style.display = 'none';
+                document.getElementById('resultSection').style.display = 'block';
+                document.getElementById('aiAdviceText').innerText = advice;
+                document.getElementById('dbStatus').innerText = "✅ تم إرسال التقرير والتحليل للوحة الإدارة";
             } catch (err) {
-                document.getElementById('dbStatus').innerText = "❌ فشل إرسال البلاغ التلقائي";
+                alert("خطأ: " + err.message);
+                document.getElementById('analyzeBtn').style.display = 'block';
+                document.getElementById('loader').style.display = 'none';
             }
-        }
+        };
     </script>
 </body>
 </html>
