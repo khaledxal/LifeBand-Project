@@ -3,37 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LifeBand - حالة طوارئ</title>
+    <title>LifeBand - تشخيص AI التفاعلي</title>
     <link rel="stylesheet" href="style.css">
     <style>
         .emergency-container { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
-        .ai-input-area { width: 100%; max-width: 500px; text-align: center; }
-        .textarea-style { width: 100%; height: 120px; padding: 15px; border-radius: 15px; border: 1px solid var(--glass-border); background: var(--input-bg); color: var(--text-main); font-family: inherit; margin-bottom: 15px; resize: none; }
-        .loading-spinner { border: 4px solid rgba(255,255,255,0.3); border-top: 4px solid var(--primary); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 10px auto; display: none; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .ai-chat-box { width: 100%; max-width: 600px; }
+        .message-bubble { padding: 15px; border-radius: 15px; margin-bottom: 15px; line-height: 1.6; }
+        .ai-msg { background: rgba(99, 102, 241, 0.1); border-right: 4px solid var(--primary); }
+        .user-input-container { display: flex; gap: 10px; margin-top: 20px; }
+        .input-style { flex: 1; margin-top: 0; }
+        .loading { font-size: 14px; color: var(--primary); display: none; margin-bottom: 10px; }
     </style>
 </head>
 <body class="page-fade">
     <div class="bg-animation"></div>
     <div class="emergency-container">
-        <div class="glass-card ai-input-area" id="mainBox">
-            <h2 id="patientName" style="color: var(--primary); margin-bottom: 10px;">تحميل بيانات المريض...</h2>
-            <p id="medicalSummary" style="font-size: 14px; opacity: 0.8; margin-bottom: 20px;"></p>
+        <div class="glass-card ai-chat-box">
+            <h2 id="patientHeader" style="text-align: center; margin-bottom: 20px;">نظام التشخيص الذكي</h2>
             
-            <div id="inputSection">
-                <p style="margin-bottom: 10px;">ما هي الأعراض أو الحالة الحالية؟</p>
-                <textarea id="symptomInput" class="textarea-style" placeholder="مثلاً: المريض يشعر بضيق تنفس وتنميل في اليد اليسرى..."></textarea>
-                <button id="analyzeBtn" class="main-btn">تحليل الحالة بواسطة AI</button>
-                <div id="loader" class="loading-spinner"></div>
+            <div id="chatWindow" style="max-height: 400px; overflow-y: auto; margin-bottom: 10px;">
+                <div class="message-bubble ai-msg">
+                    أهلاً، أنا المساعد الطبي لـ LifeBand. يرجى وصف الأعراض التي يعاني منها المريض بدقة؟
+                </div>
             </div>
 
-            <div id="resultSection" style="display: none;">
-                <div style="background: rgba(16, 185, 129, 0.1); padding: 20px; border-radius: 15px; border-right: 5px solid #10b981; text-align: right;">
-                    <h4 style="color: #10b981; margin-bottom: 10px;">إرشادات الذكاء الاصطناعي:</h4>
-                    <p id="aiAdviceText" style="line-height: 1.6;"></p>
-                </div>
-                <p id="dbStatus" style="margin-top: 15px; font-weight: bold; color: var(--accent);"></p>
-                <button onclick="location.reload()" class="main-btn" style="margin-top: 15px; background: var(--secondary);">حالة جديدة</button>
+            <div id="loading" class="loading">⏳ جاري التحليل وتوليد الأسئلة...</div>
+
+            <div id="inputArea" class="user-input-container">
+                <input type="text" id="userInput" class="input-style" placeholder="اكتب الأعراض هنا...">
+                <button id="sendBtn" class="main-btn" style="width: auto; padding: 0 25px;">إرسال</button>
+            </div>
+
+            <div id="finalAction" style="display: none; margin-top: 20px;">
+                <button onclick="saveAndFinish()" class="main-btn">حفظ التقرير النهائي وإنهاء الجلسة</button>
             </div>
         </div>
     </div>
@@ -46,61 +48,87 @@
         const urlParams = new URLSearchParams(window.location.search);
         const userId = urlParams.get('id');
 
-        let patientData = null;
+        let chatHistory = [];
+        let questionCount = 0;
+        let patientName = "مريض";
+        let finalDiagnosis = "";
 
+        // جلب اسم المريض عند البداية
         if (userId) {
-            get(ref(db, `patients/${userId}`)).then((snapshot) => {
-                if (snapshot.exists()) {
-                    patientData = snapshot.val();
-                    document.getElementById('patientName').innerText = patientData.name;
-                    document.getElementById('medicalSummary').innerText = `التاريخ الطبي: ${patientData.diseases?.join('، ') || 'لا يوجد'}`;
+            get(ref(db, `patients/${userId}`)).then(s => {
+                if (s.exists()) {
+                    patientName = s.val().name;
+                    document.getElementById('patientHeader').innerText = `تشخيص: ${patientName}`;
                 }
             });
         }
 
-        async function getAiDiagnosis(symptoms) {
-            const prompt = `أنت مساعد طبي طارئ ذكي. المريض: ${patientData.name}. 
-            تاريخه الطبي: ${patientData.diseases?.join('، ')}. 
-            الأعراض الحالية: ${symptoms}. 
-            حلل الحالة وقدم إرشادات إسعافية فورية باللغة العربية واذكر إذا كانت الحالة تستدعي نقله للمستشفى فوراً.`;
-
-            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-            });
-            const data = await response.json();
-            return data.candidates[0].content.parts[0].text;
-        }
-
-        document.getElementById('analyzeBtn').onclick = async () => {
-            const symptoms = document.getElementById('symptomInput').value;
-            if (!symptoms) return alert("يرجى وصف الحالة أولاً");
-
-            document.getElementById('analyzeBtn').style.display = 'none';
-            document.getElementById('loader').style.display = 'block';
+        async function callGemini() {
+            document.getElementById('loading').style.display = 'block';
+            
+            const prompt = `أنت طبيب طارئ في نظام LifeBand. هدفك تشخيص حالة المريض ${patientName}. 
+            قواعدك:
+            1. اسأل سؤالاً واحداً فقط في كل مرة لتفهم الحالة أكثر.
+            2. إذا وصلت لتشخيص شبه مؤكد، أعطِ التعليمات الإسعافية النهائية فوراً.
+            3. لا تكرر الأسئلة.
+            4. إذا لم تصل لتشخيص بعد 5 أسئلة، يمكنك طلب 5 تفاصيل إضافية محددة.
+            سجل المحادثة الحالي: ${JSON.stringify(chatHistory)}`;
 
             try {
-                const advice = await getAiDiagnosis(symptoms);
-                
-                await push(ref(db, 'reports'), {
-                    patientId: userId,
-                    patientName: patientData.name,
-                    diagnosis: advice,
-                    symptoms: symptoms,
-                    timestamp: new Date().toISOString(),
-                    status: "قيد الانتظار"
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
                 });
+                
+                const data = await response.json();
+                const aiResponse = data.candidates[0].content.parts[0].text;
+                
+                addMessage(aiResponse, 'ai');
+                chatHistory.push({ role: "model", parts: [{ text: aiResponse }] });
+                
+                // إذا كان الرد يحتوي على تعليمات نهائية (غالباً تكون أطول وتتضمن إجراءات)
+                if (aiResponse.includes("إجراء") || aiResponse.includes("إسعاف") || questionCount > 10) {
+                    finalDiagnosis = aiResponse;
+                    document.getElementById('finalAction').style.display = 'block';
+                }
 
-                document.getElementById('inputSection').style.display = 'none';
-                document.getElementById('resultSection').style.display = 'block';
-                document.getElementById('aiAdviceText').innerText = advice;
-                document.getElementById('dbStatus').innerText = "✅ تم إرسال التقرير والتحليل للوحة الإدارة";
-            } catch (err) {
-                alert("خطأ: " + err.message);
-                document.getElementById('analyzeBtn').style.display = 'block';
-                document.getElementById('loader').style.display = 'none';
-            }
+            } catch (e) { console.error(e); }
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        function addMessage(text, side) {
+            const div = document.createElement('div');
+            div.className = `message-bubble ${side === 'ai' ? 'ai-msg' : ''}`;
+            div.style.textAlign = side === 'ai' ? 'right' : 'left';
+            div.style.background = side === 'ai' ? '' : 'rgba(255,255,255,0.2)';
+            div.innerText = text;
+            document.getElementById('chatWindow').appendChild(div);
+            document.getElementById('chatWindow').scrollTop = document.getElementById('chatWindow').scrollHeight;
+        }
+
+        document.getElementById('sendBtn').onclick = () => {
+            const text = document.getElementById('userInput').value;
+            if (!text) return;
+
+            addMessage(text, 'user');
+            chatHistory.push({ role: "user", parts: [{ text: text }] });
+            document.getElementById('userInput').value = "";
+            questionCount++;
+            callGemini();
+        };
+
+        window.saveAndFinish = async () => {
+            await push(ref(db, 'reports'), {
+                patientId: userId,
+                patientName: patientName,
+                diagnosis: finalDiagnosis,
+                history: chatHistory,
+                timestamp: new Date().toISOString(),
+                status: "قيد الانتظار"
+            });
+            alert("تم حفظ التقرير وإرساله للمسؤولين.");
+            location.href = "index.html";
         };
     </script>
 </body>
