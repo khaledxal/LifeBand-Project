@@ -12,7 +12,7 @@
         .progress-ring__circle { stroke-dasharray: 565.48; stroke-dashoffset: 565.48; transition: stroke-dashoffset 0.1s linear; }
         .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 25px; }
         .option-btn { padding: 15px; border: 2px solid var(--glass-border); border-radius: 12px; background: var(--glass); color: var(--text-main); cursor: pointer; font-weight: bold; transition: 0.3s; }
-        .option-btn:hover { background: var(--primary); color: white; }
+        .option-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
         .loader { border: 3px solid #f3f3f3; border-top: 3px solid var(--primary); border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; margin: 20px auto; display: none; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
@@ -26,7 +26,7 @@
             <div id="holdBtn" class="hold-circle">
                 <span id="holdText" style="font-weight: bold; color: var(--text-main);">اضغط مطولاً<br>لفتح الملف</span>
                 <svg class="progress-ring" width="190" height="190">
-                    <circle class="progress-ring__circle" stroke="#ef4444" stroke-width="10" fill="transparent" r="90" cx="95" cy="95"/>
+                    <circle id="progressCircle" class="progress-ring__circle" stroke="#ef4444" stroke-width="10" fill="transparent" r="90" cx="95" cy="95"/>
                 </svg>
             </div>
             <p style="margin-top: 20px; font-size: 14px; opacity: 0.7;">سيتم إرسال تنبيهات فورية للمسعفين والأهل</p>
@@ -35,7 +35,7 @@
         <div id="infoSection" class="glass-card" style="display: none; width: 100%; max-width: 550px; text-align: center;">
             <span id="stepCounter" style="font-size: 12px; opacity: 0.6;">السؤال رقم: 1</span>
             <h3 id="patientNameDisplay" style="color: var(--primary); margin: 10px 0;"></h3>
-            <p id="activeQuestion" style="font-size: 1.2rem; margin: 20px 0;">جاري بدء الجلسة...</p>
+            <p id="activeQuestion" style="font-size: 1.2rem; margin: 20px 0;">جاري الاتصال بالذكاء الاصطناعي...</p>
             <div id="loader" class="loader"></div>
             <div id="optionsContainer" class="options-grid"></div>
 
@@ -50,7 +50,6 @@
     </div>
 
     <script type="module">
-        // تصحيح روابط المكتبات لتعمل بشكل مباشر
         import { db } from './js/firebase-config.js';
         import { ref, get, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
@@ -62,10 +61,10 @@
         let step = 1;
         let patientName = "المريض";
 
-        // --- منطق زر الـ 3 ثواني ---
+        // --- كود زر الـ 3 ثواني ---
         let holdTimer;
         let progress = 0;
-        const circle = document.querySelector('.progress-ring__circle');
+        const circle = document.getElementById('progressCircle');
         const offset = 565.48;
         const holdBtn = document.getElementById('holdBtn');
 
@@ -102,28 +101,37 @@
             fetchNextStep();
         }
 
-        // --- منطق AI التفاعلي بالخيارات ---
+        // --- كود AI التفاعلي المصلح ---
         async function fetchNextStep() {
             document.getElementById('loader').style.display = 'block';
             document.getElementById('optionsContainer').style.opacity = '0.3';
 
+            // تصحيح رابط الـ API بالكامل
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+            
             const prompt = `أنت مساعد طبي طارئ. المريض هو ${patientName}. 
-            يجب أن يكون ردك JSON فقط: {"question": "نص السؤال", "options": ["خيار1", "خيار2"], "isFinal": false}
+            يجب أن يكون ردك عبارة عن JSON فقط بدون أي علامات markdown:
+            {"question": "نص السؤال", "options": ["خيار1", "خيار2", "خيار3", "خيار4"], "isFinal": false}
             سجل الجلسة: ${JSON.stringify(history)}`;
 
             try {
-                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
+                const res = await fetch(apiUrl, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
                 });
+                
                 const data = await res.json();
-                let rawText = data.candidates[0].content.parts[0].text.replace(/```json|```/g, "").trim();
+                if (!data.candidates) throw new Error("API Error");
+
+                let rawText = data.candidates[0].content.parts[0].text;
+                rawText = rawText.replace(/```json|```/g, "").trim();
+                
                 const result = JSON.parse(rawText);
                 renderStep(result);
             } catch (e) { 
-                console.error(e);
-                document.getElementById('activeQuestion').innerText = "خطأ في الاتصال بالذكاء الاصطناعي.";
+                console.error("Fetch Error:", e);
+                document.getElementById('activeQuestion').innerText = "خطأ في الاتصال. تأكد من مفتاح الـ API.";
             }
             document.getElementById('loader').style.display = 'none';
             document.getElementById('optionsContainer').style.opacity = '1';
