@@ -27,10 +27,9 @@
             border: 2px solid var(--glass-border);
             transition: transform 0.2s;
         }
-        .hold-circle:active { transform: scale(0.95); }
         .progress-ring { position: absolute; top: -5px; left: -5px; transform: rotate(-90deg); }
         .progress-ring__circle {
-            stroke-dasharray: 565.48; /* 2 * PI * 90 */
+            stroke-dasharray: 565.48;
             stroke-dashoffset: 565.48;
             transition: stroke-dashoffset 0.1s linear;
         }
@@ -44,6 +43,18 @@
             opacity: 0;
         }
         @keyframes slideIn { from { transform: translateX(30px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        
+        /* تنسيق أزرار الأسئلة التفاعلية */
+        .diag-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 16px;
+            transition: 0.3s;
+        }
     </style>
 </head>
 <body class="page-fade">
@@ -58,7 +69,7 @@
                     <circle class="progress-ring__circle" stroke="#ef4444" stroke-width="10" fill="transparent" r="90" cx="95" cy="95"/>
                 </svg>
             </div>
-            <p style="margin-top: 20px; font-size: 14px; opacity: 0.7;">سيتم إرسال تنبيهات فورية عند اكتمال الدائرة</p>
+            <p style="margin-top: 20px; font-size: 14px; opacity: 0.7;">سيتم إرسال تنبيهات فورية للمسعفين والأهل</p>
         </div>
 
         <div id="infoSection" class="glass-card" style="display: none; width: 100%; max-width: 600px;">
@@ -68,17 +79,30 @@
             </div>
 
             <div id="alertsContainer">
-                <div class="alert-card" style="animation-delay: 0.2s;">✅ تم إرسال الموقع الجغرافي لعمليات الطوارئ.</div>
-                <div class="alert-card" style="animation-delay: 1.2s;">✅ تم إشعار جهات الاتصال المسجلة (الأهل).</div>
-                <div class="alert-card" style="animation-delay: 2.2s;">✅ تم تنبيه مستخدمي LifeBand القريبين.</div>
+                <div class="alert-card" style="animation-delay: 0.2s;">✅ تم إرسال الموقع الجغرافي للإسعاف.</div>
+                <div class="alert-card" style="animation-delay: 1s;">✅ تم إشعار جهات الاتصال المسجلة (الأهل).</div>
             </div>
 
-            <div id="medicalInstructions" style="background: var(--primary); color: white; padding: 20px; border-radius: 15px; margin-top: 20px;">
-                <h3 style="margin-bottom: 10px;">📋 تعليمات المسعف:</h3>
-                <div id="questionsList" style="margin-bottom: 15px; line-height: 1.8;"></div>
-                <hr style="opacity: 0.3; margin-bottom: 15px;">
-                <strong>الإجراء العاجل:</strong>
-                <p id="actionText"></p>
+            <div id="aiAssistant" style="background: var(--primary); color: white; padding: 25px; border-radius: 20px; margin-top: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                <h3 style="margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                    <span>🚑</span> المساعد الطبي التفاعلي
+                </h3>
+                
+                <div id="questionBox">
+                    <p id="activeQuestion" style="font-size: 1.2rem; margin-bottom: 20px; line-height: 1.5; font-weight: 500;"></p>
+                    <div style="display: flex; gap: 15px;">
+                        <button id="btnYes" class="diag-btn" style="background: #10b981; color: white;">نعم</button>
+                        <button id="btnNo" class="diag-btn" style="background: #ef4444; color: white;">لا</button>
+                    </div>
+                </div>
+
+                <div id="finalActionBox" style="display: none;">
+                    <div style="background: rgba(255,255,255,0.15); padding: 20px; border-radius: 15px; border-right: 4px solid #fff;">
+                        <strong style="font-size: 1.1rem;">إجراء عاجل مقترح:</strong>
+                        <p id="finalActionText" style="margin-top: 10px; font-size: 1.1rem; line-height: 1.6;"></p>
+                    </div>
+                    <button onclick="location.reload()" class="main-btn" style="margin-top: 20px; background: white; color: var(--primary);">إعادة التقييم</button>
+                </div>
             </div>
         </div>
     </div>
@@ -94,14 +118,15 @@
             document.body.innerHTML = "<h1 style='text-align:center; margin-top:50px;'>عذراً، الرابط غير صحيح</h1>";
         }
 
-        // منطق الضغط المطول
+        // --- منطق الضغط المطول ---
         let holdTimer;
         let progress = 0;
         const circle = document.querySelector('.progress-ring__circle');
         const offset = 565.48;
         const holdBtn = document.getElementById('holdBtn');
 
-        const startHold = () => {
+        const startHold = (e) => {
+            e.preventDefault();
             holdTimer = setInterval(() => {
                 progress += 2;
                 circle.style.strokeDashoffset = offset - (progress / 100) * offset;
@@ -123,39 +148,81 @@
         window.addEventListener('mouseup', cancelHold);
         window.addEventListener('touchend', cancelHold);
 
+        // --- منطق جلب البيانات والتشخيص التفاعلي ---
+        let patientDiseases = [];
+
         async function activateEmergency() {
             document.getElementById('triggerSection').style.display = 'none';
             document.getElementById('infoSection').style.display = 'block';
             
-            // جلب البيانات من Firebase
-            const snapshot = await get(ref(db, 'patients/' + userId));
-            if (snapshot.exists()) {
-                const data = snapshot.val();
-                document.getElementById('patientName').innerText = data.name;
-                document.getElementById('patientBlood').innerText = "فصيلة: " + data.bloodType;
-                
-                generateMedicalLogic(data.diseases || []);
+            try {
+                const snapshot = await get(ref(db, 'patients/' + userId));
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    patientDiseases = data.diseases || [];
+                    document.getElementById('patientName').innerText = data.name;
+                    document.getElementById('patientBlood').innerText = "فصيلة: " + data.bloodType;
+                    
+                    startDiagnostic(); // بدء شجرة القرارات
+                }
+            } catch (error) {
+                console.error("Error fetching data:", error);
             }
         }
 
-        function generateMedicalLogic(diseases) {
-            const qList = document.getElementById('questionsList');
-            const aText = document.getElementById('actionText');
+        function startDiagnostic() {
+            // السؤال الأول: الوعي (أساسي لكل الحالات)
+            askQuestion("هل المريض واعي ويستجيب لك؟", 
+                () => checkDiseasesLogic(), // نعم -> ننتقل لفحص الأمراض المزمنة
+                "ضع المريض في وضعية الإفاقة (على جنبه)، تأكد من تنفسه، وابدأ بالإنعاش القلبي (CPR) فوراً إذا توقف النبض." // لا
+            );
+        }
+
+        function checkDiseasesLogic() {
+            if (patientDiseases.includes("السكري")) {
+                askQuestion("هل تلاحظ تعرقاً بارداً أو شحوباً أو ارتعاشاً؟", 
+                    "اشتباه هبوط سكر حاد: إذا كان واعياً، أعطه عصير محلى أو ملعقة عسل فوراً. لا تعطِ شيئاً في حال فقدان الوعي الجزئي.", // نعم
+                    () => checkNextDisease("السكري") // لا -> فحص المرض التالي
+                );
+            } else if (patientDiseases.includes("الربو")) {
+                askQuestion("هل يعاني المريض من صفير في الصدر أو صعوبة بالغة في التنفس؟", 
+                    "نوبة ربو حادة: ساعده على الجلوس بوضعية قائمة واستخدام بخاخ الطوارئ (Ventalin) إذا كان متوفراً.", 
+                    () => checkNextDisease("الربو")
+                );
+            } else {
+                showFinalResult("المريض واعي ومستقر حالياً. ابقَ بجانبه، راقب تنفسه، وانتظر وصول فرق الإسعاف.");
+            }
+        }
+
+        // دالة للانتقال بين الأمراض في حال كان المريض مصاباً بأكثر من مرض
+        function checkNextDisease(lastChecked) {
+            const remaining = patientDiseases.filter(d => d !== lastChecked);
+            if (remaining.length > 0) {
+                // منطق إضافي لبقية الأمراض (مثل الضغط أو القلب)
+                showFinalResult("المريض مستقر حالياً. يرجى توخي الحذر ومراقبة العلامات الحيوية بناءً على تاريخه الطبي.");
+            } else {
+                showFinalResult("لا توجد أعراض طارئة واضحة مرتبطة بالأمراض المزمنة حالياً. انتظر الإسعاف.");
+            }
+        }
+
+        function askQuestion(text, yesAction, noAction) {
+            document.getElementById('activeQuestion').innerText = text;
             
-            let questions = ["هل المريض في حالة وعي تامة؟", "هل يتنفس بشكل طبيعي؟"];
-            let action = "ابقَ بجانب المريض وحافظ على هدوئه حتى وصول الإسعاف.";
+            document.getElementById('btnYes').onclick = () => {
+                if (typeof yesAction === "function") yesAction();
+                else showFinalResult(yesAction);
+            };
+            
+            document.getElementById('btnNo').onclick = () => {
+                if (typeof noAction === "function") noAction();
+                else showFinalResult(noAction);
+            };
+        }
 
-            if (diseases.includes("السكري")) {
-                questions.push("هل يشعر المريض بدوار أو تعرق بارد؟");
-                action = "إذا كان المريض واعياً، ساعده على تناول سكر سريع الامتصاص. في حال الإغماء لا تعطه شيئاً.";
-            }
-            if (diseases.includes("الضغط")) {
-                questions.push("هل يشعر المريض بصداع شديد أو طنين؟");
-                action = "اجعل المريض يستريح في وضعية شبه جلوس (45 درجة) وقلل من المجهود البدني.";
-            }
-
-            qList.innerHTML = questions.map(q => `<div>• ${q}</div>`).join('');
-            aText.innerText = action;
+        function showFinalResult(text) {
+            document.getElementById('questionBox').style.display = 'none';
+            document.getElementById('finalActionBox').style.display = 'block';
+            document.getElementById('finalActionText').innerText = text;
         }
     </script>
 </body>
