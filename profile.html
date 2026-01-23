@@ -21,141 +21,127 @@
 
         <main style="display: flex; justify-content: center; padding-top: 20px;">
             <div class="glass-card" style="width: 100%; max-width: 550px;">
-                <h2 style="color: var(--primary); margin-bottom: 25px; text-align: center;">الملف الطبي الشخصي</h2>
+                <h2 style="color: var(--primary); margin-bottom: 25px; text-align: center;">إدارة الملف الطبي</h2>
                 
                 <div class="input-group">
                     <label>الاسم الكامل:</label>
-                    <input type="text" id="userName" class="input-style" placeholder="أدخل اسمك">
+                    <input type="text" id="userName" class="input-style" placeholder="اسمك الثلاثي">
                 </div>
 
-                <div class="input-group">
+                <div class="input-group" style="margin-top: 15px;">
                     <label>رقم الهوية / الإقامة:</label>
-                    <input type="text" id="userIdNo" class="input-style" placeholder="أدخل رقم الهوية">
+                    <input type="text" id="userIdNo" class="input-style" placeholder="10XXXXXXXX">
                 </div>
 
-                <div class="input-group">
+                <div class="input-group" style="margin-top: 15px;">
                     <label>فصيلة الدم:</label>
                     <select id="userBlood" class="input-style">
-                        <option value="A+">A+</option><option value="A-">A-</option>
-                        <option value="B+">B+</option><option value="B-">B-</option>
-                        <option value="O+">O+</option><option value="O-">O-</option>
-                        <option value="AB+">AB+</option><option value="AB-">AB-</option>
+                        <option value="A+">A+</option>
+                        <option value="A-">A-</option>
+                        <option value="B+">B+</option>
+                        <option value="B-">B-</option>
+                        <option value="O+">O+</option>
+                        <option value="O-">O-</option>
+                        <option value="AB+">AB+</option>
+                        <option value="AB-">AB-</option>
                     </select>
                 </div>
 
-                <div class="input-group">
-                    <label>الأمراض والحساسية:</label>
-                    <div id="diseasesList" style="margin-bottom: 10px; min-height: 40px; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px;">
-                        </div>
-                    <div style="display: flex; gap: 8px;">
-                        <input type="text" id="diseaseInput" class="input-style" style="margin:0" placeholder="أضف مرض أو حساسية...">
-                        <button type="button" id="addDiseaseBtn" class="main-btn" style="width: auto; padding: 10px 20px;">إضافة</button>
+                <div class="input-group" style="margin-top: 20px;">
+                    <label>الأمراض المزمنة (اختر ما ينطبق):</label>
+                    <div id="diseasesList" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                        <label class="check-container">السكري <input type="checkbox" value="السكري"><span class="checkmark"></span></label>
+                        <label class="check-container">الضغط <input type="checkbox" value="الضغط"><span class="checkmark"></span></label>
+                        <label class="check-container">الربو <input type="checkbox" value="الربو"><span class="checkmark"></span></label>
+                        <label class="check-container">أمراض القلب <input type="checkbox" value="أمراض القلب"><span class="checkmark"></span></label>
+                        <label class="check-container">حساسية دواء <input type="checkbox" value="حساسية دواء"><span class="checkmark"></span></label>
+                        <label class="check-container">الصرع <input type="checkbox" value="الصرع"><span class="checkmark"></span></label>
                     </div>
                 </div>
 
-                <div style="display: flex; gap: 12px; margin-top: 20px;">
-                    <button id="saveBtn" class="main-btn">حفظ التغييرات</button>
-                    <button id="exportBtn" class="main-btn" style="background: var(--accent);">استخراج البيانات</button>
+                <div style="margin-top: 30px; display: flex; flex-direction: column; gap: 10px;">
+                    <button id="saveBtn" class="main-btn">💾 حفظ التعديلات</button>
+                    <button id="shareEmergencyBtn" class="main-btn" style="background: var(--secondary);">🔗 نسخ رابط الطوارئ الخاص بي</button>
+                    <button id="exportBtn" class="main-btn" style="background: var(--glass); color: var(--text-main); border: 1px solid var(--glass-border);">📄 تصدير البيانات كملف نصي</button>
                 </div>
             </div>
         </main>
     </div>
 
     <script type="module">
-        import { db, auth } from './js/firebase-config.js';
-        import { ref, get, set, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { auth, db } from './firebase-config.js';
         import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { ref, get, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        let diseases = [];
-
-        // --- 1. نظام تبديل المود الموحد ---
+        // --- 1. ثيم الصفحة ---
         const themeBtn = document.getElementById('themeBtn');
-        function applyTheme(theme) {
-            if (theme === 'dark') {
-                document.body.setAttribute('data-theme', 'dark');
-                themeBtn.innerText = '☀️';
-            } else {
-                document.body.removeAttribute('data-theme');
-                themeBtn.innerText = '🌙';
-            }
-        }
-        applyTheme(localStorage.getItem('theme') || 'light');
         themeBtn.onclick = () => {
-            const newTheme = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-            localStorage.setItem('theme', newTheme);
-            applyTheme(newTheme);
+            const isDark = document.body.getAttribute('data-theme') === 'dark';
+            document.body.setAttribute('data-theme', isDark ? '' : 'dark');
+            themeBtn.innerText = isDark ? '🌙' : '☀️';
         };
 
-        // --- 2. إدارة مربعات الأمراض ---
-        function renderDiseases() {
-            const list = document.getElementById('diseasesList');
-            list.innerHTML = diseases.length === 0 ? '<p style="color:gray; font-size:13px;">لا توجد أمراض مسجلة</p>' : '';
-            diseases.forEach((d, index) => {
-                const tag = document.createElement('div');
-                tag.className = 'disease-tag';
-                tag.innerHTML = `<span>${d}</span> <span class="remove-btn" onclick="window.delDisease(${index})">×</span>`;
-                list.appendChild(tag);
-            });
-        }
-
-        window.delDisease = (index) => {
-            diseases.splice(index, 1);
-            renderDiseases();
-        };
-
-        document.getElementById('addDiseaseBtn').onclick = () => {
-            const val = document.getElementById('diseaseInput').value.trim();
-            if (val) {
-                diseases.push(val);
-                document.getElementById('diseaseInput').value = '';
-                renderDiseases();
-            }
-        };
-
-        // --- 3. جلب البيانات من Firebase ---
-        onAuthStateChanged(auth, (user) => {
+        // --- 2. جلب البيانات عند الدخول ---
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
-                get(child(ref(db), `patients/${user.uid}`)).then((snapshot) => {
-                    if (snapshot.exists()) {
-                        const data = snapshot.val();
-                        document.getElementById('userName').value = data.name || "";
-                        document.getElementById('userIdNo').value = data.idNo || "";
-                        document.getElementById('userBlood').value = data.bloodType || "O+";
-                        diseases = data.diseases || [];
-                        renderDiseases();
-                    }
-                });
+                const snapshot = await get(ref(db, 'patients/' + user.uid));
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    document.getElementById('userName').value = data.name || "";
+                    document.getElementById('userIdNo').value = data.idNo || "";
+                    document.getElementById('userBlood').value = data.bloodType || "A+";
+                    
+                    // تحديد الأمراض المختارة
+                    const savedDiseases = data.diseases || [];
+                    document.querySelectorAll('#diseasesList input').forEach(input => {
+                        if (savedDiseases.includes(input.value)) input.checked = true;
+                    });
+                }
             } else {
                 window.location.href = "login.html";
             }
         });
 
-        // --- 4. حفظ البيانات ---
+        // --- 3. حفظ البيانات ---
         document.getElementById('saveBtn').onclick = async () => {
             const user = auth.currentUser;
             if (user) {
+                const selectedDiseases = Array.from(document.querySelectorAll('#diseasesList input:checked')).map(i => i.value);
                 const newData = {
                     name: document.getElementById('userName').value,
                     idNo: document.getElementById('userIdNo').value,
                     bloodType: document.getElementById('userBlood').value,
-                    diseases: diseases
+                    diseases: selectedDiseases
                 };
                 try {
                     await set(ref(db, 'patients/' + user.uid), newData);
-                    alert("تم حفظ ملفك الطبي بنجاح! ✅");
-                } catch (err) { alert("خطأ: " + err.message); }
+                    alert("تم تحديث ملفك الطبي بنجاح! ✅");
+                } catch (err) { alert("خطأ في الحفظ: " + err.message); }
             }
         };
 
-        // --- 5. استخراج البيانات ---
+        // --- 4. استخراج رابط الطوارئ ---
+        document.getElementById('shareEmergencyBtn').onclick = () => {
+            const user = auth.currentUser;
+            if (user) {
+                // ملاحظة: استبدل رابط الاستضافة إذا قمت برفع المشروع
+                const emergencyUrl = `${window.location.origin}/emergency.html?id=${user.uid}`;
+                navigator.clipboard.writeText(emergencyUrl).then(() => {
+                    alert("✅ تم نسخ رابط الطوارئ!\n\nيمكن للمسعف مسح هذا الرابط (عبر كود QR) للوصول لمعلوماتك في الحالات الحرجة.");
+                });
+            }
+        };
+
+        // --- 5. تصدير كملف نصي ---
         document.getElementById('exportBtn').onclick = () => {
             const name = document.getElementById('userName').value;
-            const content = `ملف LifeBand الطبي\n----------------\nالاسم: ${name}\nرقم الهوية: ${document.getElementById('userIdNo').value}\nالفصيلة: ${document.getElementById('userBlood').value}\nالأمراض: ${diseases.join(', ')}`;
-            const blob = new Blob([content], { type: 'text/plain' });
+            const selectedDiseases = Array.from(document.querySelectorAll('#diseasesList input:checked')).map(i => i.value);
+            const content = `LifeBand - الملف الطبي\nالاسم: ${name}\nرقم الهوية: ${document.getElementById('userIdNo').value}\nالفصيلة: ${document.getElementById('userBlood').value}\nالأمراض: ${selectedDiseases.join(', ')}`;
+            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `LifeBand_Profile_${name}.txt`;
+            a.download = `LifeBand_${name}.txt`;
             a.click();
         };
     </script>

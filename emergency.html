@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LifeBand - حالة طوارئ</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .emergency-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .hold-circle {
+            position: relative;
+            width: 180px;
+            height: 180px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            background: var(--glass);
+            border-radius: 50%;
+            border: 2px solid var(--glass-border);
+            transition: transform 0.2s;
+        }
+        .hold-circle:active { transform: scale(0.95); }
+        .progress-ring { position: absolute; top: -5px; left: -5px; transform: rotate(-90deg); }
+        .progress-ring__circle {
+            stroke-dasharray: 565.48; /* 2 * PI * 90 */
+            stroke-dashoffset: 565.48;
+            transition: stroke-dashoffset 0.1s linear;
+        }
+        .alert-card {
+            background: rgba(16, 185, 129, 0.1);
+            border-right: 5px solid #10b981;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            animation: slideIn 0.5s ease forwards;
+            opacity: 0;
+        }
+        @keyframes slideIn { from { transform: translateX(30px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    </style>
+</head>
+<body class="page-fade">
+    <div class="bg-animation"></div>
+    
+    <div class="emergency-container">
+        <div id="triggerSection" class="glass-card" style="text-align: center; max-width: 400px; width: 100%;">
+            <h2 style="margin-bottom: 30px;">نظام LifeBand للطوارئ</h2>
+            <div id="holdBtn" class="hold-circle" style="margin: 0 auto;">
+                <span id="holdText" style="font-weight: bold; color: var(--text-main);">اضغط مطولاً<br>لفتح الملف</span>
+                <svg class="progress-ring" width="190" height="190">
+                    <circle class="progress-ring__circle" stroke="#ef4444" stroke-width="10" fill="transparent" r="90" cx="95" cy="95"/>
+                </svg>
+            </div>
+            <p style="margin-top: 20px; font-size: 14px; opacity: 0.7;">سيتم إرسال تنبيهات فورية عند اكتمال الدائرة</p>
+        </div>
+
+        <div id="infoSection" class="glass-card" style="display: none; width: 100%; max-width: 600px;">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h1 id="patientName" style="color: #ef4444;">تحميل...</h1>
+                <span id="patientBlood" style="background: #ef4444; color: white; padding: 5px 15px; border-radius: 20px;">--</span>
+            </div>
+
+            <div id="alertsContainer">
+                <div class="alert-card" style="animation-delay: 0.2s;">✅ تم إرسال الموقع الجغرافي لعمليات الطوارئ.</div>
+                <div class="alert-card" style="animation-delay: 1.2s;">✅ تم إشعار جهات الاتصال المسجلة (الأهل).</div>
+                <div class="alert-card" style="animation-delay: 2.2s;">✅ تم تنبيه مستخدمي LifeBand القريبين.</div>
+            </div>
+
+            <div id="medicalInstructions" style="background: var(--primary); color: white; padding: 20px; border-radius: 15px; margin-top: 20px;">
+                <h3 style="margin-bottom: 10px;">📋 تعليمات المسعف:</h3>
+                <div id="questionsList" style="margin-bottom: 15px; line-height: 1.8;"></div>
+                <hr style="opacity: 0.3; margin-bottom: 15px;">
+                <strong>الإجراء العاجل:</strong>
+                <p id="actionText"></p>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { db } from './js/firebase-config.js';
+        import { ref, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get('id');
+
+        if (!userId) {
+            document.body.innerHTML = "<h1 style='text-align:center; margin-top:50px;'>عذراً، الرابط غير صحيح</h1>";
+        }
+
+        // منطق الضغط المطول
+        let holdTimer;
+        let progress = 0;
+        const circle = document.querySelector('.progress-ring__circle');
+        const offset = 565.48;
+        const holdBtn = document.getElementById('holdBtn');
+
+        const startHold = () => {
+            holdTimer = setInterval(() => {
+                progress += 2;
+                circle.style.strokeDashoffset = offset - (progress / 100) * offset;
+                if (progress >= 100) {
+                    clearInterval(holdTimer);
+                    activateEmergency();
+                }
+            }, 30);
+        };
+
+        const cancelHold = () => {
+            clearInterval(holdTimer);
+            progress = 0;
+            circle.style.strokeDashoffset = offset;
+        };
+
+        holdBtn.addEventListener('mousedown', startHold);
+        holdBtn.addEventListener('touchstart', startHold);
+        window.addEventListener('mouseup', cancelHold);
+        window.addEventListener('touchend', cancelHold);
+
+        async function activateEmergency() {
+            document.getElementById('triggerSection').style.display = 'none';
+            document.getElementById('infoSection').style.display = 'block';
+            
+            // جلب البيانات من Firebase
+            const snapshot = await get(ref(db, 'patients/' + userId));
+            if (snapshot.exists()) {
+                const data = snapshot.val();
+                document.getElementById('patientName').innerText = data.name;
+                document.getElementById('patientBlood').innerText = "فصيلة: " + data.bloodType;
+                
+                generateMedicalLogic(data.diseases || []);
+            }
+        }
+
+        function generateMedicalLogic(diseases) {
+            const qList = document.getElementById('questionsList');
+            const aText = document.getElementById('actionText');
+            
+            let questions = ["هل المريض في حالة وعي تامة؟", "هل يتنفس بشكل طبيعي؟"];
+            let action = "ابقَ بجانب المريض وحافظ على هدوئه حتى وصول الإسعاف.";
+
+            if (diseases.includes("السكري")) {
+                questions.push("هل يشعر المريض بدوار أو تعرق بارد؟");
+                action = "إذا كان المريض واعياً، ساعده على تناول سكر سريع الامتصاص. في حال الإغماء لا تعطه شيئاً.";
+            }
+            if (diseases.includes("الضغط")) {
+                questions.push("هل يشعر المريض بصداع شديد أو طنين؟");
+                action = "اجعل المريض يستريح في وضعية شبه جلوس (45 درجة) وقلل من المجهود البدني.";
+            }
+
+            qList.innerHTML = questions.map(q => `<div>• ${q}</div>`).join('');
+            aText.innerText = action;
+        }
+    </script>
+</body>
+</html>
