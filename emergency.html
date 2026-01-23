@@ -6,55 +6,13 @@
     <title>LifeBand - حالة طوارئ</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        .emergency-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-        .hold-circle {
-            position: relative;
-            width: 180px;
-            height: 180px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            background: var(--glass);
-            border-radius: 50%;
-            border: 2px solid var(--glass-border);
-            transition: transform 0.2s;
-        }
+        .emergency-container { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        .hold-circle { position: relative; width: 180px; height: 180px; cursor: pointer; display: flex; align-items: center; justify-content: center; text-align: center; background: var(--glass); border-radius: 50%; border: 2px solid var(--glass-border); transition: transform 0.2s; }
         .progress-ring { position: absolute; top: -5px; left: -5px; transform: rotate(-90deg); }
-        .progress-ring__circle {
-            stroke-dasharray: 565.48;
-            stroke-dashoffset: 565.48;
-            transition: stroke-dashoffset 0.1s linear;
-        }
-        .alert-card {
-            background: rgba(16, 185, 129, 0.1);
-            border-right: 5px solid #10b981;
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 10px;
-            animation: slideIn 0.5s ease forwards;
-            opacity: 0;
-        }
+        .progress-ring__circle { stroke-dasharray: 565.48; stroke-dashoffset: 565.48; transition: stroke-dashoffset 0.1s linear; }
+        .alert-card { background: rgba(16, 185, 129, 0.1); border-right: 5px solid #10b981; padding: 15px; margin-bottom: 10px; border-radius: 10px; animation: slideIn 0.5s ease forwards; opacity: 0; }
         @keyframes slideIn { from { transform: translateX(30px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        
-        /* تنسيق أزرار الأسئلة التفاعلية */
-        .diag-btn {
-            flex: 1;
-            padding: 15px;
-            border: none;
-            border-radius: 12px;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 16px;
-            transition: 0.3s;
-        }
+        .diag-btn { flex: 1; padding: 15px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.3s; }
     </style>
 </head>
 <body class="page-fade">
@@ -101,6 +59,7 @@
                         <strong style="font-size: 1.1rem;">إجراء عاجل مقترح:</strong>
                         <p id="finalActionText" style="margin-top: 10px; font-size: 1.1rem; line-height: 1.6;"></p>
                     </div>
+                    <p id="dbStatus" style="margin-top: 15px; font-size: 0.9rem; text-align: center; opacity: 0.9;">جاري مزامنة البلاغ مع لوحة التحكم...</p>
                     <button onclick="location.reload()" class="main-btn" style="margin-top: 20px; background: white; color: var(--primary);">إعادة التقييم</button>
                 </div>
             </div>
@@ -109,7 +68,7 @@
 
     <script type="module">
         import { db } from './js/firebase-config.js';
-        import { ref, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { ref, get, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const urlParams = new URLSearchParams(window.location.search);
         const userId = urlParams.get('id');
@@ -137,18 +96,14 @@
             }, 30);
         };
 
-        const cancelHold = () => {
-            clearInterval(holdTimer);
-            progress = 0;
-            circle.style.strokeDashoffset = offset;
-        };
+        const cancelHold = () => { clearInterval(holdTimer); progress = 0; circle.style.strokeDashoffset = offset; };
 
         holdBtn.addEventListener('mousedown', startHold);
         holdBtn.addEventListener('touchstart', startHold);
         window.addEventListener('mouseup', cancelHold);
         window.addEventListener('touchend', cancelHold);
 
-        // --- منطق جلب البيانات والتشخيص التفاعلي ---
+        // --- منطق التشخيص التفاعلي والبيانات ---
         let patientDiseases = [];
 
         async function activateEmergency() {
@@ -162,27 +117,23 @@
                     patientDiseases = data.diseases || [];
                     document.getElementById('patientName').innerText = data.name;
                     document.getElementById('patientBlood').innerText = "فصيلة: " + data.bloodType;
-                    
-                    startDiagnostic(); // بدء شجرة القرارات
+                    startDiagnostic();
                 }
-            } catch (error) {
-                console.error("Error fetching data:", error);
-            }
+            } catch (error) { console.error("Error:", error); }
         }
 
         function startDiagnostic() {
-            // السؤال الأول: الوعي (أساسي لكل الحالات)
             askQuestion("هل المريض واعي ويستجيب لك؟", 
-                () => checkDiseasesLogic(), // نعم -> ننتقل لفحص الأمراض المزمنة
-                "ضع المريض في وضعية الإفاقة (على جنبه)، تأكد من تنفسه، وابدأ بالإنعاش القلبي (CPR) فوراً إذا توقف النبض." // لا
+                () => checkDiseasesLogic(), 
+                "ضع المريض في وضعية الإفاقة (على جنبه)، تأكد من تنفسه، وابدأ بالإنعاش القلبي (CPR) فوراً إذا توقف النبض."
             );
         }
 
         function checkDiseasesLogic() {
             if (patientDiseases.includes("السكري")) {
                 askQuestion("هل تلاحظ تعرقاً بارداً أو شحوباً أو ارتعاشاً؟", 
-                    "اشتباه هبوط سكر حاد: إذا كان واعياً، أعطه عصير محلى أو ملعقة عسل فوراً. لا تعطِ شيئاً في حال فقدان الوعي الجزئي.", // نعم
-                    () => checkNextDisease("السكري") // لا -> فحص المرض التالي
+                    "اشتباه هبوط سكر حاد: إذا كان واعياً، أعطه عصير محلى أو ملعقة عسل فوراً. لا تعطِ شيئاً في حال فقدان الوعي الجزئي.",
+                    () => checkNextDisease("السكري")
                 );
             } else if (patientDiseases.includes("الربو")) {
                 askQuestion("هل يعاني المريض من صفير في الصدر أو صعوبة بالغة في التنفس؟", 
@@ -194,11 +145,9 @@
             }
         }
 
-        // دالة للانتقال بين الأمراض في حال كان المريض مصاباً بأكثر من مرض
         function checkNextDisease(lastChecked) {
             const remaining = patientDiseases.filter(d => d !== lastChecked);
             if (remaining.length > 0) {
-                // منطق إضافي لبقية الأمراض (مثل الضغط أو القلب)
                 showFinalResult("المريض مستقر حالياً. يرجى توخي الحذر ومراقبة العلامات الحيوية بناءً على تاريخه الطبي.");
             } else {
                 showFinalResult("لا توجد أعراض طارئة واضحة مرتبطة بالأمراض المزمنة حالياً. انتظر الإسعاف.");
@@ -207,22 +156,35 @@
 
         function askQuestion(text, yesAction, noAction) {
             document.getElementById('activeQuestion').innerText = text;
-            
             document.getElementById('btnYes').onclick = () => {
                 if (typeof yesAction === "function") yesAction();
                 else showFinalResult(yesAction);
             };
-            
             document.getElementById('btnNo').onclick = () => {
                 if (typeof noAction === "function") noAction();
                 else showFinalResult(noAction);
             };
         }
 
-        function showFinalResult(text) {
+        // --- إرسال البلاغ لقاعدة البيانات ---
+        async function showFinalResult(text) {
             document.getElementById('questionBox').style.display = 'none';
             document.getElementById('finalActionBox').style.display = 'block';
             document.getElementById('finalActionText').innerText = text;
+
+            try {
+                const reportsRef = ref(db, 'reports');
+                await push(reportsRef, {
+                    patientId: userId,
+                    patientName: document.getElementById('patientName').innerText,
+                    diagnosis: text,
+                    timestamp: new Date().toISOString(),
+                    status: "قيد الانتظار"
+                });
+                document.getElementById('dbStatus').innerText = "✅ تم تسجيل البلاغ وإبلاغ لوحة الإدارة";
+            } catch (err) {
+                document.getElementById('dbStatus').innerText = "❌ فشل إرسال البلاغ التلقائي";
+            }
         }
     </script>
 </body>
