@@ -32,13 +32,13 @@
 
         <div id="infoSection" class="glass-card" style="display: none; width: 100%; max-width: 550px; text-align: center;">
             <h3 id="patientNameDisplay" style="color: var(--primary); margin: 10px 0;"></h3>
-            <p id="activeQuestion" style="font-size: 1.2rem; margin: 20px 0;">جاري الاتصال بـ AI...</p>
+            <p id="activeQuestion" style="font-size: 1.2rem; margin: 20px 0;">جاري التحليل...</p>
             <div id="loader" class="loader"></div>
             <div id="optionsContainer" class="options-grid"></div>
 
             <div id="finalResult" style="display: none;">
                 <div style="background: rgba(16, 185, 129, 0.1); padding: 20px; border-radius: 15px; border-right: 5px solid #10b981; text-align: right;">
-                    <h4 style="color: #10b981;">التعامل المقترح:</h4>
+                    <h4 style="color: #10b981;">الإجراء المطلوب:</h4>
                     <p id="resultText"></p>
                 </div>
                 <button onclick="saveAndExit()" class="main-btn" style="margin-top: 20px;">حفظ التقرير وإنهاء</button>
@@ -57,31 +57,26 @@
         let history = [];
         let patientName = "المريض";
 
-        // منطق زر الـ 3 ثواني
         let progress = 0;
         let holdTimer;
         const circle = document.getElementById('progressCircle');
         const holdBtn = document.getElementById('holdBtn');
 
-        const startHold = (e) => {
-            e.preventDefault();
+        holdBtn.addEventListener('mousedown', () => {
             holdTimer = setInterval(() => {
                 progress += 2;
                 circle.style.strokeDashoffset = 565.48 - (progress / 100) * 565.48;
                 if (progress >= 100) { clearInterval(holdTimer); activateEmergency(); }
             }, 30);
-        };
+        });
+
         const cancelHold = () => { clearInterval(holdTimer); progress = 0; circle.style.strokeDashoffset = 565.48; };
-        
-        holdBtn.addEventListener('mousedown', startHold);
-        holdBtn.addEventListener('touchstart', startHold);
         window.addEventListener('mouseup', cancelHold);
         window.addEventListener('touchend', cancelHold);
 
         async function activateEmergency() {
             document.getElementById('triggerSection').style.display = 'none';
             document.getElementById('infoSection').style.display = 'block';
-            
             if (userId) {
                 const s = await get(ref(db, `patients/${userId}`));
                 if(s.exists()) {
@@ -96,14 +91,12 @@
             document.getElementById('loader').style.display = 'block';
             document.getElementById('optionsContainer').innerHTML = "";
             
-            // تصحيح الرابط لمنع خطأ 404
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
             
-            const prompt = `أنت مساعد طبي طارئ. المريض هو ${patientName}. 
-            يجب أن يكون ردك بصيغة JSON فقط كالتالي:
-            {"question": "نص السؤال هنا", "options": ["خيار1", "خيار2", "خيار3", "خيار4"], "isFinal": false}
-            إذا انتهى التشخيص: {"question": "النص النهائي", "options": [], "isFinal": true}
-            المحادثة: ${JSON.stringify(history)}`;
+            const prompt = `أنت مساعد طوارئ. المريض هو ${patientName}. 
+            أجب بصيغة JSON فقط: {"question": "سؤال قصير", "options": ["نعم", "لا", "غير متأكد"], "isFinal": false}
+            إذا انتهيت: {"question": "الإرشادات", "options": [], "isFinal": true}
+            السجل: ${JSON.stringify(history)}`;
 
             try {
                 const res = await fetch(apiUrl, {
@@ -113,21 +106,21 @@
                 });
                 
                 const data = await res.json();
-                if (!data.candidates) throw new Error("API Limit or Error");
+                if (data.error) throw new Error(data.error.message);
 
                 let rawText = data.candidates[0].content.parts[0].text;
                 rawText = rawText.replace(/```json|```/g, "").trim();
-                
                 const result = JSON.parse(rawText);
                 renderStep(result);
             } catch (e) {
-                document.getElementById('activeQuestion').innerText = "خطأ في الاتصال، تأكد من مفتاح الـ API.";
-                console.error("Fetch/Parse Error:", e);
+                console.error(e);
+                document.getElementById('activeQuestion').innerText = "حدث ضغط على النظام، يرجى الانتظار وصول الإسعاف ومراقبة المريض.";
+                document.getElementById('loader').style.display = 'none';
             }
-            document.getElementById('loader').style.display = 'none';
         }
 
         function renderStep(data) {
+            document.getElementById('loader').style.display = 'none';
             if (data.isFinal) {
                 document.getElementById('optionsContainer').style.display = 'none';
                 document.getElementById('finalResult').style.display = 'block';
