@@ -7,7 +7,8 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="page-fade">
-    <div class="bg-animation"></div> <div class="container">
+    <div class="bg-animation"></div> 
+    <div class="container">
         <header class="navbar">
             <a href="index.html" class="nav-brand">LifeBand</a>
             <div class="nav-links" id="dynamic-nav">
@@ -62,14 +63,22 @@
 
         themeBtn.onclick = toggleTheme;
 
-        // تحديث القائمة العلوية بناءً على حالة تسجيل الدخول
+        // تحديث القائمة العلوية بناءً على حالة تسجيل الدخول وصلاحية الأدمن
         onAuthStateChanged(auth, (user) => {
             const navLinks = document.getElementById('dynamic-nav');
             if (user) {
                 const currentThemeIcon = document.body.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+                
+                // تحقق إذا كان المستخدم هو الأدمن (استبدل الايميل بايميلك الخاص)
+                let adminLink = '';
+                if (user.email === "khaledxalbughdadi@gmail.com") {
+                    adminLink = `<a href="admin.html" class="nav-item" style="color: var(--accent); font-weight: bold;">⚙️ لوحة الإدارة</a>`;
+                }
+
                 navLinks.innerHTML = `
                     <a href="tips.html" class="nav-item">نصائح طبية</a>
-                    <a href="profile.html?id=${user.uid}" class="nav-item active">ملفي الطبي</a>
+                    ${adminLink}
+                    <a href="profile.html?id=${user.uid}" class="nav-item">ملفي الطبي</a>
                     <button id="logoutBtn" class="nav-item" style="background:none; border:none; cursor:pointer;">خروج</button>
                     <button id="themeBtnDynamic" class="theme-toggle">${currentThemeIcon}</button>
                 `;
