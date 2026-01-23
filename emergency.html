@@ -3,143 +3,169 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LifeBand - تشخيص الخيارات الذكي</title>
+    <title>LifeBand - حالة طوارئ</title>
     <link rel="stylesheet" href="style.css">
     <style>
         .emergency-container { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
-        .diagnostic-card { width: 100%; max-width: 550px; text-align: center; }
+        .hold-circle { position: relative; width: 180px; height: 180px; cursor: pointer; display: flex; align-items: center; justify-content: center; text-align: center; background: var(--glass); border-radius: 50%; border: 2px solid var(--glass-border); transition: transform 0.2s; margin: 0 auto; }
+        .progress-ring { position: absolute; top: -5px; left: -5px; transform: rotate(-90deg); }
+        .progress-ring__circle { stroke-dasharray: 565.48; stroke-dashoffset: 565.48; transition: stroke-dashoffset 0.1s linear; }
         .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 25px; }
-        .option-btn { 
-            padding: 15px; border: 2px solid var(--glass-border); border-radius: 12px; 
-            background: var(--glass); color: var(--text-main); cursor: pointer; 
-            font-weight: bold; transition: 0.3s; font-size: 15px;
-        }
-        .option-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
-        .question-text { font-size: 1.3rem; line-height: 1.5; margin-bottom: 10px; min-height: 60px; }
-        .step-indicator { font-size: 12px; opacity: 0.6; margin-bottom: 20px; display: block; }
+        .option-btn { padding: 15px; border: 2px solid var(--glass-border); border-radius: 12px; background: var(--glass); color: var(--text-main); cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .option-btn:hover { background: var(--primary); color: white; }
         .loader { border: 3px solid #f3f3f3; border-top: 3px solid var(--primary); border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; margin: 20px auto; display: none; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="page-fade">
     <div class="bg-animation"></div>
+    
     <div class="emergency-container">
-        <div class="glass-card diagnostic-card">
-            <span class="step-indicator" id="stepCounter">السؤال رقم: 1</span>
-            <div id="questionArea">
-                <p class="question-text" id="activeQuestion">جاري بدء جلسة التشخيص...</p>
-                <div id="loader" class="loader"></div>
-                <div class="options-grid" id="optionsContainer">
-                    </div>
+        <div id="triggerSection" class="glass-card" style="text-align: center; max-width: 400px; width: 100%;">
+            <h2 style="margin-bottom: 30px;">نظام LifeBand للطوارئ</h2>
+            <div id="holdBtn" class="hold-circle">
+                <span id="holdText" style="font-weight: bold; color: var(--text-main);">اضغط مطولاً<br>لفتح الملف</span>
+                <svg class="progress-ring" width="190" height="190">
+                    <circle class="progress-ring__circle" stroke="#ef4444" stroke-width="10" fill="transparent" r="90" cx="95" cy="95"/>
+                </svg>
             </div>
+            <p style="margin-top: 20px; font-size: 14px; opacity: 0.7;">سيتم إرسال تنبيهات فورية للمسعفين والأهل</p>
+        </div>
 
-            <div id="finalResult" style="display: none;">
-                <div style="background: rgba(16, 185, 129, 0.1); padding: 20px; border-radius: 15px; border-right: 5px solid #10b981; text-align: right; margin-bottom: 20px;">
-                    <h3 style="color: #10b981; margin-bottom: 10px;">النتيجة النهائية والتعامل:</h3>
+        <div id="infoSection" class="glass-card" style="display: none; width: 100%; max-width: 550px; text-align: center;">
+            <span id="stepCounter" style="font-size: 12px; opacity: 0.6;">السؤال رقم: 1</span>
+            <h3 id="patientNameDisplay" style="color: var(--primary); margin: 10px 0;"></h3>
+            <p id="activeQuestion" style="font-size: 1.2rem; margin: 20px 0;">جاري بدء الجلسة...</p>
+            <div id="loader" class="loader"></div>
+            <div id="optionsContainer" class="options-grid"></div>
+
+            <div id="finalResult" style="display: none; margin-top: 20px;">
+                <div style="background: rgba(16, 185, 129, 0.1); padding: 20px; border-radius: 15px; border-right: 5px solid #10b981; text-align: right;">
+                    <h4 style="color: #10b981;">التعامل المقترح:</h4>
                     <p id="resultText" style="line-height: 1.6;"></p>
                 </div>
-                <button onclick="saveAndExit()" class="main-btn">حفظ التقرير وإنهاء</button>
+                <button onclick="saveAndExit()" class="main-btn" style="margin-top: 20px;">حفظ التقرير وإنهاء</button>
             </div>
         </div>
     </div>
-<script type="module">
-    import { db } from './js/firebase-config.js';
-    import { ref, get, push } from "[https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js](https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js)";
 
-    // تأكد من وضع مفتاحك هنا
-    const API_KEY = "AIzaSyBfaNgh-JQX25tK-6HMm9KDeXud5RhOnwg"; 
-    const urlParams = new URLSearchParams(window.location.search);
-    const userId = urlParams.get('id');
+    <script type="module">
+        // تصحيح روابط المكتبات لتعمل بشكل مباشر
+        import { db } from './js/firebase-config.js';
+        import { ref, get, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    let history = [];
-    let step = 1;
-    let patientName = "المريض";
+        const API_KEY = "AIzaSyBfaNgh-JQX25tK-6HMm9KDeXud5RhOnwg"; 
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get('id');
 
-    if (userId) {
-        get(ref(db, `patients/${userId}`)).then(s => { if(s.exists()) patientName = s.val().name; });
-    }
+        let history = [];
+        let step = 1;
+        let patientName = "المريض";
 
-    async function fetchNextStep() {
-        toggleLoader(true);
-        
-        // برومبت صارم لضمان الحصول على JSON نظيف فقط
-        const prompt = `أنت مساعد طبي طارئ. المريض هو ${patientName}. 
-        يجب أن يكون ردك عبارة عن كود JSON فقط، بدون أي مقدمات أو كلام خارج الكود.
-        التنسيق المطلوبة:
-        {"question": "نص السؤال هنا", "options": ["خيار1", "خيار2", "خيار3", "خيار4"], "isFinal": false}
-        
-        إذا كانت هذه النتيجة النهائية:
-        {"question": "الإرشادات النهائية هنا", "options": [], "isFinal": true}
+        // --- منطق زر الـ 3 ثواني ---
+        let holdTimer;
+        let progress = 0;
+        const circle = document.querySelector('.progress-ring__circle');
+        const offset = 565.48;
+        const holdBtn = document.getElementById('holdBtn');
 
-        سجل الجلسة: ${JSON.stringify(history)}`;
+        const startHold = (e) => {
+            e.preventDefault();
+            holdTimer = setInterval(() => {
+                progress += 2;
+                circle.style.strokeDashoffset = offset - (progress / 100) * offset;
+                if (progress >= 100) {
+                    clearInterval(holdTimer);
+                    activateEmergency();
+                }
+            }, 30);
+        };
 
-        try {
-            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+        const cancelHold = () => { clearInterval(holdTimer); progress = 0; circle.style.strokeDashoffset = offset; };
+
+        holdBtn.addEventListener('mousedown', startHold);
+        holdBtn.addEventListener('touchstart', startHold);
+        window.addEventListener('mouseup', cancelHold);
+        window.addEventListener('touchend', cancelHold);
+
+        async function activateEmergency() {
+            document.getElementById('triggerSection').style.display = 'none';
+            document.getElementById('infoSection').style.display = 'block';
+            
+            if (userId) {
+                const s = await get(ref(db, `patients/${userId}`));
+                if(s.exists()) {
+                    patientName = s.val().name;
+                    document.getElementById('patientNameDisplay').innerText = patientName;
+                }
+            }
+            fetchNextStep();
+        }
+
+        // --- منطق AI التفاعلي بالخيارات ---
+        async function fetchNextStep() {
+            document.getElementById('loader').style.display = 'block';
+            document.getElementById('optionsContainer').style.opacity = '0.3';
+
+            const prompt = `أنت مساعد طبي طارئ. المريض هو ${patientName}. 
+            يجب أن يكون ردك JSON فقط: {"question": "نص السؤال", "options": ["خيار1", "خيار2"], "isFinal": false}
+            سجل الجلسة: ${JSON.stringify(history)}`;
+
+            try {
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                });
+                const data = await res.json();
+                let rawText = data.candidates[0].content.parts[0].text.replace(/```json|```/g, "").trim();
+                const result = JSON.parse(rawText);
+                renderStep(result);
+            } catch (e) { 
+                console.error(e);
+                document.getElementById('activeQuestion').innerText = "خطأ في الاتصال بالذكاء الاصطناعي.";
+            }
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('optionsContainer').style.opacity = '1';
+        }
+
+        function renderStep(data) {
+            if (data.isFinal) {
+                document.getElementById('optionsContainer').style.display = 'none';
+                document.getElementById('activeQuestion').style.display = 'none';
+                document.getElementById('finalResult').style.display = 'block';
+                document.getElementById('resultText').innerText = data.question;
+                return;
+            }
+
+            document.getElementById('activeQuestion').innerText = data.question;
+            document.getElementById('stepCounter').innerText = `السؤال رقم: ${step}`;
+            const container = document.getElementById('optionsContainer');
+            container.innerHTML = "";
+
+            data.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerText = opt;
+                btn.onclick = () => {
+                    history.push({ question: data.question, answer: opt });
+                    step++;
+                    fetchNextStep();
+                };
+                container.appendChild(btn);
             });
-            
-            const data = await res.json();
-            let rawText = data.candidates[0].content.parts[0].text;
-            
-            // تنظيف النص من أي علامات Markdown قد يضيفها الذكاء الاصطناعي
-            rawText = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
-            
-            const result = JSON.parse(rawText);
-            renderStep(result);
-        } catch (e) { 
-            console.error("Error parsing JSON:", e);
-            document.getElementById('activeQuestion').innerText = "خطأ في تحميل السؤال، حاول مرة أخرى.";
-        }
-        toggleLoader(false);
-    }
-
-    function renderStep(data) {
-        if (data.isFinal) {
-            document.getElementById('questionArea').style.display = 'none';
-            document.getElementById('finalResult').style.display = 'block';
-            document.getElementById('resultText').innerText = data.question;
-            return;
         }
 
-        document.getElementById('activeQuestion').innerText = data.question;
-        document.getElementById('stepCounter').innerText = `السؤال رقم: ${step}`;
-        const container = document.getElementById('optionsContainer');
-        container.innerHTML = "";
-
-        data.options.forEach(opt => {
-            const btn = document.createElement('button');
-            btn.className = 'option-btn';
-            btn.innerText = opt;
-            btn.onclick = () => {
-                history.push({ question: data.question, answer: opt });
-                step++;
-                fetchNextStep();
-            };
-            container.appendChild(btn);
-        });
-    }
-
-    function toggleLoader(show) {
-        document.getElementById('loader').style.display = show ? 'block' : 'none';
-        document.getElementById('optionsContainer').style.opacity = show ? '0.3' : '1';
-    }
-
-    window.saveAndExit = async () => {
-        await push(ref(db, 'reports'), {
-            patientId: userId,
-            patientName: patientName,
-            diagnosis: document.getElementById('resultText').innerText,
-            fullLog: history,
-            timestamp: new Date().toISOString(),
-            status: "قيد الانتظار"
-        });
-        location.href = "index.html";
-    };
-
-    // تشغيل أول خطوة تلقائياً
-    fetchNextStep();
-</script>
+        window.saveAndExit = async () => {
+            await push(ref(db, 'reports'), {
+                patientId: userId,
+                patientName: patientName,
+                diagnosis: document.getElementById('resultText').innerText,
+                timestamp: new Date().toISOString(),
+                status: "قيد الانتظار"
+            });
+            location.href = "index.html";
+        };
+    </script>
 </body>
 </html>
