@@ -41,7 +41,7 @@
 
         const themeBtn = document.getElementById('themeBtn');
 
-        // وظيفة تبديل الثيم وحفظ الخيار في المتصفح
+        // وظيفة تبديل الثيم
         function toggleTheme() {
             const isDark = document.body.getAttribute('data-theme') === 'dark';
             if (isDark) {
@@ -55,7 +55,7 @@
             }
         }
 
-        // استعادة الثيم المفضل عند تحميل الصفحة
+        // استعادة الثيم المفضل
         if (localStorage.getItem('theme') === 'dark') {
             document.body.setAttribute('data-theme', 'dark');
             themeBtn.innerText = '☀️';
@@ -63,15 +63,15 @@
 
         themeBtn.onclick = toggleTheme;
 
-        // تحديث القائمة العلوية بناءً على حالة تسجيل الدخول وصلاحية الأدمن
+        // تحديث القائمة العلوية بناءً على حالة تسجيل الدخول
         onAuthStateChanged(auth, (user) => {
             const navLinks = document.getElementById('dynamic-nav');
             if (user) {
                 const currentThemeIcon = document.body.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
                 
-                // تحقق إذا كان المستخدم هو الأدمن (استبدل الايميل بايميلك الخاص)
+                // التحقق من حساب الأدمن لظهور الرابط
                 let adminLink = '';
-                if (user.email === "khaledxalbughdadi@gmail.com") {
+                if (user.email === "admin@lifeband.com") {
                     adminLink = `<a href="admin.html" class="nav-item" style="color: var(--accent); font-weight: bold;">⚙️ لوحة الإدارة</a>`;
                 }
 
