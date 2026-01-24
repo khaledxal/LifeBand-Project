@@ -108,49 +108,33 @@
             fetchNextStep();
         }
 
-        async function fetchNextStep() {
-            document.getElementById('loader').style.display = 'block';
-            document.getElementById('optionsContainer').innerHTML = "";
-            
-            // صياغة البرومبت لـ ChatGPT
-            const prompt = `أنت مساعد طوارئ طبي ذكي لمشروع LifeBand. المريض هو: ${patientName}.
-            يجب أن يكون ردك عبارة عن كائن JSON فقط ولا شيء غيره.
-            الصيغة المطلوبة:
-            {"question": "سؤال التشخيص التالي", "options": ["خيار1", "خيار2"], "isFinal": false}
-            إذا وصلت للنتيجة النهائية:
-            {"question": "تعليمات الإسعافات الأولية النهائية هنا", "options": [], "isFinal": true}
-            
-            السجل الحالي للمحادثة: ${JSON.stringify(history)}`;
+       async function fetchNextStep() {
+    document.getElementById('loader').style.display = 'block';
+    document.getElementById('optionsContainer').innerHTML = "";
+    
+    try {
+        // نرسل الطلب لسيرفرك المحلي بدلاً من OpenAI مباشرة
+        const res = await fetch("http://localhost:3000/api/emergency", {
+            method: "POST",
+            headers: { 
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                patientName: patientName,
+                history: history // إرسال سجل الإجابات للسيرفر
+            })
+        });
+        
+        if (!res.ok) throw new Error("Server Error");
 
-            try {
-                const res = await fetch(OPENAI_URL, {
-                    method: "POST",
-                    headers: { 
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${API_KEY}` // توثيق OpenAI
-                    },
-                    body: JSON.stringify({
-                        model: "gpt-3.5-turbo", 
-                        messages: [{ role: "user", content: prompt }],
-                        response_format: { type: "json_object" }, // إجبار الموديل على JSON
-                        temperature: 0.7
-                    })
-                });
-                
-                const data = await res.json();
-                if (data.error) throw new Error(data.error.message);
-
-                // استخراج النص من رد OpenAI
-                let rawText = data.choices[0].message.content;
-                const result = JSON.parse(rawText);
-                renderStep(result);
-            } catch (e) {
-                console.error("OpenAI Error:", e);
-                document.getElementById('activeQuestion').innerText = "حدث خطأ في الاتصال بالذكاء الاصطناعي. يرجى اتباع الإجراءات التقليدية.";
-                document.getElementById('loader').style.display = 'none';
-            }
-        }
-
+        const result = await res.json();
+        renderStep(result);
+    } catch (e) {
+        console.error("Connection Error:", e);
+        document.getElementById('activeQuestion').innerText = "خطأ في الاتصال بالسيرفر. تأكد من تشغيل server.js";
+        document.getElementById('loader').style.display = 'none';
+    }
+}
         function renderStep(data) {
             document.getElementById('loader').style.display = 'none';
             if (data.isFinal) {
