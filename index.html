@@ -72,9 +72,9 @@
                     نظام LifeBand المتطور يربط ملفك الطبي بتقنية NFC لضمان وصول الرعاية الفورية للمسعفين فوراً عند الطوارئ.
                 </p>
                 <div style="display: flex; gap: 15px; flex-wrap: wrap;">
-                    <a href="register.html" class="main-btn" style="width: auto; padding: 18px 60px; text-decoration: none; text-align: center;">ابدأ الآن</a>
-                    <a href="#about" class="nav-item" style="padding: 15px 30px; border: 1px solid var(--glass-border); border-radius: 50px;">عن سوار الحياة</a>
-                </div>
+    <a href="register.html" id="heroStartBtn" class="main-btn" style="width: auto; padding: 18px 60px; text-decoration: none; text-align: center;">ابدأ الآن</a>
+    <a href="#about" class="nav-item" style="padding: 15px 30px; border: 1px solid var(--glass-border); border-radius: 50px;">عن سوار الحياة</a>
+</div>
             </div>
             
             <div class="hero-image" style="flex: 1; min-width: 300px; text-align: center;" data-aos="zoom-in">
@@ -152,30 +152,43 @@
         }
 
         // --- نظام التحكم في منطقة تسجيل الدخول ---
-        const authZone = document.getElementById('auth-zone');
-        
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                // حالة تسجيل الدخول: استبدال أزرار الدخول بملفي وخروج
-                authZone.innerHTML = `
-                    <a href="profile.html?id=${user.uid}" class="nav-item">ملفي الطبي</a>
-                    <button id="logoutBtn" class="nav-item" style="background:none; border:none; cursor:pointer; font-family: inherit; color: #ef4444;">تسجيل خروج</button>
-                `;
+   // --- نظام التحكم في منطقة تسجيل الدخول وزر البداية ---
+const authZone = document.getElementById('auth-zone');
+const heroStartBtn = document.getElementById('heroStartBtn'); // استهداف الزر
 
-                const logoutBtn = document.getElementById('logoutBtn');
-                logoutBtn.onclick = () => {
-                    if(confirm("هل تريد تسجيل الخروج؟")) {
-                        signOut(auth).then(() => window.location.reload());
-                    }
-                };
-            } else {
-                // حالة تسجيل الخروج: الأزرار الافتراضية
-                authZone.innerHTML = `
-                    <a href="login.html" class="nav-item">دخول</a>
-                    <a href="register.html" class="nav-item">إنشاء حساب</a>
-                `;
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        // إذا سجل دخول:
+        // 1. تحديث القائمة العلوية
+        authZone.innerHTML = `
+            <a href="profile.html?id=${user.uid}" class="nav-item">ملفي الطبي</a>
+            <button id="logoutBtn" class="nav-item" style="background:none; border:none; cursor:pointer; font-family: inherit; color: #ef4444;">تسجيل خروج</button>
+        `;
+
+        // 2. تحديث رابط زر "ابدأ الآن" ليذهب للملف الشخصي
+        if(heroStartBtn) {
+            heroStartBtn.href = `profile.html?id=${user.uid}`;
+        }
+
+        const logoutBtn = document.getElementById('logoutBtn');
+        logoutBtn.onclick = () => {
+            if(confirm("هل تريد تسجيل الخروج؟")) {
+                signOut(auth).then(() => window.location.reload());
             }
-        });
+        };
+    } else {
+        // إذا سجل خروج:
+        authZone.innerHTML = `
+            <a href="login.html" class="nav-item">دخول</a>
+            <a href="register.html" class="nav-item">إنشاء حساب</a>
+        `;
+        
+        // إعادة رابط الزر لصفحة التسجيل الأصلية
+        if(heroStartBtn) {
+            heroStartBtn.href = "register.html";
+        }
+    }
+});
     </script>
 </body>
 </html>
