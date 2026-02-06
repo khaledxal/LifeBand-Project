@@ -90,14 +90,12 @@
     </style>
 </head>
 <body class="page-fade">
-    <div class="bg-animation"></div> 
-
     <div class="container">
         <header class="navbar">
             <a href="index.html" class="nav-brand">LifeBand</a>
-            <div class="nav-links" id="dynamic-nav">
+            <div class="nav-links">
                 <a href="index.html" class="nav-item">الرئيسية</a>
-                <a href="tips.html" class="nav-item">نصائح طبية</a>
+                <a href="tips.html" class="nav-item active">نصائح طبية</a>
                 
                 <div class="dropdown">
                     <button class="nav-item" style="background:none; border:none; cursor:pointer; font-family: inherit;">للمختصين ▼</button>
@@ -109,8 +107,11 @@
                     </div>
                 </div>
 
-                <a href="login.html" class="nav-item">دخول</a>
-                <a href="register.html" class="nav-item active">إنشاء حساب</a>
+                <span id="auth-zone">
+                    <a href="login.html" class="nav-item">دخول</a>
+                    <a href="register.html" class="nav-item">إنشاء حساب</a>
+                </span>
+
                 <button id="themeBtn" class="theme-toggle">🌙</button>
             </div>
         </header>
@@ -121,21 +122,21 @@
                     <div class="slide-overlay">
                         <h2>مستقبلك يبدأ من وعيك</h2>
                         <p>اكتشف كيف يمكن لتغييرات بسيطة في نمط حياتك أن تحميك من الأمراض المزمنة وتزيد من طاقتك اليومية.</p>
-                        <a href="#tipsGrid" class="main-btn" style="width: fit-content; padding: 10px 30px;">تصفح النصائح</a>
+                        <a href="#tipsGrid" class="main-btn" style="width: fit-content; padding: 10px 30px; text-decoration: none;">تصفح النصائح</a>
                     </div>
                 </div>
                 <div class="slide" style="background-image: url('https://images.pexels.com/photos/7088483/pexels-photo-7088483.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1');">
                     <div class="slide-overlay">
                         <h2>تقنية تصنع الفرق</h2>
                         <p>سوار LifeBand ليس مجرد إكسسوار، بل هو رفيقك الذكي الذي يحمل ملفك الطبي لإنقاذك في اللحظات الحرجة.</p>
-                        <a href="register.html" class="main-btn" style="width: fit-content; padding: 10px 30px; background: var(--secondary);">سجل الآن</a>
+                        <a href="register.html" class="main-btn" style="width: fit-content; padding: 10px 30px; background: var(--secondary); text-decoration: none;">سجل الآن</a>
                     </div>
                 </div>
                 <div class="slide" style="background-image: url('https://images.pexels.com/photos/3913025/pexels-photo-3913025.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1');">
                     <div class="slide-overlay">
                         <h2>مجتمع صحي متكامل</h2>
                         <p>انضم لبرامجنا التطوعية وساهم في نشر الوعي الصحي باستخدام أحدث التقنيات الرقمية.</p>
-                        <a href="volunteering.html" class="main-btn" style="width: fit-content; padding: 10px 30px;">برامج التطوع</a>
+                        <a href="volunteering.html" class="main-btn" style="width: fit-content; padding: 10px 30px; text-decoration: none;">برامج التطوع</a>
                     </div>
                 </div>
             </div>
@@ -215,10 +216,8 @@
             </div>
         `).join('');
 
-        // نظام الثيم وتحديث القائمة العلوية
+        // نظام الثيم
         const themeBtn = document.getElementById('themeBtn');
-        const navContainer = document.getElementById('dynamic-nav');
-
         function applyTheme(theme) {
             if (theme === 'dark') {
                 document.body.setAttribute('data-theme', 'dark');
@@ -231,44 +230,34 @@
 
         applyTheme(localStorage.getItem('theme') || 'light');
 
-        // مراقبة حالة المستخدم
+        if(themeBtn) {
+            themeBtn.onclick = () => {
+                const isDark = document.body.getAttribute('data-theme') === 'dark';
+                const nt = isDark ? 'light' : 'dark';
+                localStorage.setItem('theme', nt);
+                applyTheme(nt);
+            };
+        }
+
+        // نظام منطقة تسجيل الدخول الموحد
+        const authZone = document.getElementById('auth-zone');
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                // تحديث القائمة لمسجل الدخول
-                navContainer.innerHTML = `
-                    <a href="index.html" class="nav-item">الرئيسية</a>
-                    <a href="tips.html" class="nav-item">نصائح طبية</a>
+                authZone.innerHTML = `
                     <a href="profile.html?id=${user.uid}" class="nav-item">ملفي الطبي</a>
                     <button id="logoutBtn" class="nav-item" style="background:none; border:none; cursor:pointer; font-family: inherit; color: #ef4444;">تسجيل خروج</button>
-                    <button id="themeBtn" class="theme-toggle">🌙</button>
                 `;
 
-                // إعادة تفعيل زر الثيسم
-                const newThemeBtn = document.getElementById('themeBtn');
-                newThemeBtn.innerText = document.body.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
-                newThemeBtn.onclick = () => {
-                    const isDark = document.body.getAttribute('data-theme') === 'dark';
-                    const nt = isDark ? 'light' : 'dark';
-                    localStorage.setItem('theme', nt);
-                    applyTheme(nt);
-                };
-
-                // تفعيل زر تسجيل الخروج
                 document.getElementById('logoutBtn').onclick = () => {
                     if(confirm("هل تريد تسجيل الخروج؟")) {
                         signOut(auth).then(() => window.location.reload());
                     }
                 };
             } else {
-                // إذا لم يكن مسجل دخول، نربط زر الثيم الأصلي
-                if(themeBtn) {
-                    themeBtn.onclick = () => {
-                        const isDark = document.body.getAttribute('data-theme') === 'dark';
-                        const newTheme = isDark ? 'light' : 'dark';
-                        localStorage.setItem('theme', newTheme);
-                        applyTheme(newTheme);
-                    };
-                }
+                authZone.innerHTML = `
+                    <a href="login.html" class="nav-item">دخول</a>
+                    <a href="register.html" class="nav-item">إنشاء حساب</a>
+                `;
             }
         });
     </script>
