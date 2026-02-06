@@ -6,7 +6,7 @@
     <title>LifeBand - الرئيسية</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* إضافة تنسيق القائمة المنسدلة */
+        /* تنسيق القائمة المنسدلة بناءً على مسوداتك */
         .dropdown { position: relative; display: inline-block; }
         .dropdown-content {
             display: none;
@@ -27,7 +27,6 @@
             text-decoration: none;
             display: block;
             font-size: 14px;
-            transition: 0.3s;
         }
         .dropdown-content a:hover { background: rgba(99, 102, 241, 0.1); color: var(--primary); }
         .dropdown:hover .dropdown-content { display: block; }
@@ -60,48 +59,56 @@
         <main style="display: flex; align-items: center; flex-wrap: wrap; gap: 40px; min-height: 70vh; padding-top: 40px;">
             <div style="flex: 1; min-width: 300px;">
                 <h1 style="font-size: clamp(2.5rem, 5vw, 4rem); line-height: 1.1; margin-bottom: 20px;">
-                    معاً نبني مجتمعاً أكثر وعياً.. <br><span style="color: var(--primary);">سوار الحياة</span>
+                    أمانك الصحي.. <br><span style="color: var(--primary);">في معصمك.</span>
                 </h1>
-                <p style="font-size: 1.2rem; opacity: 0.8; margin-bottom: 30px;">
-                    مشروعك التقني الصحي الأول للتعامل مع حالات الطوارئ والابتكار في الرعاية الصحية.
+                <p style="color: var(--text-main); opacity: 0.8; font-size: 1.1rem; margin-bottom: 35px; max-width: 500px;">
+                    نظام LifeBand المتطور يربط ملفك الطبي بتقنية NFC لضمان وصول الرعاية والبيانات للمسعفين فوراً عند الطوارئ.
                 </p>
                 <div style="display: flex; gap: 15px;">
-                    <button onclick="location.href='register.html'" class="main-btn" style="flex: 1;">ابدأ الآن</button>
-                    <button onclick="location.href='emergency.html'" class="main-btn" style="flex: 1; background: var(--primary);">بلاغ طوارئ</button>
+                    <a href="register.html" class="main-btn" style="width: auto; padding: 18px 45px; text-decoration: none; text-align: center;">ابدأ الآن</a>
+                    <a href="emergency.html" class="main-btn" style="width: auto; padding: 18px 45px; background: var(--primary); text-decoration: none; text-align: center;">بلاغ طوارئ</a>
                 </div>
             </div>
             
-            <div style="flex: 1; min-width: 300px; display: flex; justify-content: center;">
-                <div class="glass-card" style="width: 300px; height: 300px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 5rem;">
-                    ⌚
-                </div>
+            <div style="flex: 1; min-width: 300px; text-align: center;">
+                <img src="https://i.postimg.cc/522wb9Gf/56460561925.png" 
+                     style="width: 85%; filter: drop-shadow(0 0 30px rgba(99, 102, 241, 0.3)); transform: perspective(1000px) rotateY(-5deg);" 
+                     alt="LifeBand Device">
             </div>
         </main>
     </div>
 
     <script type="module">
-        import { auth, db } from './js/firebase-config.js';
+        import { auth } from './js/firebase-config.js';
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const themeBtn = document.getElementById('themeBtn');
-        function toggleTheme() {
-            const isDark = document.body.getAttribute('data-theme') === 'dark';
-            document.body.setAttribute('data-theme', isDark ? '' : 'dark');
-            themeBtn.innerText = isDark ? '🌙' : '☀️';
-            localStorage.setItem('theme', isDark ? 'light' : 'dark');
+
+        function applyTheme(theme) {
+            if (theme === 'dark') {
+                document.body.setAttribute('data-theme', 'dark');
+                themeBtn.innerText = '☀️';
+            } else {
+                document.body.removeAttribute('data-theme');
+                themeBtn.innerText = '🌙';
+            }
         }
 
-        if (localStorage.getItem('theme') === 'dark') {
-            document.body.setAttribute('data-theme', 'dark');
-            themeBtn.innerText = '☀️';
-        }
-        themeBtn.onclick = toggleTheme;
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        applyTheme(savedTheme);
+
+        themeBtn.onclick = () => {
+            const isDark = document.body.getAttribute('data-theme') === 'dark';
+            const newTheme = isDark ? 'light' : 'dark';
+            localStorage.setItem('theme', newTheme);
+            applyTheme(newTheme);
+        };
 
         onAuthStateChanged(auth, (user) => {
             const navLinks = document.getElementById('dynamic-nav');
             if (user) {
                 const currentThemeIcon = document.body.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
-                let adminLink = user.email === "khaledxalbughdadi@gmail.com" ? `<a href="admin.html" class="nav-item" style="color: var(--accent);">⚙️ لوحة الإدارة</a>` : '';
+                let adminLink = user.email === "khaledxalbughdadi@gmail.com" ? `<a href="admin.html" class="nav-item" style="color: var(--primary); font-weight: bold;">⚙️ لوحة الإدارة</a>` : '';
 
                 navLinks.innerHTML = `
                     <a href="tips.html" class="nav-item">نصائح طبية</a>
@@ -119,9 +126,9 @@
                     <button id="logoutBtn" class="nav-item" style="background:none; border:none; cursor:pointer;">خروج</button>
                     <button id="themeBtnDynamic" class="theme-toggle">${currentThemeIcon}</button>
                 `;
-
+                
                 document.getElementById('logoutBtn').onclick = () => signOut(auth).then(() => location.reload());
-                document.getElementById('themeBtnDynamic').onclick = toggleTheme;
+                document.getElementById('themeBtnDynamic').onclick = () => themeBtn.onclick();
             }
         });
     </script>
