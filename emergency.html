@@ -11,9 +11,9 @@
             --glass-border: #ddd;
             --text-main: #333;
         }
-        body { font-family: sans-serif; background-color: #f0f2f5; margin: 0; }
+        body { font-family: sans-serif; background-color: #f0f2f5; margin: 0; direction: rtl; }
         .emergency-container { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
-        .glass-card { background: var(--glass); padding: 30px; border-radius: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); border: 1px solid var(--glass-border); width: 100%; max-width: 500px; }
+        .glass-card { background: var(--glass); padding: 30px; border-radius: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); border: 1px solid var(--glass-border); width: 100%; max-width: 500px; text-align: center; }
         .hold-circle { position: relative; width: 180px; height: 180px; cursor: pointer; display: flex; align-items: center; justify-content: center; text-align: center; border-radius: 50%; border: 2px solid var(--glass-border); margin: 0 auto; user-select: none; }
         .progress-ring { position: absolute; top: -5px; left: -5px; transform: rotate(-90deg); }
         .progress-ring__circle { stroke-dasharray: 565.48; stroke-dashoffset: 565.48; transition: stroke-dashoffset 0.1s linear; }
@@ -22,12 +22,13 @@
         .option-btn:hover { background: var(--primary); color: white; }
         .loader { border: 3px solid #f3f3f3; border-top: 3px solid var(--primary); border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; margin: 20px auto; display: none; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .main-btn { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; }
+        .main-btn { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 1rem; font-weight: bold; transition: 0.3s; margin-top: 10px; }
+        .main-btn:hover { transform: translateY(-2px); opacity: 0.9; }
     </style>
 </head>
 <body>
     <div class="emergency-container">
-        <div id="triggerSection" class="glass-card" style="text-align: center;">
+        <div id="triggerSection" class="glass-card">
             <h2 style="margin-bottom: 30px;">نظام LifeBand للطوارئ</h2>
             <div id="holdBtn" class="hold-circle">
                 <span id="holdText" style="font-weight: bold;">اضغط مطولاً<br>لفتح الملف</span>
@@ -35,46 +36,45 @@
                     <circle id="progressCircle" class="progress-ring__circle" stroke="#ef4444" stroke-width="10" fill="transparent" r="90" cx="95" cy="95"/>
                 </svg>
             </div>
+            <button onclick="location.href='index.html'" class="main-btn" style="background: #6b7280; margin-top: 30px;">العودة للرئيسية</button>
         </div>
 
-        <div id="infoSection" class="glass-card" style="display: none; text-align: center;">
+        <div id="infoSection" class="glass-card" style="display: none;">
             <h3 id="patientNameDisplay" style="color: var(--primary); margin: 10px 0;"></h3>
-            <p id="activeQuestion" style="font-size: 1.2rem; margin: 20px 0;">جاري التحليل عبر ChatGPT...</p>
+            <p id="activeQuestion" style="font-size: 1.2rem; margin: 20px 0;">جاري تحليل الحالة الطبية...</p>
             <div id="loader" class="loader"></div>
             <div id="optionsContainer" class="options-grid"></div>
 
             <div id="finalResult" style="display: none;">
-                <div style="background: rgba(16, 185, 129, 0.1); padding: 20px; border-radius: 15px; border-right: 5px solid #10b981; text-align: right;">
+                <div style="background: rgba(16, 185, 129, 0.1); padding: 20px; border-radius: 15px; border-right: 5px solid #10b981; text-align: right; margin-bottom: 20px;">
                     <h4 style="color: #10b981;">الإجراء المطلوب:</h4>
-                    <p id="resultText"></p>
+                    <p id="resultText">الحالة مستقرة، يرجى مراقبة المريض بانتظام.</p>
                 </div>
-                <button onclick="saveAndExit()" class="main-btn" style="margin-top: 20px;">حفظ التقرير وإنهاء</button>
+                <button onclick="saveAndExit()" class="main-btn" style="background: #10b981;">✅ حفظ التقرير وإنهاء</button>
+                <button onclick="location.href='index.html'" class="main-btn" style="background: #6b7280;">❌ إلغاء والعودة للرئيسية</button>
             </div>
         </div>
     </div>
 
-   <script type="module">
+<script type="module">
 import { db } from './js/firebase-config.js';
 import { ref, get, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-// رابط السيرفر (غيره بعد النشر)
-const SERVER_URL = "http://localhost:3000/api/emergency";
+// ================= تم إيقاف الباك اند مؤقتاً =================
+// const SERVER_URL = "http://localhost:3000/api/emergency";
+// ==========================================================
 
-// قراءة ID من الرابط
 const urlParams = new URLSearchParams(window.location.search);
 const userId = urlParams.get("id");
 
-// متغيرات الحالة
-let history = [];
-let patientName = "المريض";
 let progress = 0;
 let holdTimer;
+let patientName = "المريض";
 
-// عناصر الواجهة
 const circle = document.getElementById("progressCircle");
 const holdBtn = document.getElementById("holdBtn");
 
-// ================= الضغط المطوّل =================
+// الضغط المطول
 holdBtn.addEventListener("mousedown", startHold);
 holdBtn.addEventListener("touchstart", startHold);
 
@@ -83,7 +83,6 @@ function startHold(e) {
   holdTimer = setInterval(() => {
     progress += 2;
     circle.style.strokeDashoffset = 565.48 - (progress / 100) * 565.48;
-
     if (progress >= 100) {
       clearInterval(holdTimer);
       activateEmergency();
@@ -100,7 +99,6 @@ function cancelHold() {
 window.addEventListener("mouseup", cancelHold);
 window.addEventListener("touchend", cancelHold);
 
-// ================= بدء الطوارئ =================
 async function activateEmergency() {
   document.getElementById("triggerSection").style.display = "none";
   document.getElementById("infoSection").style.display = "block";
@@ -110,73 +108,19 @@ async function activateEmergency() {
       const snap = await get(ref(db, `patients/${userId}`));
       if (snap.exists()) {
         patientName = snap.val().name;
-        document.getElementById("patientNameDisplay").innerText = patientName;
+        document.getElementById("patientNameDisplay").innerText = "ملف: " + patientName;
       }
-    } catch (e) {
-      console.error("Firebase Error:", e);
-    }
+    } catch (e) { console.error(e); }
   }
 
-  fetchNextStep();
-}
-
-// ================= طلب الخطوة القادمة من السيرفر =================
-async function fetchNextStep() {
-  document.getElementById("loader").style.display = "block";
-  document.getElementById("optionsContainer").innerHTML = "";
-
-  try {
-    const res = await fetch(SERVER_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        patientName,
-        history
-      })
-    });
-
-    if (!res.ok) throw new Error("Server error");
-
-    const data = await res.json();
-    renderStep(data);
-
-  } catch (err) {
-    console.error(err);
-    document.getElementById("activeQuestion").innerText =
-      "❌ خطأ في الاتصال بالسيرفر";
+  // محاكاة التحليل بدلاً من السيرفر
+  setTimeout(() => {
     document.getElementById("loader").style.display = "none";
-  }
-}
-
-// ================= عرض السؤال / النتيجة =================
-function renderStep(data) {
-  document.getElementById("loader").style.display = "none";
-
-  if (data.isFinal) {
-    document.getElementById("optionsContainer").style.display = "none";
     document.getElementById("finalResult").style.display = "block";
-    document.getElementById("resultText").innerText = data.question;
     document.getElementById("activeQuestion").style.display = "none";
-    return;
-  }
-
-  document.getElementById("activeQuestion").innerText = data.question;
-
-  data.options.forEach(option => {
-    const btn = document.createElement("button");
-    btn.className = "option-btn";
-    btn.innerText = option;
-
-    btn.onclick = () => {
-      history.push({ سؤال: data.question, جواب: option });
-      fetchNextStep();
-    };
-
-    document.getElementById("optionsContainer").appendChild(btn);
-  });
+  }, 1500);
 }
 
-// ================= حفظ التقرير =================
 window.saveAndExit = async () => {
   try {
     await push(ref(db, "reports"), {
@@ -184,17 +128,12 @@ window.saveAndExit = async () => {
       patientName,
       diagnosis: document.getElementById("resultText").innerText,
       timestamp: new Date().toISOString(),
-      status: "قيد الانتظار"
+      status: "تم الإجراء (محاكاة)"
     });
-
-    alert("✅ تم حفظ التقرير");
+    alert("✅ تم حفظ البلاغ بنجاح");
     location.href = "index.html";
-
-  } catch (e) {
-    alert("❌ فشل حفظ التقرير");
-  }
+  } catch (e) { alert("❌ فشل الحفظ"); }
 };
 </script>
-
 </body>
 </html>
