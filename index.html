@@ -242,10 +242,21 @@
         const navContainer = document.getElementById('dynamic-nav');
       onAuthStateChanged(auth, (user) => {
     if (user) {
-        // عند تسجيل الدخول: نظهر القائمة كاملة مع الروابط الجديدة
+        // تحديث القائمة لتشمل كل شيء: الرئيسية + المنسدلة + ملفي الطبي + خروج
         navContainer.innerHTML = `
             <a href="index.html" class="nav-item active">الرئيسية</a> 
             <a href="tips.html" class="nav-item">نصائح طبية</a>
+            
+            <div class="dropdown">
+                <button class="nav-item" style="background:none; border:none; cursor:pointer; font-family: inherit;">للمختصين ▼</button>
+                <div class="dropdown-content">
+                    <a href="volunteering.html">التطوع الصحي</a>
+                    <a href="innovation.html">الابتكار</a>
+                    <a href="awareness.html">التوعية والتثقيف</a>
+                    <a href="media.html">المركز الإعلامي</a>
+                </div>
+            </div>
+
             <a href="profile.html?id=${user.uid}" class="nav-item">ملفي الطبي</a>
             <button id="logoutBtn" class="nav-item" style="background:none; border:none; cursor:pointer; font-family: inherit; color: #ef4444;">تسجيل خروج</button>
             <button id="themeBtn" class="theme-toggle">🌙</button>
@@ -265,22 +276,6 @@
             if(confirm("هل تريد تسجيل الخروج؟")) {
                 signOut(auth).then(() => window.location.reload());
             }
-        };
-    } else {
-        // عند تسجيل الخروج: نتأكد أن "الرئيسية" موجودة مع أزرار الدخول
-        navContainer.innerHTML = `
-            <a href="index.html" class="nav-item active">الرئيسية</a>
-            <a href="tips.html" class="nav-item">نصائح طبية</a>
-            <a href="login.html" class="nav-item">دخول</a>
-            <a href="register.html" class="nav-item">إنشاء حساب</a>
-            <button id="themeBtn" class="theme-toggle">🌙</button>
-        `;
-        // تفعيل زر الثيم للزوار
-        document.getElementById('themeBtn').onclick = () => {
-            const isDark = document.body.getAttribute('data-theme') === 'dark';
-            const nt = isDark ? 'light' : 'dark';
-            localStorage.setItem('theme', nt);
-            applyTheme(nt);
         };
     }
 });
