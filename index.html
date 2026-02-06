@@ -19,7 +19,6 @@
             position: relative;
         }
 
-        /* تأثير النجوم المتحركة الموحد لكل الأوضاع */
         .stars-overlay {
             position: fixed;
             top: 0;
@@ -42,7 +41,6 @@
             to { background-position: 1000px 1000px; }
         }
 
-        /* تحسين القائمة المنسدلة لتكون عمودية (تحت بعض) */
         .dropdown { position: relative; display: inline-block; }
         .dropdown-content {
             display: none;
@@ -191,45 +189,6 @@
             </div>
         </section>
 
-        <section style="padding: 60px 0;">
-            <h2 class="section-title" data-aos="fade-up">مجتمع المختصين</h2>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px;">
-                <div class="glass-card" data-aos="fade-right">
-                    <h3 style="color: var(--primary);">🤝 التطوع الصحي</h3>
-                    <p style="margin: 15px 0; font-weight: bold;">"معاً نبني مجتمعاً أكثر وعياً.. كن متطوعاً حريصاً"</p>
-                    <p style="font-size: 0.95rem; opacity: 0.8; line-height: 1.6;">نهدف لتعزيز ثقافة العمل التطوعي وتمكين المختصين من المساهمة الفعالة في التنمية الصحية المستدامة.</p>
-                    <a href="volunteering.html" class="nav-item" style="display: inline-block; margin-top: 15px; color: var(--secondary); padding: 0;">انضم إلينا الآن ←</a>
-                </div>
-                <div class="glass-card" data-aos="fade-left">
-                    <h3 style="color: var(--primary);">💡 مناطق الابتكار</h3>
-                    <p style="margin: 15px 0;">حلول مبتكرة لمعالجة التحديات الصحية وتطوير منظومة الرعاية.</p>
-                    <div style="margin-bottom: 20px;">
-                        <span class="innovation-tag">الصحة الرقمية</span>
-                        <span class="innovation-tag">الذكاء الاصطناعي</span>
-                        <span class="innovation-tag">التقنية الطبية</span>
-                    </div>
-                    <a href="innovation.html" class="nav-item" style="display: inline-block; color: var(--secondary); padding: 0;">اكتشف مناطق الابتكار ←</a>
-                </div>
-            </div>
-        </section>
-
-        <section style="padding: 80px 0;">
-            <h2 class="section-title" data-aos="fade-up">المركز الإعلامي</h2>
-            <div class="glass-card" style="text-align: center; padding: 50px;" data-aos="zoom-in">
-                <p style="font-size: 1.2rem; margin-bottom: 30px;">هنا نروي قصص النجاح ونشارك رؤيتنا لمستقبل صحي أفضل.</p>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
-                    <div class="glass-card" style="padding: 20px; background: rgba(255,255,255,0.05);">
-                        <h4 style="margin-bottom: 10px;">آخر الأخبار</h4>
-                        <p style="font-size: 0.9rem; opacity: 0.7;">تغطية حية لفعاليات اليوم العالمي للسرطان وأسبوع التوعية.</p>
-                    </div>
-                    <div class="glass-card" style="padding: 20px; background: rgba(255,255,255,0.05);">
-                        <h4 style="margin-bottom: 10px;">التوعية والتثقيف</h4>
-                        <p style="font-size: 0.9rem; opacity: 0.7;">"مستقبلك يبدأ من وعيك الصحي" - استراتيجيات التواصل الفعال.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
         <footer style="margin-top: 50px; padding: 40px 20px; background: var(--glass); border-radius: 40px 40px 0 0;" data-aos="fade-in">
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 40px;">
                 <div>
@@ -249,20 +208,24 @@
     </div>
 
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    <script>
+    <script type="module">
+        import { auth } from './js/firebase-config.js';
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        // إعداد AOS للأنيميشن
         AOS.init({ duration: 1000, once: true });
 
+        // --- نظام التحكم بالثيم (Dark/Light) ---
         const themeBtn = document.getElementById('themeBtn');
         function applyTheme(theme) {
             if (theme === 'dark') {
                 document.body.setAttribute('data-theme', 'dark');
-                themeBtn.innerText = '☀️';
+                if(themeBtn) themeBtn.innerText = '☀️';
             } else {
                 document.body.removeAttribute('data-theme');
-                themeBtn.innerText = '🌙';
+                if(themeBtn) themeBtn.innerText = '🌙';
             }
         }
-
         const savedTheme = localStorage.getItem('theme') || 'light';
         applyTheme(savedTheme);
 
@@ -274,6 +237,39 @@
                 applyTheme(newTheme);
             };
         }
+
+        // --- حل مشكلة تسجيل الخروج التلقائي في القائمة ---
+        const navContainer = document.getElementById('dynamic-nav');
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // إذا كان المستخدم مسجلاً، نحدث القائمة لتشمل ملفه الشخصي وزر خروج
+                navContainer.innerHTML = `
+                    <a href="tips.html" class="nav-item">نصائح طبية</a>
+                    <a href="profile.html?id=${user.uid}" class="nav-item">ملفي الطبي</a>
+                    <button id="logoutBtn" class="nav-item" style="background:none; border:none; cursor:pointer; font-family: inherit; color: #ef4444;">تسجيل خروج</button>
+                    <button id="themeBtn" class="theme-toggle">🌙</button>
+                `;
+                
+                // إعادة ربط زر الثيم لأنه تم مسحه بـ innerHTML
+                const newThemeBtn = document.getElementById('themeBtn');
+                newThemeBtn.innerText = document.body.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+                newThemeBtn.onclick = () => {
+                    const isDark = document.body.getAttribute('data-theme') === 'dark';
+                    const nt = isDark ? 'light' : 'dark';
+                    localStorage.setItem('theme', nt);
+                    applyTheme(nt);
+                };
+
+                // زر تسجيل الخروج
+                document.getElementById('logoutBtn').onclick = () => {
+                    if(confirm("هل تريد تسجيل الخروج؟")) {
+                        signOut(auth).then(() => {
+                            window.location.reload();
+                        });
+                    }
+                };
+            }
+        });
     </script>
 </body>
 </html>
