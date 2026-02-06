@@ -2,7 +2,8 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>LifeBand - لوحة الإدارة</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LifeBand - Admin Panel</title>
     <link rel="stylesheet" href="style.css">
     <style>
         .admin-layout { display: flex; min-height: 100vh; gap: 20px; padding: 20px; }
@@ -11,7 +12,24 @@
         .report-card { background: var(--glass); padding: 20px; border-radius: 15px; margin-bottom: 15px; border-right: 5px solid var(--primary); transition: 0.3s; }
         .status-done { color: #10b981; font-weight: bold; }
         .status-pending { color: #f59e0b; font-weight: bold; }
-        .btn-delete { background: #ef4444; margin-right: 10px; width: auto; padding: 8px 15px; }
+        .btn-delete { background: #ef4444 !important; margin-right: 10px; width: auto; padding: 8px 15px; }
+        
+        /* زر اللغة الدائري للمسؤول */
+        .lang-toggle {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body class="page-fade">
@@ -21,17 +39,20 @@
 
     <div class="admin-layout">
         <aside class="sidebar">
-            <h2 style="color: var(--primary); margin-bottom: 30px;">لوحة الإدارة</h2>
+            <h2 style="color: var(--primary); margin-bottom: 10px;" data-i18n="adm_title">لوحة الإدارة</h2>
+            
+            <button id="langBtn" class="lang-toggle">EN</button>
+            
             <nav>
-                <a href="#" class="nav-item active">📋 قائمة البلاغات</a>
-                <a href="index.html" class="nav-item">🏠 العودة للرئيسية</a>
+                <a href="#" class="nav-item active" data-i18n="adm_nav_reports">📋 قائمة البلاغات</a>
+                <a href="index.html" class="nav-item" data-i18n="nav_home">🏠 العودة للرئيسية</a>
             </nav>
         </aside>
 
         <main class="main-content">
-            <h1 style="margin-bottom: 20px;">البلاغات النشطة</h1>
+            <h1 style="margin-bottom: 20px;" data-i18n="adm_active_reports">البلاغات النشطة</h1>
             <div id="reportsList">
-                <p>جاري تحميل البلاغات...</p>
+                <p data-i18n="adm_loading">جاري تحميل البلاغات...</p>
             </div>
         </main>
     </div>
@@ -40,73 +61,152 @@
         import { db } from './js/firebase-config.js';
         import { ref, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
+        // --- نظام الترجمة ---
+        const translations = {
+            ar: {
+                adm_title: "لوحة الإدارة",
+                adm_nav_reports: "📋 قائمة البلاغات",
+                nav_home: "🏠 العودة للرئيسية",
+                adm_active_reports: "البلاغات النشطة",
+                adm_loading: "جاري تحميل البلاغات...",
+                adm_no_reports: "لا توجد بلاغات حالياً.",
+                adm_patient: "المريض",
+                adm_time: "التوقيت",
+                adm_diagnosis: "التشخيص",
+                adm_status: "الحالة",
+                adm_btn_confirm: "تأكيد الإجراء",
+                adm_btn_delete: "حذف",
+                status_done: "تم الإجراء",
+                status_pending: "قيد الانتظار",
+                confirm_done: "هل تم اتخاذ الإجراء الطبي اللازم؟",
+                confirm_delete: "هل أنت متأكد من حذف هذا البلاغ نهائياً؟",
+                lang_label: "EN"
+            },
+            en: {
+                adm_title: "Admin Panel",
+                adm_nav_reports: "📋 Reports List",
+                nav_home: "🏠 Back to Home",
+                adm_active_reports: "Active Reports",
+                adm_loading: "Loading reports...",
+                adm_no_reports: "No active reports currently.",
+                adm_patient: "Patient",
+                adm_time: "Time",
+                adm_diagnosis: "Diagnosis",
+                adm_status: "Status",
+                adm_btn_confirm: "Confirm Action",
+                adm_btn_delete: "Delete",
+                status_done: "Done",
+                status_pending: "Pending",
+                confirm_done: "Has the necessary medical action been taken?",
+                confirm_delete: "Are you sure you want to delete this report permanently?",
+                lang_label: "AR"
+            }
+        };
+
         const reportsList = document.getElementById('reportsList');
         const alertAudio = document.getElementById('emergencySound');
+        const langBtn = document.getElementById('langBtn');
         let firstLoad = true;
         let lastReportCount = 0;
 
+        function setLanguage(lang) {
+            const t = translations[lang];
+            document.documentElement.lang = lang;
+            document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+            
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                el.innerText = t[key];
+            });
+
+            langBtn.innerText = t.lang_label;
+            localStorage.setItem('preferred_lang', lang);
+            // إعادة رندر القائمة لتحديث اللغات داخل الكروت
+            renderReports(); 
+        }
+
+        langBtn.onclick = () => {
+            const current = localStorage.getItem('preferred_lang') || 'ar';
+            setLanguage(current === 'ar' ? 'en' : 'ar');
+        };
+
+        let currentData = {};
+
         const reportsRef = ref(db, 'reports');
         onValue(reportsRef, (snapshot) => {
-            reportsList.innerHTML = "";
             if (snapshot.exists()) {
-                const data = snapshot.val();
-                const keys = Object.keys(data);
+                currentData = snapshot.val();
+                const keys = Object.keys(currentData);
                 
-                // تشغيل صوت التنبيه عند وصول بلاغ جديد فقط (ليس عند التحميل الأول)
                 if (!firstLoad && keys.length > lastReportCount) {
-                    alertAudio.play().catch(e => console.log("تفاعل مع الصفحة لتفعيل الصوت"));
+                    alertAudio.play().catch(e => console.log("Audio interaction needed"));
                 }
                 
                 lastReportCount = keys.length;
                 firstLoad = false;
-
-                keys.reverse().forEach(key => {
-                    const report = data[key];
-                    const date = new Date(report.timestamp).toLocaleString('ar-SA');
-                    
-                    const card = document.createElement('div');
-                    card.className = 'report-card';
-                    card.innerHTML = `
-                        <div style="display: flex; justify-content: space-between; align-items: start;">
-                            <div>
-                                <h3>المريض: ${report.patientName}</h3>
-                                <p style="font-size: 13px; opacity: 0.7;">التوقيت: ${date}</p>
-                                <p style="margin-top: 10px;"><b>التشخيص:</b> ${report.diagnosis}</p>
-                                <p>الحالة: <span class="${report.status === 'تم الإجراء' ? 'status-done' : 'status-pending'}">${report.status}</span></p>
-                            </div>
-                            <div style="display: flex; gap: 10px;">
-                                ${report.status === 'قيد الانتظار' ? 
-                                    `<button onclick="markAsDone('${key}')" class="main-btn" style="width: auto; padding: 8px 15px; background: #10b981;">تأكيد الإجراء</button>` : ''}
-                                <button onclick="deleteReport('${key}')" class="main-btn btn-delete">حذف</button>
-                            </div>
-                        </div>
-                    `;
-                    reportsList.appendChild(card);
-                });
+                renderReports();
             } else {
-                reportsList.innerHTML = "<p>لا توجد بلاغات حالياً.</p>";
+                currentData = {};
+                reportsList.innerHTML = `<p>${translations[localStorage.getItem('preferred_lang') || 'ar'].adm_no_reports}</p>`;
                 lastReportCount = 0;
                 firstLoad = false;
             }
         });
 
-        // دالة تحديث الحالة
+        function renderReports() {
+            const lang = localStorage.getItem('preferred_lang') || 'ar';
+            const t = translations[lang];
+            const keys = Object.keys(currentData);
+            
+            if (keys.length === 0) return;
+
+            reportsList.innerHTML = "";
+            keys.reverse().forEach(key => {
+                const report = currentData[key];
+                const date = new Date(report.timestamp).toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-US');
+                const statusText = report.status === 'تم الإجراء' ? t.status_done : t.status_pending;
+                
+                const card = document.createElement('div');
+                card.className = 'report-card';
+                card.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                        <div>
+                            <h3>${t.adm_patient}: ${report.patientName}</h3>
+                            <p style="font-size: 13px; opacity: 0.7;">${t.adm_time}: ${date}</p>
+                            <p style="margin-top: 10px;"><b>${t.adm_diagnosis}:</b> ${report.diagnosis}</p>
+                            <p>${t.adm_status}: <span class="${report.status === 'تم الإجراء' ? 'status-done' : 'status-pending'}">${statusText}</span></p>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            ${report.status === 'قيد الانتظار' ? 
+                                `<button onclick="markAsDone('${key}')" class="main-btn" style="width: auto; padding: 8px 15px; background: #10b981;">${t.adm_btn_confirm}</button>` : ''}
+                            <button onclick="deleteReport('${key}')" class="main-btn btn-delete">${t.adm_btn_delete}</button>
+                        </div>
+                    </div>
+                `;
+                reportsList.appendChild(card);
+            });
+        }
+
         window.markAsDone = async (reportId) => {
-            if(confirm("هل تم اتخاذ الإجراء الطبي اللازم؟")) {
+            const lang = localStorage.getItem('preferred_lang') || 'ar';
+            if(confirm(translations[lang].confirm_done)) {
                 await update(ref(db, `reports/${reportId}`), { status: "تم الإجراء" });
             }
         };
 
-        // دالة حذف البلاغ (الجديدة)
         window.deleteReport = async (reportId) => {
-            if(confirm("هل أنت متأكد من حذف هذا البلاغ نهائياً؟")) {
+            const lang = localStorage.getItem('preferred_lang') || 'ar';
+            if(confirm(translations[lang].confirm_delete)) {
                 try {
                     await remove(ref(db, `reports/${reportId}`));
                 } catch (err) {
-                    alert("فشل الحذف: " + err.message);
+                    alert(err.message);
                 }
             }
         };
+
+        // تشغيل اللغة المحفوظة
+        setLanguage(localStorage.getItem('preferred_lang') || 'ar');
     </script>
 </body>
 </html>

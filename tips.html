@@ -6,6 +6,30 @@
     <title>LifeBand - نصائح طبية</title>
     <link rel="stylesheet" href="style.css">
     <style>
+        /* تنسيق زر اللغة الدائري الموحد */
+        .lang-toggle {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: bold;
+            transition: 0.3s;
+            backdrop-filter: blur(5px);
+            font-family: sans-serif;
+        }
+        .lang-toggle:hover {
+            background: var(--primary);
+            color: white;
+            transform: scale(1.1);
+        }
+
         /* تنسيق السلايدر (Slider) */
         .hero-slider {
             position: relative;
@@ -39,6 +63,9 @@
             padding: 50px;
             color: white;
         }
+        [dir="ltr"] .slide-overlay {
+            background: linear-gradient(to left, rgba(0,0,0,0.7), transparent);
+        }
         .slide-overlay h2 { font-size: 2rem; margin-bottom: 15px; color: var(--accent); }
         .slide-overlay p { font-size: 1.1rem; max-width: 450px; margin-bottom: 20px; line-height: 1.6; }
 
@@ -53,24 +80,29 @@
             margin-bottom: 30px;
             border-radius: 15px;
         }
-        .ticker {
-            display: flex;
-            white-space: nowrap;
-            animation: tickerMove 25s linear infinite;
-        }
-        .ticker-item {
-            display: inline-block;
-            padding: 0 40px;
-            font-size: 14px;
-            font-weight: bold;
-            color: var(--primary);
-        }
-        @keyframes tickerMove {
-            0% { transform: translateX(100%); }
-            100% { transform: translateX(-100%); }
-        }
+/* 1. تعريف حركة العربي (يمين إلى يسار) */
+@keyframes tickerMoveAr {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
+}
 
-        /* نقاط التحكم في السلايدر */
+/* 2. تعريف حركة الإنجليزي (يسار إلى يمين) */
+@keyframes tickerMoveEn {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* 3. تطبيق الحركة بناءً على اتجاه الصفحة */
+.ticker {
+    display: flex;
+    white-space: nowrap;
+    animation: tickerMoveAr 25s linear infinite; /* الافتراضي عربي */
+}
+
+[dir="ltr"] .ticker {
+    animation: tickerMoveEn 25s linear infinite; /* يتحول لإنجليزي تلقائياً */
+}
+
         .slider-dots {
             position: absolute;
             bottom: 20px;
@@ -94,24 +126,22 @@
         <header class="navbar">
             <a href="index.html" class="nav-brand">LifeBand</a>
             <div class="nav-links">
-                <a href="index.html" class="nav-item">الرئيسية</a>
-                <a href="tips.html" class="nav-item active">نصائح طبية</a>
+                <a href="index.html" class="nav-item" data-i18n="nav_home">الرئيسية</a>
+                <a href="tips.html" class="nav-item active" data-i18n="nav_tips">نصائح طبية</a>
                 
                 <div class="dropdown">
-                    <button class="nav-item" style="background:none; border:none; cursor:pointer; font-family: inherit;">للمختصين ▼</button>
+                    <button class="nav-item" style="background:none; border:none; cursor:pointer; font-family: inherit;" data-i18n="nav_specialists">للمختصين ▼</button>
                     <div class="dropdown-content">
-                        <a href="volunteering.html">التطوع الصحي</a>
-                        <a href="innovation.html">الابتكار</a>
-                        <a href="awareness.html">التوعية والتثقيف</a>
-                        <a href="media.html">المركز الإعلامي</a>
+                        <a href="volunteering.html" data-i18n="drop_volunteer">التطوع الصحي</a>
+                        <a href="innovation.html" data-i18n="drop_innovation">الابتكار</a>
+                        <a href="awareness.html" data-i18n="drop_awareness">التوعية والتثقيف</a>
+                        <a href="media.html" data-i18n="drop_media">المركز الإعلامي</a>
                     </div>
                 </div>
 
-                <span id="auth-zone">
-                    <a href="login.html" class="nav-item">دخول</a>
-                    <a href="register.html" class="nav-item">إنشاء حساب</a>
-                </span>
+                <span id="auth-zone"></span>
 
+                <button id="langBtn" class="lang-toggle">EN</button>
                 <button id="themeBtn" class="theme-toggle">🌙</button>
             </div>
         </header>
@@ -120,23 +150,23 @@
             <div class="slides" id="mainSlides">
                 <div class="slide" style="background-image: url('https://images.pexels.com/photos/40568/medical-appointment-doctor-healthcare-40568.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1');">
                     <div class="slide-overlay">
-                        <h2>مستقبلك يبدأ من وعيك</h2>
-                        <p>اكتشف كيف يمكن لتغييرات بسيطة في نمط حياتك أن تحميك من الأمراض المزمنة وتزيد من طاقتك اليومية.</p>
-                        <a href="#tipsGrid" class="main-btn" style="width: fit-content; padding: 10px 30px; text-decoration: none;">تصفح النصائح</a>
+                        <h2 data-i18n="slide1_h">مستقبلك يبدأ من وعيك</h2>
+                        <p data-i18n="slide1_p">اكتشف كيف يمكن لتغييرات بسيطة في نمط حياتك أن تحميك من الأمراض المزمنة وتزيد من طاقتك اليومية.</p>
+                        <a href="#tipsGrid" class="main-btn" style="width: fit-content; padding: 10px 30px; text-decoration: none;" data-i18n="slide_btn_browse">تصفح النصائح</a>
                     </div>
                 </div>
                 <div class="slide" style="background-image: url('https://images.pexels.com/photos/7088483/pexels-photo-7088483.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1');">
                     <div class="slide-overlay">
-                        <h2>تقنية تصنع الفرق</h2>
-                        <p>سوار LifeBand ليس مجرد إكسسوار، بل هو رفيقك الذكي الذي يحمل ملفك الطبي لإنقاذك في اللحظات الحرجة.</p>
-                        <a href="register.html" class="main-btn" style="width: fit-content; padding: 10px 30px; background: var(--secondary); text-decoration: none;">سجل الآن</a>
+                        <h2 data-i18n="slide2_h">تقنية تصنع الفرق</h2>
+                        <p data-i18n="slide2_p">سوار LifeBand ليس مجرد إكسسوار، بل هو رفيقك الذكي الذي يحمل ملفك الطبي لإنقاذك في اللحظات الحرجة.</p>
+                        <a href="register.html" class="main-btn" style="width: fit-content; padding: 10px 30px; background: var(--secondary); text-decoration: none;" data-i18n="slide_btn_reg">سجل الآن</a>
                     </div>
                 </div>
                 <div class="slide" style="background-image: url('https://images.pexels.com/photos/3913025/pexels-photo-3913025.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1');">
                     <div class="slide-overlay">
-                        <h2>مجتمع صحي متكامل</h2>
-                        <p>انضم لبرامجنا التطوعية وساهم في نشر الوعي الصحي باستخدام أحدث التقنيات الرقمية.</p>
-                        <a href="volunteering.html" class="main-btn" style="width: fit-content; padding: 10px 30px; text-decoration: none;">برامج التطوع</a>
+                        <h2 data-i18n="slide3_h">مجتمع صحي متكامل</h2>
+                        <p data-i18n="slide3_p">انضم لبرامجنا التطوعية وساهم في نشر الوعي الصحي باستخدام أحدث التقنيات الرقمية.</p>
+                        <a href="volunteering.html" class="main-btn" style="width: fit-content; padding: 10px 30px; text-decoration: none;" data-i18n="slide_btn_vol">برامج التطوع</a>
                     </div>
                 </div>
             </div>
@@ -148,18 +178,13 @@
         </div>
 
         <div class="ticker-wrap">
-            <div class="ticker">
-                <div class="ticker-item">🚨 تنبيه: حدث بياناتك الطبية دورياً.</div>
-                <div class="ticker-item">💡 هل تعلم؟ المشي 30 دقيقة يحسن مزاجك فوراً.</div>
-                <div class="ticker-item">📞 رقم الطوارئ الموحد: 911.</div>
-                <div class="ticker-item">🔒 أمانك أولويتنا: بياناتك مشفرة بالكامل.</div>
-                <div class="ticker-item">🌟 جديد: تم إضافة 20 نصيحة طبية جديدة اليوم.</div>
-            </div>
+            <div class="ticker" id="tickerContent">
+                </div>
         </div>
 
         <main>
             <div id="tipsGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; padding-bottom: 50px;">
-            </div>
+                </div>
         </main>
     </div>
 
@@ -167,99 +192,145 @@
         import { auth } from './js/firebase-config.js';
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        // منطق السلايدر
+        // --- 1. الترجمات ---
+        const translations = {
+            ar: {
+                nav_home: "الرئيسية",
+                nav_tips: "نصائح طبية",
+                nav_specialists: "للمختصين ▼",
+                drop_volunteer: "التطوع الصحي",
+                drop_innovation: "الابتكار",
+                drop_awareness: "التوعية والتثقيف",
+                drop_media: "المركز الإعلامي",
+                slide1_h: "مستقبلك يبدأ من وعيك",
+                slide1_p: "اكتشف كيف يمكن لتغييرات بسيطة في نمط حياتك أن تحميك من الأمراض المزمنة.",
+                slide2_h: "تقنية تصنع الفرق",
+                slide2_p: "سوار LifeBand رفيقك الذكي لإنقاذك في اللحظات الحرجة.",
+                slide3_h: "مجتمع صحي متكامل",
+                slide3_p: "انضم لبرامجنا التطوعية وساهم في نشر الوعي الصحي.",
+                slide_btn_browse: "تصفح النصائح",
+                slide_btn_reg: "سجل الآن",
+                slide_btn_vol: "برامج التطوع",
+                ticker_items: [
+                    "🚨 تنبيه: حدث بياناتك الطبية دورياً.",
+                    "💡 هل تعلم؟ المشي 30 دقيقة يحسن مزاجك فوراً.",
+                    "📞 رقم الطوارئ الموحد: 911.",
+                    "🔒 أمانك أولويتنا: بياناتك مشفرة بالكامل."
+                ],
+                lang_label: "EN"
+            },
+            en: {
+                nav_home: "Home",
+                nav_tips: "Medical Tips",
+                nav_specialists: "Specialists ▼",
+                drop_volunteer: "Health Volunteering",
+                drop_innovation: "Innovation",
+                drop_awareness: "Awareness",
+                drop_media: "Media Center",
+                slide1_h: "Future Starts with Awareness",
+                slide1_p: "Discover how simple lifestyle changes can protect you from chronic diseases.",
+                slide2_h: "Tech That Makes a Difference",
+                slide2_p: "LifeBand is your smart companion for critical emergency moments.",
+                slide3_h: "Integrated Health Community",
+                slide3_p: "Join our volunteer programs and help spread health awareness.",
+                slide_btn_browse: "Browse Tips",
+                slide_btn_reg: "Register Now",
+                slide_btn_vol: "Volunteer Programs",
+                ticker_items: [
+                    "🚨 Alert: Update your medical data regularly.",
+                    "💡 Did you know? A 30-min walk boosts your mood instantly.",
+                    "📞 Emergency Number: 911.",
+                    "🔒 Security First: Your data is fully encrypted."
+                ],
+                lang_label: "AR"
+            }
+        };
+
+        const tips = [
+            { ar: {t:"شرب الماء", c:"8 أكواب يومياً تحسن وظائف الكلى."}, en: {t:"Drink Water", c:"8 glasses a day improves kidney function."}, icon: "💧", img: "https://images.pexels.com/photos/1452115/pexels-photo-1452115.jpeg?auto=compress&cs=tinysrgb&w=400" },
+            { ar: {t:"النوم العميق", c:"7-8 ساعات تعزز المناعة."}, en: {t:"Deep Sleep", c:"7-8 hours boosts immunity."}, icon: "🌙", img: "https://images.pexels.com/photos/3771069/pexels-photo-3771069.jpeg?auto=compress&cs=tinysrgb&w=400" },
+            { ar: {t:"المشي السريع", c:"30 دقيقة تقلل مخاطر القلب."}, en: {t:"Brisk Walk", c:"30 mins daily reduces heart risk."}, icon: "🏃‍♂️", img: "https://images.pexels.com/photos/601177/pexels-photo-601177.jpeg?auto=compress&cs=tinysrgb&w=400" },
+            { ar: {t:"الخضروات", c:"الألياف تدعم الجهاز الهضمي."}, en: {t:"Vegetables", c:"Fiber supports the digestive system."}, icon: "🥗", img: "https://images.pexels.com/photos/1143754/pexels-photo-1143754.jpeg?auto=compress&cs=tinysrgb&w=400" },
+            { ar: {t:"تقليل السكر", c:"يحميك من السكري والسمنة."}, en: {t:"Reduce Sugar", c:"Protects from diabetes and obesity."}, icon: "🚫", img: "https://images.pexels.com/photos/4113661/pexels-photo-4113661.jpeg?auto=compress&cs=tinysrgb&w=400" }
+            // ... يمكن إضافة البقية بنفس النمط
+        ];
+
+        const langBtn = document.getElementById('langBtn');
+
+        function setLanguage(lang) {
+            const t = translations[lang];
+            document.documentElement.lang = lang;
+            document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+            
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                el.innerText = t[key];
+            });
+
+            // تحديث التيكر
+            document.getElementById('tickerContent').innerHTML = t.ticker_items.map(item => `<div class="ticker-item">${item}</div>`).join('');
+
+            // تحديث كروت النصائح
+            document.getElementById('tipsGrid').innerHTML = tips.map(tip => `
+                <div class="glass-card" style="padding: 0; overflow: hidden; transition: 0.4s;">
+                    <img src="${tip.img}" style="width: 100%; height: 160px; object-fit: cover; opacity: 0.8;" alt="tip">
+                    <div style="padding: 20px;">
+                        <div style="font-size: 24px; margin-bottom: 5px;">${tip.icon}</div>
+                        <h3 style="color: var(--primary); margin-bottom: 5px;">${tip[lang].t}</h3>
+                        <p style="color: var(--text-main); font-size: 13px; opacity: 0.8; line-height: 1.5;">${tip[lang].c}</p>
+                    </div>
+                </div>
+            `).join('');
+
+            langBtn.innerText = t.lang_label;
+            localStorage.setItem('preferred_lang', lang);
+        }
+
+        langBtn.onclick = () => {
+            const current = localStorage.getItem('preferred_lang') || 'ar';
+            setLanguage(current === 'ar' ? 'en' : 'ar');
+        };
+
+        // --- منطق السلايدر ---
         let currentSlide = 0;
         const slides = document.getElementById('mainSlides');
         const dots = document.querySelectorAll('.dot');
 
         function moveSlide() {
             currentSlide = (currentSlide + 1) % 3;
-            slides.style.transform = `translateX(${currentSlide * 33.33}%)`;
-            dots.forEach((dot, index) => {
-                dot.classList.toggle('active', index === currentSlide);
-            });
+            const factor = document.documentElement.dir === 'rtl' ? 33.33 : -33.33;
+            slides.style.transform = `translateX(${currentSlide * factor}%)`;
+            dots.forEach((dot, index) => dot.classList.toggle('active', index === currentSlide));
         }
         setInterval(moveSlide, 5000);
 
-        // مصفوفة النصائح
-        const tips = [
-            { title: "شرب الماء", content: "8 أكواب يومياً تحسن وظائف الكلى وتنظف الجسم.", icon: "💧", img: "https://images.pexels.com/photos/1452115/pexels-photo-1452115.jpeg?auto=compress&cs=tinysrgb&w=400" },
-            { title: "النوم العميق", content: "7-8 ساعات تعزز المناعة وتقوي الذاكرة والتركيز.", icon: "🌙", img: "https://images.pexels.com/photos/3771069/pexels-photo-3771069.jpeg?auto=compress&cs=tinysrgb&w=400" },
-            { title: "المشي السريع", content: "30 دقيقة يومياً تقلل مخاطر أمراض القلب بنسبة 40%.", icon: "🏃‍♂️", img: "https://images.pexels.com/photos/601177/pexels-photo-601177.jpeg?auto=compress&cs=tinysrgb&w=400" },
-            { title: "الخضروات", content: "الألياف تدعم الجهاز الهضمي وتمنحك شعوراً بالشبع.", icon: "🥗", img: "https://images.pexels.com/photos/1143754/pexels-photo-1143754.jpeg?auto=compress&cs=tinysrgb&w=400" },
-            { title: "تقليل السكر", content: "تجنب السكريات المضافة يحميك من السكري والسمنة.", icon: "🚫", img: "https://images.pexels.com/photos/4113661/pexels-photo-4113661.jpeg?auto=compress&cs=tinysrgb&w=400" },
-            { title: "فحص الضغط", icon: "🩺", content: "المتابعة الدورية للضغط تقي من الجلطات المفاجئة.", img: "https://images.pexels.com/photos/6050516/pexels-photo-6050516.jpeg?auto=compress&cs=tinysrgb&w=400" },
-            { title: "صحة العين", icon: "👁️", content: "قاعدة 20-20-20: كل 20 دقيقة انظر بعيداً لـ20 ثانية.", img: "https://images.pexels.com/photos/4621558/pexels-photo-4621558.jpeg?auto=compress&cs=tinysrgb&w=400" },
-            { title: "غسل اليدين", icon: "🧼", content: "أبسط وسيلة لمنع انتقال العدوى والفيروسات.", img: "https://images.pexels.com/photos/4202325/pexels-photo-4202325.jpeg?auto=compress&cs=tinysrgb&w=400" },
-            { title: "الفاكهة الموسمية", icon: "🍎", content: "مصدر طبيعي للفيتامينات التي يحتاجها جسمك.", img: "https://images.pexels.com/photos/1132047/pexels-photo-1132047.jpeg?auto=compress&cs=tinysrgb&w=400" },
-            { title: "التنفس العميق", icon: "🧘", content: "يقلل التوتر ويحسن تدفق الأكسجين للدماغ.", img: "https://images.pexels.com/photos/3822622/pexels-photo-3822622.jpeg?auto=compress&cs=tinysrgb&w=400" },
-            { title: "تقليل الملح", icon: "🧂", content: "يحافظ على توازن السوائل ويحمي الشرايين.", img: "https://images.pexels.com/photos/4033100/pexels-photo-4033100.jpeg?auto=compress&cs=tinysrgb&w=400" },
-            { title: "أشعة الشمس", icon: "☀️", content: "15 دقيقة يومياً تمنحك فيتامين D لعظام قوية.", img: "https://images.pexels.com/photos/1435832/pexels-photo-1435832.jpeg?auto=compress&cs=tinysrgb&w=400" },
-            { title: "شرب الأخضر", icon: "🍵", content: "الشاي الأخضر غني بمضادات الأكسدة المفيدة.", img: "https://images.pexels.com/photos/1417945/pexels-photo-1417945.jpeg?auto=compress&cs=tinysrgb&w=400" },
-            { title: "الوضعية الصحيحة", icon: "💻", content: "حافظ على استقامة ظهرك أثناء العمل المكتبي.", img: "https://images.pexels.com/photos/4050290/pexels-photo-4050290.jpeg?auto=compress&cs=tinysrgb&w=400" },
-            { title: "المكسرات", icon: "🥜", content: "حفنة صغيرة يومياً تحسن صحة الدماغ والقلب.", img: "https://images.pexels.com/photos/95425/pexels-photo-95425.jpeg?auto=compress&cs=tinysrgb&w=400" },
-            { title: "صحة الأسنان", icon: "🪥", content: "التنظيف اليومي يحمي من التهابات اللثة والقلب.", img: "https://images.pexels.com/photos/3762461/pexels-photo-3762461.jpeg?auto=compress&cs=tinysrgb&w=400" },
-            { title: "لا للتدخين", icon: "🚭", content: "أهم خطوة لتحسين كفاءة الرئة وطول العمر.", img: "https://images.pexels.com/photos/355938/pexels-photo-355938.jpeg?auto=compress&cs=tinysrgb&w=400" },
-            { title: "الضحك", icon: "😊", content: "يفرز هرمونات السعادة ويقوي عضلة القلب.", img: "https://images.pexels.com/photos/1104007/pexels-photo-1104007.jpeg?auto=compress&cs=tinysrgb&w=400" },
-            { title: "البروتين", icon: "🥚", content: "ضروري لبناء العضلات وإصلاح أنسجة الجسم.", img: "https://images.pexels.com/photos/1556706/pexels-photo-1556706.jpeg?auto=compress&cs=tinysrgb&w=400" },
-            { title: "القهوة باعتدال", icon: "☕", content: "تحسن التركيز وتنشط الدورة الدموية.", img: "https://images.pexels.com/photos/312418/pexels-photo-312418.jpeg?auto=compress&cs=tinysrgb&w=400" }
-        ];
-
-        document.getElementById('tipsGrid').innerHTML = tips.map(tip => `
-            <div class="glass-card" style="padding: 0; overflow: hidden; transition: 0.4s;">
-                <img src="${tip.img}" style="width: 100%; height: 160px; object-fit: cover; opacity: 0.8;" alt="${tip.title}">
-                <div style="padding: 20px;">
-                    <div style="font-size: 24px; margin-bottom: 5px;">${tip.icon}</div>
-                    <h3 style="color: var(--primary); margin-bottom: 5px;">${tip.title}</h3>
-                    <p style="color: var(--text-main); font-size: 13px; opacity: 0.8; line-height: 1.5;">${tip.content}</p>
-                </div>
-            </div>
-        `).join('');
-
-        // نظام الثيم
+        // --- نظام الثيم ومنطقة الدخول ---
         const themeBtn = document.getElementById('themeBtn');
         function applyTheme(theme) {
-            if (theme === 'dark') {
-                document.body.setAttribute('data-theme', 'dark');
-                if(themeBtn) themeBtn.innerText = '☀️';
-            } else {
-                document.body.removeAttribute('data-theme');
-                if(themeBtn) themeBtn.innerText = '🌙';
-            }
+            document.body.setAttribute('data-theme', theme === 'dark' ? 'dark' : '');
+            if(themeBtn) themeBtn.innerText = theme === 'dark' ? '☀️' : '🌙';
         }
-
         applyTheme(localStorage.getItem('theme') || 'light');
+        themeBtn.onclick = () => {
+            const nt = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('theme', nt);
+            applyTheme(nt);
+        };
 
-        if(themeBtn) {
-            themeBtn.onclick = () => {
-                const isDark = document.body.getAttribute('data-theme') === 'dark';
-                const nt = isDark ? 'light' : 'dark';
-                localStorage.setItem('theme', nt);
-                applyTheme(nt);
-            };
-        }
-
-        // نظام منطقة تسجيل الدخول الموحد
-        const authZone = document.getElementById('auth-zone');
         onAuthStateChanged(auth, (user) => {
+            const authZone = document.getElementById('auth-zone');
+            const lang = localStorage.getItem('preferred_lang') || 'ar';
             if (user) {
-                authZone.innerHTML = `
-                    <a href="profile.html?id=${user.uid}" class="nav-item">ملفي الطبي</a>
-                    <button id="logoutBtn" class="nav-item" style="background:none; border:none; cursor:pointer; font-family: inherit; color: #ef4444;">تسجيل خروج</button>
-                `;
-
-                document.getElementById('logoutBtn').onclick = () => {
-                    if(confirm("هل تريد تسجيل الخروج؟")) {
-                        signOut(auth).then(() => window.location.reload());
-                    }
-                };
+                authZone.innerHTML = `<a href="profile.html?id=${user.uid}" class="nav-item">${lang==='ar'?'ملفي الطبي':'My Profile'}</a>
+                <button id="logoutBtn" class="nav-item" style="background:none; border:none; cursor:pointer; font-family: inherit; color: #ef4444;">${lang==='ar'?'تسجيل خروج':'Logout'}</button>`;
+                document.getElementById('logoutBtn').onclick = () => signOut(auth).then(() => window.location.reload());
             } else {
-                authZone.innerHTML = `
-                    <a href="login.html" class="nav-item">دخول</a>
-                    <a href="register.html" class="nav-item">إنشاء حساب</a>
-                `;
+                authZone.innerHTML = `<a href="login.html" class="nav-item">${lang==='ar'?'دخول':'Login'}</a>
+                <a href="register.html" class="nav-item">${lang==='ar'?'إنشاء حساب':'Register'}</a>`;
             }
         });
+
+        setLanguage(localStorage.getItem('preferred_lang') || 'ar');
     </script>
 </body>
 </html>

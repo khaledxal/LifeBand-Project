@@ -209,3 +209,32 @@ body::before {
     justify-content: center; 
     font-size: 20px;
 }
+
+/* زر اللغة الدائري */
+.lang-toggle {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    color: var(--text-main);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: bold;
+    transition: 0.3s;
+    backdrop-filter: blur(5px);
+}
+
+.lang-toggle:hover {
+    transform: scale(1.1);
+    background: var(--primary);
+    color: white;
+}
+
+/* دعم اللغة الإنجليزية */
+[lang="en"] {
+    font-family: 'Segoe UI', Roboto, sans-serif;
+}
