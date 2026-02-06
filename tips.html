@@ -70,30 +70,32 @@
                 </div>
             </div>
         `).join('');
+// كود تبديل المود (Theme Toggle) الموحد والمصلح
+const themeBtn = document.getElementById('themeBtn');
 
-        // كود تبديل المود (Theme Toggle) الموحد والفعال
-        const themeBtn = document.getElementById('themeBtn');
+function applyTheme(theme) {
+    if (theme === 'dark') {
+        document.body.setAttribute('data-theme', 'dark'); // تفعيل ألوان الليل والنجوم البيضاء
+        if(themeBtn) themeBtn.innerText = '☀️';
+    } else {
+        document.body.removeAttribute('data-theme'); // العودة للوضع الصباحي والنجوم الزرقاء
+        if(themeBtn) themeBtn.innerText = '🌙';
+    }
+}
 
-        function applyTheme(theme) {
-            if (theme === 'dark') {
-                document.body.setAttribute('data-theme', 'dark');
-                themeBtn.innerText = '☀️';
-            } else {
-                document.body.removeAttribute('data-theme');
-                themeBtn.innerText = '🌙';
-            }
-        }
+// استعادة الوضع المفضل فور التحميل
+const savedTheme = localStorage.getItem('theme') || 'light';
+applyTheme(savedTheme);
 
-        // استعادة الوضع المفضل من ذاكرة المتصفح فور التحميل
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        applyTheme(savedTheme);
-
-        themeBtn.onclick = () => {
-            const isDark = document.body.getAttribute('data-theme') === 'dark';
-            const newTheme = isDark ? 'light' : 'dark';
-            localStorage.setItem('theme', newTheme);
-            applyTheme(newTheme);
-        };
+// وظيفة زر التبديل
+if(themeBtn) {
+    themeBtn.onclick = () => {
+        const isDark = document.body.getAttribute('data-theme') === 'dark';
+        const newTheme = isDark ? 'light' : 'dark';
+        localStorage.setItem('theme', newTheme);
+        applyTheme(newTheme);
+    };
+}
     </script>
 </body>
 </html>

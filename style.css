@@ -5,8 +5,8 @@
     --accent: #00d4ff;
 
     /* الوضع الصباحي - ألوان هادئة ونظيفة */
-    --bg-main: linear-gradient(135deg, #e0e7ff 0%, #f8fafc 100%);
-    --star-color: rgba(99, 102, 241, 0.2); /* نجوم زرقاء خفيفة للنهار */
+    --bg-main: linear-gradient(135deg, #a7a7a7 0%, #f8fafc 100%);
+    --star-color: rgba(0, 0, 0, 0.2); /* نجوم زرقاء خفيفة للنهار */
     --text-main: #1e293b;
     --input-bg: #ffffff;
     --glass: rgba(255, 255, 255, 0.75);
