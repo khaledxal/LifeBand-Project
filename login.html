@@ -11,8 +11,21 @@
         <header class="navbar">
             <a href="index.html" class="nav-brand">LifeBand</a>
             <div class="nav-links">
-                <a href="tips.html" class="nav-item">نصائح</a>
-                <a href="register.html" class="nav-item">تسجيل</a>
+                <a href="index.html" class="nav-item">الرئيسية</a>
+                <a href="tips.html" class="nav-item">نصائح طبية</a>
+                
+                <div class="dropdown">
+                    <button class="nav-item" style="background:none; border:none; cursor:pointer; font-family: inherit;">للمختصين ▼</button>
+                    <div class="dropdown-content">
+                        <a href="volunteering.html">التطوع الصحي</a>
+                        <a href="innovation.html">الابتكار</a>
+                        <a href="awareness.html">التوعية والتثقيف</a>
+                        <a href="media.html">المركز الإعلامي</a>
+                    </div>
+                </div>
+
+                <a href="login.html" class="nav-item active">دخول</a>
+                <a href="register.html" class="nav-item">إنشاء حساب</a>
                 <button id="themeBtn" class="theme-toggle">🌙</button>
             </div>
         </header>
@@ -40,42 +53,51 @@
         import { auth } from './js/firebase-config.js';
         import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        // تبديل الوضع (Dark/Light Mode)
-        const btn = document.getElementById('themeBtn');
-        btn.onclick = () => {
-            const current = document.body.getAttribute('data-theme');
-            if(current === 'dark') {
-                document.body.removeAttribute('data-theme');
-                btn.innerText = '🌙';
-            } else {
+        // منطق الثيم الموحد والمستمر
+        const themeBtn = document.getElementById('themeBtn');
+        
+        function applyTheme(theme) {
+            if (theme === 'dark') {
                 document.body.setAttribute('data-theme', 'dark');
-                btn.innerText = '☀️';
+                themeBtn.innerText = '☀️';
+            } else {
+                document.body.removeAttribute('data-theme');
+                themeBtn.innerText = '🌙';
             }
+        }
+
+        // تحميل المود المحفوظ عند فتح الصفحة
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        applyTheme(savedTheme);
+
+        themeBtn.onclick = () => {
+            const isDark = document.body.getAttribute('data-theme') === 'dark';
+            const newTheme = isDark ? 'light' : 'dark';
+            localStorage.setItem('theme', newTheme);
+            applyTheme(newTheme);
         };
 
-        // منطق تسجيل الدخول المطور
-  // منطق تسجيل الدخول المطور
-document.getElementById('loginForm').onsubmit = async (e) => {
-    e.preventDefault();
-    
-    let userInput = document.getElementById('loginEmail').value;
-    let passInput = document.getElementById('loginPassword').value;
+        // منطق تسجيل الدخول
+        document.getElementById('loginForm').onsubmit = async (e) => {
+            e.preventDefault();
+            
+            let userInput = document.getElementById('loginEmail').value;
+            let passInput = document.getElementById('loginPassword').value;
 
-    try {
-        const userCredential = await signInWithEmailAndPassword(auth, userInput, passInput);
-        const user = userCredential.user;
-        
-        // التحقق من البريد الإلكتروني الخاص بك كأدمن
-        if (user.email === "khaledxalbughdadi@gmail.com") {
-            window.location.href = "admin.html"; // توجيه خالد للوحة الإدارة
-        } else {
-            window.location.href = `profile.html?id=${user.uid}`; // توجيه بقية المستخدمين لملفاتهم
-        }
-    } catch (err) { 
-        alert("خطأ في الدخول: تأكد من البريد الإلكتروني أو كلمة المرور");
-        console.error(err.message);
-    }
-};
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, userInput, passInput);
+                const user = userCredential.user;
+                
+                if (user.email === "khaledxalbughdadi@gmail.com") {
+                    window.location.href = "admin.html";
+                } else {
+                    window.location.href = `profile.html?id=${user.uid}`;
+                }
+            } catch (err) { 
+                alert("خطأ في الدخول: تأكد من البريد الإلكتروني أو كلمة المرور");
+                console.error(err.message);
+            }
+        };
     </script>
 </body>
 </html>
