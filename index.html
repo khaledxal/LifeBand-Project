@@ -241,10 +241,10 @@
         // --- حل مشكلة تسجيل الخروج التلقائي في القائمة ---
         const navContainer = document.getElementById('dynamic-nav');
         onAuthStateChanged(auth, (user) => {
-            if (user) {
-                // إذا كان المستخدم مسجلاً، نحدث القائمة لتشمل ملفه الشخصي وزر خروج
-              navContainer.innerHTML = `
-            <a href="index.html" class="nav-item">الرئيسية</a> 
+        if (user) {
+        // نحدث القائمة لتشمل "الرئيسية" وباقي الروابط بعد تسجيل الدخول
+        navContainer.innerHTML = `
+            <a href="index.html" class="nav-item active">الرئيسية</a> 
             <a href="tips.html" class="nav-item">نصائح طبية</a>
             <a href="profile.html?id=${user.uid}" class="nav-item">ملفي الطبي</a>
             <button id="logoutBtn" class="nav-item" style="background:none; border:none; cursor:pointer; font-family: inherit; color: #ef4444;">تسجيل خروج</button>
