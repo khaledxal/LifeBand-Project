@@ -11,27 +11,24 @@
             --glass-border: #ddd;
             --text-main: #333;
         }
-        body { font-family: sans-serif; background-color: #f0f2f5; margin: 0; direction: rtl; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; margin: 0; direction: rtl; }
         .emergency-container { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
         .glass-card { background: var(--glass); padding: 30px; border-radius: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); border: 1px solid var(--glass-border); width: 100%; max-width: 500px; text-align: center; }
-        .hold-circle { position: relative; width: 180px; height: 180px; cursor: pointer; display: flex; align-items: center; justify-content: center; text-align: center; border-radius: 50%; border: 2px solid var(--glass-border); margin: 0 auto; user-select: none; }
+        .hold-circle { position: relative; width: 180px; height: 180px; cursor: pointer; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 2px solid var(--glass-border); margin: 0 auto; user-select: none; }
         .progress-ring { position: absolute; top: -5px; left: -5px; transform: rotate(-90deg); }
         .progress-ring__circle { stroke-dasharray: 565.48; stroke-dashoffset: 565.48; transition: stroke-dashoffset 0.1s linear; }
-        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 25px; }
-        .option-btn { padding: 15px; border: 2px solid var(--glass-border); border-radius: 12px; background: white; color: var(--text-main); cursor: pointer; font-weight: bold; transition: 0.3s; }
-        .option-btn:hover { background: var(--primary); color: white; }
         .loader { border: 3px solid #f3f3f3; border-top: 3px solid var(--primary); border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; margin: 20px auto; display: none; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .main-btn { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 1rem; font-weight: bold; transition: 0.3s; margin-top: 10px; }
+        .main-btn { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 1rem; font-weight: bold; margin-top: 10px; transition: 0.3s; }
         .main-btn:hover { transform: translateY(-2px); opacity: 0.9; }
     </style>
 </head>
 <body>
     <div class="emergency-container">
         <div id="triggerSection" class="glass-card">
-            <h2 style="margin-bottom: 30px;">نظام LifeBand للطوارئ</h2>
+            <h2 style="margin-bottom: 30px; color: var(--primary);">نظام LifeBand للطوارئ</h2>
             <div id="holdBtn" class="hold-circle">
-                <span id="holdText" style="font-weight: bold;">اضغط مطولاً<br>لفتح الملف</span>
+                <span style="font-weight: bold;">اضغط مطولاً<br>لفتح الملف</span>
                 <svg class="progress-ring" width="190" height="190">
                     <circle id="progressCircle" class="progress-ring__circle" stroke="#ef4444" stroke-width="10" fill="transparent" r="90" cx="95" cy="95"/>
                 </svg>
@@ -41,17 +38,16 @@
 
         <div id="infoSection" class="glass-card" style="display: none;">
             <h3 id="patientNameDisplay" style="color: var(--primary); margin: 10px 0;"></h3>
-            <p id="activeQuestion" style="font-size: 1.2rem; margin: 20px 0;">جاري تحليل الحالة الطبية...</p>
+            <p id="activeQuestion" style="font-size: 1.2rem; margin: 20px 0;">جاري تحليل البيانات الطبية...</p>
             <div id="loader" class="loader"></div>
-            <div id="optionsContainer" class="options-grid"></div>
 
             <div id="finalResult" style="display: none;">
                 <div style="background: rgba(16, 185, 129, 0.1); padding: 20px; border-radius: 15px; border-right: 5px solid #10b981; text-align: right; margin-bottom: 20px;">
-                    <h4 style="color: #10b981;">الإجراء المطلوب:</h4>
-                    <p id="resultText">الحالة مستقرة، يرجى مراقبة المريض بانتظام.</p>
+                    <h4 style="color: #10b981;">التشخيص المبدئي:</h4>
+                    <p id="resultText">الحالة تتطلب رعاية فورية. تم إرسال تنبيه للمسعفين.</p>
                 </div>
-                <button onclick="saveAndExit()" class="main-btn" style="background: #10b981;">✅ حفظ التقرير وإنهاء</button>
-                <button onclick="location.href='index.html'" class="main-btn" style="background: #6b7280;">❌ إلغاء والعودة للرئيسية</button>
+                <button onclick="saveAndExit()" class="main-btn" style="background: #10b981;">✅ حفظ وإنهاء الإجراء</button>
+                <button onclick="location.href='index.html'" class="main-btn" style="background: #6b7280;">❌ إلغاء والعودة</button>
             </div>
         </div>
     </div>
@@ -60,79 +56,74 @@
 import { db } from './js/firebase-config.js';
 import { ref, get, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-// ================= تم إيقاف الباك اند مؤقتاً =================
-// const SERVER_URL = "http://localhost:3000/api/emergency";
-// ==========================================================
-
 const urlParams = new URLSearchParams(window.location.search);
 const userId = urlParams.get("id");
-
 let progress = 0;
 let holdTimer;
-let patientName = "المريض";
+let patientName = "مريض طوارئ";
 
 const circle = document.getElementById("progressCircle");
 const holdBtn = document.getElementById("holdBtn");
 
-// الضغط المطول
+// إدارة الضغط المطول
+const startHold = (e) => {
+    e.preventDefault();
+    holdTimer = setInterval(() => {
+        progress += 2;
+        circle.style.strokeDashoffset = 565.48 - (progress / 100) * 565.48;
+        if (progress >= 100) {
+            clearInterval(holdTimer);
+            activateEmergency();
+        }
+    }, 30);
+};
+
+const cancelHold = () => {
+    clearInterval(holdTimer);
+    progress = 0;
+    circle.style.strokeDashoffset = 565.48;
+};
+
 holdBtn.addEventListener("mousedown", startHold);
 holdBtn.addEventListener("touchstart", startHold);
-
-function startHold(e) {
-  e.preventDefault();
-  holdTimer = setInterval(() => {
-    progress += 2;
-    circle.style.strokeDashoffset = 565.48 - (progress / 100) * 565.48;
-    if (progress >= 100) {
-      clearInterval(holdTimer);
-      activateEmergency();
-    }
-  }, 30);
-}
-
-function cancelHold() {
-  clearInterval(holdTimer);
-  progress = 0;
-  circle.style.strokeDashoffset = 565.48;
-}
-
 window.addEventListener("mouseup", cancelHold);
 window.addEventListener("touchend", cancelHold);
 
 async function activateEmergency() {
-  document.getElementById("triggerSection").style.display = "none";
-  document.getElementById("infoSection").style.display = "block";
+    document.getElementById("triggerSection").style.display = "none";
+    document.getElementById("infoSection").style.display = "block";
+    document.getElementById("loader").style.display = "block";
 
-  if (userId) {
-    try {
-      const snap = await get(ref(db, `patients/${userId}`));
-      if (snap.exists()) {
-        patientName = snap.val().name;
-        document.getElementById("patientNameDisplay").innerText = "ملف: " + patientName;
-      }
-    } catch (e) { console.error(e); }
-  }
+    if (userId) {
+        try {
+            const snap = await get(ref(db, `patients/${userId}`));
+            if (snap.exists()) {
+                patientName = snap.val().name;
+                document.getElementById("patientNameDisplay").innerText = "ملف المريض: " + patientName;
+            }
+        } catch (e) { console.error("Firebase Error"); }
+    }
 
-  // محاكاة التحليل بدلاً من السيرفر
-  setTimeout(() => {
-    document.getElementById("loader").style.display = "none";
-    document.getElementById("finalResult").style.display = "block";
-    document.getElementById("activeQuestion").style.display = "none";
-  }, 1500);
+    // محاكاة استجابة الذكاء الاصطناعي
+    setTimeout(() => {
+        document.getElementById("loader").style.display = "none";
+        document.getElementById("finalResult").style.display = "block";
+        document.getElementById("activeQuestion").style.display = "none";
+    }, 2000);
 }
 
 window.saveAndExit = async () => {
-  try {
-    await push(ref(db, "reports"), {
-      patientId: userId || "unknown",
-      patientName,
-      diagnosis: document.getElementById("resultText").innerText,
-      timestamp: new Date().toISOString(),
-      status: "تم الإجراء (محاكاة)"
-    });
-    alert("✅ تم حفظ البلاغ بنجاح");
-    location.href = "index.html";
-  } catch (e) { alert("❌ فشل الحفظ"); }
+    try {
+        await push(ref(db, "reports"), {
+            patientId: userId || "NFC_SCAN",
+            patientName,
+            diagnosis: document.getElementById("resultText").innerText,
+            timestamp: new Date().toISOString(),
+            status: "قيد المراجعة"
+        });
+        alert("✅ تم تسجيل حالة الطوارئ بنجاح");
+        location.href = "index.html";
+    } catch (e) { alert("❌ خطأ في الحفظ"); }
 };
 </script>
 </body>
