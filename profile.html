@@ -112,55 +112,59 @@
         };
 
         // 2. مراقبة حالة المستخدم وتحديث القائمة + جلب البيانات
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                // تحديث القائمة العلوية
-                authZone.innerHTML = `
-                    <a href="profile.html?id=${user.uid}" class="nav-item active">ملفي الطبي</a>
-                    <button id="logoutBtn" class="nav-item" style="background:none; border:none; cursor:pointer; font-family: inherit; color: #ef4444;">تسجيل خروج</button>
-                `;
+     // 2. جلب البيانات عند التحميل من مسار users الجديد
+onAuthStateChanged(auth, async (user) => {
+    if (user) {
+        // تحديث القائمة العلوية لتظهر أنك مسجل دخول
+        const authZone = document.getElementById('auth-zone');
+        if (authZone) {
+            authZone.innerHTML = `
+                <a href="profile.html?id=${user.uid}" class="nav-item active">ملفي الطبي</a>
+                <button id="logoutBtn" class="nav-item" style="background:none; border:none; cursor:pointer; font-family: inherit; color: #ef4444;">تسجيل خروج</button>
+            `;
+            document.getElementById('logoutBtn').onclick = () => {
+                if(confirm("هل تريد تسجيل الخروج؟")) signOut(auth).then(() => window.location.href = "index.html");
+            };
+        }
 
-                document.getElementById('logoutBtn').onclick = () => {
-                    if(confirm("هل تريد تسجيل الخروج؟")) {
-                        signOut(auth).then(() => window.location.href = "index.html");
-                    }
-                };
+        // جلب البيانات من مسار 'users' بدلاً من 'patients'
+        const snapshot = await get(ref(db, 'users/' + user.uid)); 
+        if (snapshot.exists()) {
+            const data = snapshot.val();
+            // تعبئة الحقول تلقائياً بالبيانات التي أدخلتها في التسجيل
+            document.getElementById('userName').value = data.name || "";
+            document.getElementById('userIdNo').value = data.idNo || "";
+            document.getElementById('userBlood').value = data.bloodType || "A+";
+            
+            // في حال وجود أمراض مزمنة محفوظة مسبقاً
+            const savedDiseases = data.diseases || [];
+            document.querySelectorAll('#diseasesList input').forEach(input => {
+                if (savedDiseases.includes(input.value)) input.checked = true;
+            });
+        }
+    } else {
+        window.location.href = "login.html";
+    }
+});
 
-                // جلب بيانات الملف الطبي
-                const snapshot = await get(ref(db, 'patients/' + user.uid));
-                if (snapshot.exists()) {
-                    const data = snapshot.val();
-                    document.getElementById('userName').value = data.name || "";
-                    document.getElementById('userIdNo').value = data.idNo || "";
-                    document.getElementById('userBlood').value = data.bloodType || "A+";
-                    const savedDiseases = data.diseases || [];
-                    document.querySelectorAll('#diseasesList input').forEach(input => {
-                        if (savedDiseases.includes(input.value)) input.checked = true;
-                    });
-                }
-            } else {
-                // إذا لم يسجل دخول، ارسله لصفحة الدخول
-                window.location.href = "login.html";
-            }
-        });
-
-        // 3. حفظ التعديلات
-        document.getElementById('saveBtn').addEventListener('click', async () => {
-            const user = auth.currentUser;
-            if (user) {
-                const selectedDiseases = Array.from(document.querySelectorAll('#diseasesList input:checked')).map(i => i.value);
-                const newData = {
-                    name: document.getElementById('userName').value,
-                    idNo: document.getElementById('userIdNo').value,
-                    bloodType: document.getElementById('userBlood').value,
-                    diseases: selectedDiseases
-                };
-                try {
-                    await set(ref(db, 'patients/' + user.uid), newData);
-                    alert("تم حفظ ملفك بنجاح! ✅");
-                } catch (err) { alert("خطأ في الحفظ: " + err.message); }
-            }
-        });
+// 3. تحديث وظيفة الحفظ لتستخدم نفس المسار 'users'
+document.getElementById('saveBtn').addEventListener('click', async () => {
+    const user = auth.currentUser;
+    if (user) {
+        const selectedDiseases = Array.from(document.querySelectorAll('#diseasesList input:checked')).map(i => i.value);
+        const newData = {
+            name: document.getElementById('userName').value,
+            idNo: document.getElementById('userIdNo').value,
+            bloodType: document.getElementById('userBlood').value,
+            diseases: selectedDiseases,
+            role: "user" // الحفاظ على نوع الحساب
+        };
+        try {
+            await set(ref(db, 'users/' + user.uid), newData);
+            alert("تم تحديث ملفك بنجاح! ✅");
+        } catch (err) { alert("خطأ في الحفظ: " + err.message); }
+    }
+});
 
         // 4. نسخ رابط الطوارئ
         document.getElementById('shareEmergencyBtn').addEventListener('click', () => {
