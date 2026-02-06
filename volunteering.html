@@ -34,10 +34,26 @@
 <body class="page-fade">
     <div class="bg-animation"></div>
     <div class="container">
-        <header class="navbar">
+         <div class="container">
+        <header class="navbar" data-aos="fade-down">
             <a href="index.html" class="nav-brand">LifeBand</a>
             <div class="nav-links">
-                <a href="index.html" class="nav-item" data-i18n="nav_home">الرئيسية</a>
+                <a href="index.html" class="nav-item active" data-i18n="nav_home">الرئيسية</a> 
+                <a href="tips.html" class="nav-item" data-i18n="nav_tips">نصائح طبية</a>
+                
+                <div class="dropdown">
+                    <button class="nav-item" style="background:none; border:none; cursor:pointer; font-family: inherit;" data-i18n="nav_specialists">للمختصين ▼</button>
+                    <div class="dropdown-content">
+                        <a href="volunteering.html" data-i18n="drop_volunteer">التطوع الصحي</a>
+                        <a href="innovation.html" data-i18n="drop_innovation">الابتكار</a>
+                        <a href="awareness.html" data-i18n="drop_awareness">التوعية والتثقيف</a>
+                        <a href="media.html" data-i18n="drop_media">المركز الإعلامي</a>
+                    </div>
+                </div>
+
+                <span id="auth-zone">
+                    </span>
+
                 <button id="langBtn" class="lang-toggle">EN</button>
                 <button id="themeBtn" class="theme-toggle">🌙</button>
             </div>
