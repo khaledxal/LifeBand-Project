@@ -7,39 +7,8 @@
     <link rel="stylesheet" href="style.css">
     <style>
         .reports-container { padding: 40px 20px; }
-      /* تنسيق بطاقة البلاغ المرتبة */
-.report-card { 
-    background: var(--glass); 
-    padding: 25px; 
-    border-radius: 18px; 
-    margin-bottom: 20px; 
-    border-right: 6px solid var(--primary); 
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center; 
-    transition: 0.3s ease;
-    box-shadow: var(--card-shadow);
-}
-
-.report-card:hover { transform: translateY(-3px); }
-
-/* تنسيق النصوص */
-.report-info h3 { color: var(--primary); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
-.report-info p { margin: 5px 0; font-size: 14px; line-height: 1.6; }
-.report-meta { display: flex; gap: 20px; opacity: 0.8; font-size: 12px; margin-bottom: 10px; }
-
-/* الأوسمة (Tags) */
-.status-tag { 
-    padding: 4px 12px; 
-    border-radius: 50px; 
-    font-size: 12px; 
-    font-weight: bold; 
-}
-.status-pending { background: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid #f59e0b; }
-.status-done { background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid #10b981; }
-
-/* حاوية الأزرار */
-.report-actions { display: flex; gap: 10px; }        .respond-btn { background: #10b981 !important; width: auto !important; padding: 10px 25px !important; }
+        .report-card { background: var(--glass); border: 1px solid var(--glass-border); padding: 20px; border-radius: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .respond-btn { background: #10b981 !important; width: auto !important; padding: 10px 25px !important; }
         .lang-toggle { background: var(--glass); border: 1px solid var(--glass-border); color: var(--text-main); width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; transition: 0.3s; }
     </style>
 </head>

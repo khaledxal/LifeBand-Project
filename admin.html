@@ -202,41 +202,39 @@
             }
         });
 
-     function renderReports() {
-    const lang = localStorage.getItem('preferred_lang') || 'ar';
-    const t = translations[lang];
-    const keys = Object.keys(currentData);
-    
-    if (keys.length === 0) return;
+        function renderReports() {
+            const lang = localStorage.getItem('preferred_lang') || 'ar';
+            const t = translations[lang];
+            const keys = Object.keys(currentData);
+            
+            if (keys.length === 0) return;
 
-    reportsList.innerHTML = "";
-    keys.reverse().forEach(key => {
-        const report = currentData[key];
-        const date = new Date(report.timestamp).toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-US');
-        const isDone = report.status === 'تم الإجراء';
-        
-        const card = document.createElement('div');
-        card.className = 'report-card';
-        card.innerHTML = `
-            <div class="report-info">
-                <div class="report-meta">
-                    <span>🕒 ${date}</span>
-                    <span class="status-tag ${isDone ? 'status-done' : 'status-pending'}">
-                        ${isDone ? t.status_done : t.status_pending}
-                    </span>
-                </div>
-                <h3>👤 ${report.patientName}</h3>
-                <p><b>📝 ${t.adm_diagnosis}:</b> ${report.diagnosis}</p>
-            </div>
-            <div class="report-actions">
-                ${!isDone ? 
-                    `<button onclick="markAsDone('${key}')" class="main-btn" style="width: auto; padding: 10px 20px; background: #10b981;">✅ ${t.adm_btn_confirm}</button>` : ''}
-                <button onclick="deleteReport('${key}')" class="main-btn" style="width: auto; padding: 10px 20px; background: #ef4444;">🗑️</button>
-            </div>
-        `;
-        reportsList.appendChild(card);
-    });
-}
+            reportsList.innerHTML = "";
+            keys.reverse().forEach(key => {
+                const report = currentData[key];
+                const date = new Date(report.timestamp).toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-US');
+                const statusText = report.status === 'تم الإجراء' ? t.status_done : t.status_pending;
+                
+                const card = document.createElement('div');
+                card.className = 'report-card';
+                card.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                        <div>
+                            <h3>${t.adm_patient}: ${report.patientName}</h3>
+                            <p style="font-size: 13px; opacity: 0.7;">${t.adm_time}: ${date}</p>
+                            <p style="margin-top: 10px;"><b>${t.adm_diagnosis}:</b> ${report.diagnosis}</p>
+                            <p>${t.adm_status}: <span class="${report.status === 'تم الإجراء' ? 'status-done' : 'status-pending'}">${statusText}</span></p>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            ${report.status === 'قيد الانتظار' ? 
+                                `<button onclick="markAsDone('${key}')" class="main-btn" style="width: auto; padding: 8px 15px; background: #10b981;">${t.adm_btn_confirm}</button>` : ''}
+                            <button onclick="deleteReport('${key}')" class="main-btn btn-delete">${t.adm_btn_delete}</button>
+                        </div>
+                    </div>
+                `;
+                reportsList.appendChild(card);
+            });
+        }
 
         window.markAsDone = async (reportId) => {
             const lang = localStorage.getItem('preferred_lang') || 'ar';
