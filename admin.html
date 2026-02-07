@@ -7,11 +7,11 @@
     <link rel="stylesheet" href="style.css">
     <style>
         :root {
-            --primary: #6366f1;
-            --secondary: #a855f7;
-            --glass: rgba(255, 255, 255, 0.1);
-            --glass-border: rgba(255, 255, 255, 0.2);
-            --text-main: #ffffff;
+            --primary: #4f46e5; /* أزرق مشبع أكثر للوضوح */
+            --secondary: #7c3aed;
+            --text-dark: #111827; /* أسود كربوني للنصوص */
+            --text-muted: #374151; /* رمادي غامق جداً */
+            --glass-border: rgba(0, 0, 0, 0.1);
         }
 
         .admin-layout { display: flex; min-height: 100vh; gap: 20px; padding: 20px; }
@@ -19,14 +19,14 @@
         /* السايدبار */
         .sidebar { 
             width: 280px; 
-            background: var(--glass); 
-            backdrop-filter: blur(15px); 
+            background: #ffffff; /* خلفية بيضاء صريحة للوضوح */
             border-radius: 20px; 
             padding: 25px; 
             border: 1px solid var(--glass-border);
             display: flex;
             flex-direction: column;
             gap: 15px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
         .sidebar nav {
@@ -41,12 +41,12 @@
             align-items: center;
             gap: 12px;
             padding: 14px 18px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--glass-border);
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
             border-radius: 12px;
             text-decoration: none;
-            color: var(--text-main);
-            font-weight: 600;
+            color: var(--text-dark);
+            font-weight: 700;
             transition: all 0.3s ease;
         }
 
@@ -54,7 +54,6 @@
             background: var(--primary);
             color: white;
             transform: translateX(-5px);
-            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2);
         }
 
         .sidebar .nav-item.active {
@@ -68,92 +67,112 @@
 
         .main-content h1 {
             font-size: 1.8rem;
-            color: var(--text-main);
+            color: #1e1b4b; /* أزرق داكن جداً */
             margin-bottom: 30px;
             display: inline-block;
-            border-bottom: 3px solid var(--primary);
+            border-bottom: 4px solid var(--primary);
             padding-bottom: 5px;
+            font-weight: 800;
         }
 
-        /* تنسيق كرت البلاغ الجديد */
+        /* كرت البلاغ المطور بوضوح عالي */
         .report-card {
-            background: var(--glass);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--glass-border);
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            background: #ffffff; /* أبيض صريح */
+            border: 2px solid #e5e7eb; /* إطار أوضح */
+            border-radius: 15px; 
+            padding: 25px; 
+            margin-bottom: 25px; 
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
             transition: 0.3s;
         }
 
-        .report-card:hover { transform: translateY(-3px); }
+        .report-card:hover { transform: translateY(-3px); border-color: var(--primary); }
 
         .report-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            border-bottom: 2px solid #f3f4f6;
             padding-bottom: 15px;
             margin-bottom: 15px;
         }
 
-        .patient-name { font-size: 1.2rem; font-weight: bold; color: var(--primary); }
-        .report-time { font-size: 0.85rem; opacity: 0.7; }
+        .patient-name { 
+            font-size: 1.4rem; 
+            font-weight: 900; 
+            color: #1e1b4b; /* لون داكن جداً لاسم المريض */
+        }
+
+        .report-time { 
+            font-size: 0.95rem; 
+            color: #4b5563; /* رمادي غامق جداً */
+            font-weight: 600;
+            margin-top: 4px;
+        }
 
         .diagnosis-box {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 15px;
-            border-radius: 10px;
-            border-right: 4px solid var(--primary);
-            margin: 15px 0;
+            background: #f8fafc; /* خلفية فاتحة لتمييز النص الداكن */
+            padding: 20px; 
+            border-radius: 12px; 
+            border-right: 6px solid var(--primary);
+            margin: 20px 0;
+            color: var(--text-dark);
+            font-size: 1.1rem;
+            line-height: 1.7;
+            font-weight: 500;
+        }
+
+        .diagnosis-box strong {
+            color: #000000;
+            font-weight: 800;
+            font-size: 1.2rem;
         }
 
         .status-badge {
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: bold;
+            padding: 8px 18px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            font-weight: 900;
+            border: 1px solid rgba(0,0,0,0.1);
         }
 
-        .status-pending { background: #fef3c7; color: #92400e; }
-        .status-done { background: #d1fae5; color: #065f46; }
+        .status-pending { background: #ffedd5; color: #9a3412; } /* برتقالي داكن */
+        .status-done { background: #dcfce7; color: #166534; }    /* أخضر داكن */
 
-        .action-btns { display: flex; gap: 10px; justify-content: flex-end; }
+        .action-btns { display: flex; gap: 12px; justify-content: flex-end; }
         
         .btn-main {
-            padding: 8px 20px;
-            border-radius: 8px;
+            padding: 10px 24px;
+            border-radius: 10px;
             border: none;
             cursor: pointer;
-            font-weight: 600;
+            font-weight: 800;
             transition: 0.2s;
+            font-size: 1rem;
         }
 
-        .btn-confirm { background: #10b981; color: white; }
-        .btn-delete { background: #ef4444; color: white; }
-        .btn-main:hover { opacity: 0.8; transform: scale(1.05); }
+        .btn-confirm { background: #059669; color: white; }
+        .btn-delete { background: #dc2626; color: white; }
+        .btn-main:hover { filter: brightness(1.1); transform: scale(1.05); }
 
         .lang-toggle {
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            color: var(--text-main);
-            width: 45px;
-            height: 45px;
+            background: #f3f4f6;
+            border: 2px solid #d1d5db;
+            color: var(--text-dark);
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             cursor: pointer;
-            font-weight: bold;
+            font-weight: 800;
             transition: 0.3s;
         }
     </style>
 </head>
-<body class="page-fade">
-    <div class="bg-animation"></div>
-    <audio id="emergencySound" src="https://assets.mixkit.co/active_storage/sfx/951/951-preview.mp3" preload="auto"></audio>
+<body class="page-fade" style="background-color: #f1f5f9;"> <audio id="emergencySound" src="https://assets.mixkit.co/active_storage/sfx/951/951-preview.mp3" preload="auto"></audio>
 
     <div class="admin-layout">
         <aside class="sidebar">
-            <h2 data-i18n="adm_title" style="color: var(--primary);">لوحة الإدارة</h2>
+            <h2 data-i18n="adm_title" style="color: var(--primary); font-weight: 900;">لوحة الإدارة</h2>
             <button id="langBtn" class="lang-toggle">EN</button>
             <nav>
                 <a href="#" class="nav-item active" data-i18n="adm_nav_reports">📋 قائمة البلاغات</a>
@@ -164,8 +183,7 @@
         <main class="main-content">
             <h1 data-i18n="adm_active_reports">البلاغات النشطة</h1>
             <div id="reportsList">
-                <p data-i18n="adm_loading">جاري تحميل البلاغات...</p>
-            </div>
+                </div>
         </main>
     </div>
 
@@ -185,12 +203,12 @@
                 adm_time: "التوقيت",
                 adm_diagnosis: "التشخيص",
                 adm_status: "الحالة",
-                adm_btn_confirm: "تأكيد الإجراء",
-                adm_btn_delete: "حذف",
+                adm_btn_confirm: "تم التعامل مع الحالة",
+                adm_btn_delete: "حذف نهائي",
                 status_done: "تم الإجراء",
                 status_pending: "قيد الانتظار",
                 confirm_done: "هل تم اتخاذ الإجراء الطبي اللازم؟",
-                confirm_delete: "هل أنت متأكد من حذف هذا البلاغ نهائياً؟",
+                confirm_delete: "هل أنت متأكد من حذف هذا البلاغ؟",
                 lang_label: "EN"
             },
             en: {
@@ -199,12 +217,12 @@
                 nav_home: "🏠 Back to Home",
                 adm_active_reports: "Active Reports",
                 adm_loading: "Loading reports...",
-                adm_no_reports: "No active reports currently.",
+                adm_no_reports: "No active reports.",
                 adm_patient: "Patient",
                 adm_time: "Time",
                 adm_diagnosis: "Diagnosis",
                 adm_status: "Status",
-                adm_btn_confirm: "Confirm",
+                adm_btn_confirm: "Mark as Done",
                 adm_btn_delete: "Delete",
                 status_done: "Done",
                 status_pending: "Pending",
@@ -254,7 +272,7 @@
                 renderReports();
             } else {
                 currentData = {};
-                reportsList.innerHTML = `<p>${translations[localStorage.getItem('preferred_lang') || 'ar'].adm_no_reports}</p>`;
+                reportsList.innerHTML = `<p style="color:black; font-weight:bold;">${translations[localStorage.getItem('preferred_lang') || 'ar'].adm_no_reports}</p>`;
                 firstLoad = false;
             }
         });
