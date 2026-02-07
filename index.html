@@ -33,7 +33,6 @@
             margin-bottom: 80px;
         }
 
-        /* تنسيق زر اللغة الدائري ليكون مطابقاً لزر الثيم */
         .lang-toggle {
             background: var(--glass);
             border: 1px solid var(--glass-border);
@@ -77,8 +76,7 @@
                     </div>
                 </div>
 
-                <span id="auth-zone">
-                    </span>
+                <span id="auth-zone"></span>
 
                 <button id="langBtn" class="lang-toggle">EN</button>
                 <button id="themeBtn" class="theme-toggle">🌙</button>
@@ -144,12 +142,12 @@
 
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script type="module">
-        import { auth } from './js/firebase-config.js';
+        import { auth, db } from './js/firebase-config.js';
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { ref, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         AOS.init({ duration: 1000, once: true });
 
-        // --- 1. نظام الترجمة (I18N) ---
         const translations = {
             ar: {
                 nav_home: "الرئيسية",
@@ -202,6 +200,8 @@
         };
 
         const langBtn = document.getElementById('langBtn');
+        const authZone = document.getElementById('auth-zone');
+        const heroStartBtn = document.getElementById('heroStartBtn');
 
         function setLanguage(lang) {
             const t = translations[lang];
@@ -219,8 +219,6 @@
 
             langBtn.innerText = t.lang_label;
             localStorage.setItem('preferred_lang', lang);
-            
-            // تحديث نصوص منطقة الـ Auth إذا كان المستخدم مسجل دخول
             updateAuthZoneUI(auth.currentUser);
         }
 
@@ -229,7 +227,6 @@
             setLanguage(current === 'ar' ? 'en' : 'ar');
         };
 
-        // --- 2. نظام الثيم ---
         const themeBtn = document.getElementById('themeBtn');
         function applyTheme(theme) {
             if (theme === 'dark') {
@@ -252,72 +249,56 @@
             };
         }
 
-        // --- 3. نظام المستخدم والترجمة الديناميكية لمنطقة الدخول ---
-        const authZone = document.getElementById('auth-zone');
-        const heroStartBtn = document.getElementById('heroStartBtn');
-
-      // تأكد أنك أضفت get و ref في سطر الاستيراد (import) بالأعلى في ملفك
-// import { ref, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-async function updateAuthZoneUI(user) {
-    const lang = localStorage.getItem('preferred_lang') || 'ar';
-    const authZone = document.getElementById('auth-zone');
-    
-    if (user) {
-        // 1. جلب بيانات المستخدم من المسار users/uid
-        try {
-            const snapshot = await get(ref(db, 'users/' + user.uid));
-            const userData = snapshot.val();
+        async function updateAuthZoneUI(user) {
+            const lang = localStorage.getItem('preferred_lang') || 'ar';
             
-            let volunteerMenu = '';
+            if (user) {
+                try {
+                    const snapshot = await get(ref(db, 'users/' + user.uid));
+                    const userData = snapshot.val();
+                    
+                    let volunteerMenu = '';
+                    if (userData && userData.role === 'rescuer') {
+                        volunteerMenu = `
+                            <a href="active-reports.html" class="nav-item">${lang === 'ar' ? 'البلاغات المتواجدة' : 'Active Reports'}</a>
+                            <a href="history.html" class="nav-item">${lang === 'ar' ? 'سجل الحالات' : 'Case History'}</a>
+                            <a href="leaderboard.html" class="nav-item">${lang === 'ar' ? 'لوحة المتطوعين' : 'Leaderboard'}</a>
+                            <a href="rewards.html" class="nav-item">${lang === 'ar' ? 'نظام المكافآت' : 'Rewards'}</a>
+                        `;
+                    }
 
-            // 2. التحقق إذا كان الدور هو "rescuer"
-            if (userData && userData.role === 'rescuer') {
-                volunteerMenu = `
-                    <a href="active-reports.html" class="nav-item">${lang === 'ar' ? 'البلاغات المتواجدة' : 'Active Reports'}</a>
-                    <a href="history.html" class="nav-item">${lang === 'ar' ? 'سجل الحالات' : 'Case History'}</a>
-                    <a href="leaderboard.html" class="nav-item">${lang === 'ar' ? 'لوحة المتطوعين' : 'Leaderboard'}</a>
-                    <a href="rewards.html" class="nav-item">${lang === 'ar' ? 'نظام المكافآت' : 'Rewards'}</a>
+                    authZone.innerHTML = `
+                        ${volunteerMenu}
+                        <a href="profile.html?id=${user.uid}" class="nav-item">${lang === 'ar' ? 'ملفي الطبي' : 'My Profile'}</a>
+                        <button id="logoutBtn" class="nav-item" style="background:none; border:none; cursor:pointer; font-family: inherit; color: #ef4444;">
+                            ${lang === 'ar' ? 'تسجيل خروج' : 'Logout'}
+                        </button>
+                    `;
+
+                    if(heroStartBtn) heroStartBtn.href = `profile.html?id=${user.uid}`;
+                    
+                    document.getElementById('logoutBtn').onclick = () => {
+                        const msg = lang === 'ar' ? "هل تريد تسجيل الخروج؟" : "Do you want to logout?";
+                        if(confirm(msg)) signOut(auth).then(() => window.location.reload());
+                    };
+
+                } catch (error) {
+                    console.error("خطأ في جلب بيانات الرتبة:", error);
+                }
+            } else {
+                authZone.innerHTML = `
+                    <a href="login.html" class="nav-item">${lang === 'ar' ? 'دخول' : 'Login'}</a>
+                    <a href="register.html" class="nav-item">${lang === 'ar' ? 'إنشاء حساب' : 'Register'}</a>
                 `;
+                if(heroStartBtn) heroStartBtn.href = "register.html";
             }
-
-            // 3. تحديث الناف بار
-            authZone.innerHTML = `
-                ${volunteerMenu}
-                <a href="profile.html?id=${user.uid}" class="nav-item">${lang === 'ar' ? 'ملفي الطبي' : 'My Profile'}</a>
-                <button id="logoutBtn" class="nav-item" style="background:none; border:none; cursor:pointer; font-family: inherit; color: #ef4444;">
-                    ${lang === 'ar' ? 'تسجيل خروج' : 'Logout'}
-                </button>
-            `;
-
-            if(heroStartBtn) heroStartBtn.href = `profile.html?id=${user.uid}`;
-            
-            // ربط زر تسجيل الخروج
-            document.getElementById('logoutBtn').onclick = () => {
-                const msg = lang === 'ar' ? "هل تريد تسجيل الخروج؟" : "Do you want to logout?";
-                if(confirm(msg)) signOut(auth).then(() => window.location.reload());
-            };
-
-        } catch (error) {
-            console.error("خطأ في جلب بيانات الرتبة:", error);
         }
-    } else {
-        // في حال عدم تسجيل الدخول
-        authZone.innerHTML = `
-            <a href="login.html" class="nav-item">${lang === 'ar' ? 'دخول' : 'Login'}</a>
-            <a href="register.html" class="nav-item">${lang === 'ar' ? 'إنشاء حساب' : 'Register'}</a>
-        `;
-        if(heroStartBtn) heroStartBtn.href = "register.html";
-    }
-}
 
-// مراقبة حالة المستخدم
-onAuthStateChanged(auth, (user) => {
-    updateAuthZoneUI(user);
-});
-        // تشغيل اللغة المحفوظة عند التحميل
+        onAuthStateChanged(auth, (user) => {
+            updateAuthZoneUI(user);
+        });
+
         setLanguage(localStorage.getItem('preferred_lang') || 'ar');
-
     </script>
 </body>
 </html>
