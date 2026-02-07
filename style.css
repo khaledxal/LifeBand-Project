@@ -4,37 +4,40 @@
     --secondary: #a855f7;
     --accent: #00d4ff;
 
-    /* الوضع الصباحي */
-    --bg-main: linear-gradient(135deg, #a7a7a7 0%, #f8fafc 100%);
-    --star-color: rgba(0, 0, 0, 0.2); 
+    /* الوضع الصباحي - تم تعديل الألوان لضمان عدم التداخل مع النجوم */
+    --bg-main: #f1f5f9; 
+    --bg-gradient: linear-gradient(135deg, #e2e8f0 0%, #f8fafc 100%);
+    --star-color: rgba(99, 102, 241, 0.2); 
     --text-main: #1e293b;
     --input-bg: #ffffff;
-    --glass: rgba(255, 255, 255, 0.75);
-    --glass-border: rgba(255, 255, 255, 0.6);
+    --glass: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.5);
     --card-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08);
 }
 
 [data-theme="dark"] {
     /* الوضع الليلي */
-    --bg-main: radial-gradient(circle at center, #1e1b4b 0%, #0f172a 100%);
+    --bg-main: #0f172a;
+    --bg-gradient: radial-gradient(circle at center, #1e1b4b 0%, #0f172a 100%);
     --star-color: rgba(255, 255, 255, 0.4); 
     --text-main: #f8fafc;
     --input-bg: rgba(0, 0, 0, 0.3);
-    --glass: rgba(15, 23, 42, 0.7);
+    --glass: rgba(15, 23, 42, 0.75);
     --glass-border: rgba(255, 255, 255, 0.1);
-    --card-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    --card-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
 }
 
 * { 
     margin: 0; 
     padding: 0; 
     box-sizing: border-box; 
-    transition: background 0.5s, color 0.5s, border-color 0.5s, box-shadow 0.5s; 
+    transition: background 0.4s, color 0.4s; 
 }
 
 body {
     direction: rtl;
-    background: var(--bg-main);
+    background-color: var(--bg-main); /* لون احتياطي في حال فشل التدرج */
+    background-image: var(--bg-gradient);
     background-attachment: fixed;
     color: var(--text-main);
     font-family: 'Segoe UI', Tahoma, sans-serif;
@@ -44,7 +47,7 @@ body {
     line-height: 1.6;
 }
 
-/* تأثير النجوم المتحركة في الخلفية */
+/* تأثير النجوم المتحركة - تم تحسينه للظهور بوضوح */
 body::before {
     content: "";
     position: fixed;
@@ -55,12 +58,13 @@ body::before {
     z-index: -1;
     pointer-events: none;
     background-image: 
-        radial-gradient(1.5px 1.5px at 20px 30px, var(--star-color), rgba(0,0,0,0)),
-        radial-gradient(2px 2px at 40px 70px, var(--star-color), rgba(0,0,0,0)),
-        radial-gradient(1px 1px at 50px 160px, var(--star-color), rgba(0,0,0,0)),
-        radial-gradient(2px 2px at 90px 40px, var(--star-color), rgba(0,0,0,0));
-    background-size: 250px 250px;
-    animation: starsMove 150s linear infinite;
+        radial-gradient(2px 2px at 20px 30px, var(--star-color), transparent),
+        radial-gradient(2px 2px at 150px 150px, var(--star-color), transparent),
+        radial-gradient(1.5px 1.5px at 50px 200px, var(--star-color), transparent),
+        radial-gradient(2px 2px at 250px 50px, var(--star-color), transparent);
+    background-size: 300px 300px;
+    animation: starsMove 100s linear infinite;
+    opacity: 0.8;
 }
 
 @keyframes starsMove {
@@ -69,18 +73,18 @@ body::before {
 }
 
 .container { 
-    width: 95%; 
-    max-width: 1100px; 
+    width: 92%; 
+    max-width: 1200px; 
     margin: 0 auto; 
     padding: 10px; 
 }
 
-/* الهيدر الزجاجي الموحد */
+/* الهيدر الزجاجي */
 .navbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 25px;
+    padding: 10px 25px;
     margin-top: 15px;
     background: var(--glass);
     backdrop-filter: blur(15px);
@@ -100,7 +104,6 @@ body::before {
     -webkit-background-clip: text; 
     -webkit-text-fill-color: transparent; 
     text-decoration: none; 
-    white-space: nowrap;
 }
 
 .nav-links { 
@@ -109,22 +112,15 @@ body::before {
     align-items: center; 
 }
 
-#auth-zone {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-}
-
 .nav-item {
     text-decoration: none;
     color: var(--text-main);
     font-weight: 600;
-    padding: clamp(6px, 1.5vw, 10px) clamp(10px, 2vw, 20px);
+    padding: 8px 15px;
     border-radius: 50px;
-    font-size: clamp(12px, 2vw, 14px);
+    font-size: 14px;
     transition: 0.3s;
     cursor: pointer;
-    white-space: nowrap;
 }
 
 .nav-item:hover, .nav-item.active {
@@ -134,7 +130,6 @@ body::before {
 
 /* القائمة المنسدلة */
 .dropdown { position: relative; display: inline-block; }
-
 .dropdown-content {
     display: none;
     position: absolute;
@@ -148,149 +143,97 @@ body::before {
     border: 1px solid var(--glass-border);
     right: 0;
     top: 100%;
-    padding: 8px 0;
+    padding: 10px 0;
     flex-direction: column;
 }
-
 .dropdown-content a {
     color: var(--text-main);
-    padding: 10px 18px;
+    padding: 10px 20px;
     text-decoration: none;
     display: block;
     font-size: 14px;
     text-align: right;
-    transition: 0.3s;
 }
-
-.dropdown-content a:hover {
-    background: rgba(99, 102, 241, 0.15);
-    color: var(--primary);
-}
-
 .dropdown:hover .dropdown-content { display: flex; }
 
 /* البطاقات والمدخلات */
 .glass-card { 
     background: var(--glass); 
-    backdrop-filter: blur(15px); 
-    -webkit-backdrop-filter: blur(15px);
+    backdrop-filter: blur(20px); 
+    -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--glass-border); 
-    border-radius: 24px; 
+    border-radius: 25px; 
     padding: clamp(20px, 5vw, 35px); 
     box-shadow: var(--card-shadow); 
 }
 
 .input-style { 
     width: 100%; 
-    padding: 14px; 
+    padding: 15px; 
     background: var(--input-bg); 
     border: 1px solid rgba(0, 0, 0, 0.1); 
     border-radius: 12px; 
     color: var(--text-main); 
     outline: none; 
     margin-top: 8px;
-    font-size: 16px;
 }
 
 .main-btn { 
     width: 100%; 
-    padding: clamp(12px, 3vw, 16px); 
+    padding: 15px; 
     border: none; 
-    border-radius: 14px; 
+    border-radius: 12px; 
     background: linear-gradient(135deg, var(--primary), var(--secondary)); 
     color: white; 
     font-weight: bold; 
     cursor: pointer; 
-    font-size: clamp(14px, 2.5vw, 16px);
-    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2);
-    position: relative;
-    z-index: 10;
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
 }
 
 .theme-toggle, .lang-toggle { 
-    width: 38px; 
-    height: 38px; 
+    width: 40px; 
+    height: 40px; 
     border-radius: 50%; 
-    cursor: pointer; 
     display: flex; 
     align-items: center; 
     justify-content: center; 
-    transition: 0.3s;
-    backdrop-filter: blur(5px);
+    cursor: pointer;
 }
+.theme-toggle { background: var(--primary); color: white; border: none; font-size: 18px; }
+.lang-toggle { background: var(--glass); border: 1px solid var(--glass-border); color: var(--text-main); font-weight: bold; font-family: sans-serif; font-size: 12px; }
 
-.theme-toggle { 
-    background: var(--primary); 
-    border: none; 
-    color: white; 
-    font-size: 18px;
-}
-
-.lang-toggle {
-    background: var(--glass);
-    border: 1px solid var(--glass-border);
-    color: var(--text-main);
-    font-size: 12px;
-    font-weight: bold;
-    font-family: sans-serif;
-}
-
-.lang-toggle:hover {
-    transform: scale(1.1);
-    background: var(--primary);
-    color: white;
-}
-
-/* تحسين التجاوب للجوال (Mobile Response) */
+/* تحسين استجابة الجوال وحل مشكلة البياض */
 @media (max-width: 768px) {
+    body { 
+        background-attachment: scroll; /* ضروري لمنع السواد/البياض المفاجئ في الجوال */
+    }
+    
     .navbar {
         flex-direction: column;
         padding: 15px;
-        border-radius: 25px;
-        top: 10px;
+        border-radius: 20px;
     }
-
+    
     .nav-links {
         flex-wrap: wrap;
         justify-content: center;
         margin-top: 10px;
+        gap: 5px;
         width: 100%;
     }
-
+    
     .nav-item {
-        padding: 6px 10px;
+        font-size: 12px;
+        padding: 5px 10px;
     }
 
-    .dropdown-content {
-        right: 50%;
-        transform: translateX(50%);
-        text-align: center;
-    }
-
-    body::before {
-        background-attachment: scroll; /* لثبات الأداء على الجوال */
-        background-size: 150px 150px;
-    }
-
-    /* إصلاح عرض الأقسام الرئيسية */
     .hero-section {
         flex-direction: column-reverse !important;
-        text-align: center !important;
-        padding: 30px 0 !important;
+        text-align: center;
+        padding: 20px 0 !important;
         gap: 20px !important;
-    }
-
-    .hero-content h1 {
-        font-size: 1.8rem !important;
-    }
-
-    .hero-image img {
-        width: 100% !important;
-        max-width: 250px;
     }
 }
 
 /* دعم اللغة الإنجليزية */
-[lang="en"] {
-    font-family: 'Segoe UI', Roboto, sans-serif;
-}
+[lang="en"] { font-family: 'Segoe UI', Roboto, sans-serif; }
