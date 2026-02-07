@@ -249,111 +249,70 @@
             };
         }
 
-  async function updateAuthZoneUI(user) {
-    const lang = localStorage.getItem('preferred_lang') || 'ar';
-    const specialistsDrop = document.querySelector('.dropdown');
-    const medicalTipsLink = document.querySelector('a[href="tips.html"]');
-    
-    if (user) {
-        try {
-            const snapshot = await get(ref(db, 'users/' + user.uid));
-            const userData = snapshot.val();
+        async function updateAuthZoneUI(user) {
+            const lang = localStorage.getItem('preferred_lang') || 'ar';
+            const specialistsDrop = document.querySelector('.dropdown');
+            const medicalTipsLink = document.querySelector('a[href="tips.html"]');
             
-            // --- حالة المتطوع (Rescuer) ---
-            if (userData && userData.role === 'rescuer') {
-                // 1. إخفاء الروابط العامة
-                if(specialistsDrop) specialistsDrop.style.display = 'none';
-                if(medicalTipsLink) medicalTipsLink.style.display = 'none';
+            if (user) {
+                try {
+                    const snapshot = await get(ref(db, 'users/' + user.uid));
+                    const userData = snapshot.val();
+                    
+                    if (userData && userData.role === 'rescuer') {
+                        // إخفاء الروابط غير المطلوبة للمسعف
+                        if(specialistsDrop) specialistsDrop.style.display = 'none';
+                        if(medicalTipsLink) medicalTipsLink.style.display = 'none';
 
-                // 2. عرض خيارات المتطوع الجديدة في النافبار
-                authZone.innerHTML = `
-                    <a href="active-reports.html" class="nav-item">${lang === 'ar' ? 'البلاغات المتواجدة' : 'Active Reports'}</a>
-                    <a href="history.html" class="nav-item">${lang === 'ar' ? 'سجل الحالات المباشرة' : 'Case History'}</a>
-                    <a href="rewards.html" class="nav-item">${lang === 'ar' ? 'نظام المكافآت' : 'Rewards'}</a>
-                    <button id="logoutBtn" class="nav-item" style="background:none; border:none; cursor:pointer; font-family: inherit; color: #ef4444;">
-                        ${lang === 'ar' ? 'تسجيل خروج' : 'Logout'}
-                    </button>
-                `;
+                        authZone.innerHTML = `
+                            <a href="active-reports.html" class="nav-item">${lang === 'ar' ? 'البلاغات المتواجدة' : 'Active Reports'}</a>
+                            <a href="history.html" class="nav-item">${lang === 'ar' ? 'سجل الحالات المباشرة' : 'Case History'}</a>
+                            <a href="leaderboard.html" class="nav-item">${lang === 'ar' ? 'لوحة المتطوعين' : 'Leaderboard'}</a>
+                            <a href="rewards.html" class="nav-item">${lang === 'ar' ? 'نظام المكافآت' : 'Rewards'}</a>
+                            <button id="logoutBtn" class="nav-item" style="background:none; border:none; cursor:pointer; font-family: inherit; color: #ef4444;">
+                                ${lang === 'ar' ? 'تسجيل خروج' : 'Logout'}
+                            </button>
+                        `;
+                    } else {
+                        // للمستخدم العادي (مريض): إظهار الروابط بشكل طبيعي
+                        if(specialistsDrop) specialistsDrop.style.display = 'inline-block';
+                        if(medicalTipsLink) medicalTipsLink.style.display = 'inline-block';
 
-                // 3. تعديل نص وزر "ابدأ الآن" في الصفحة الرئيسية للمتطوع
-                const heroTitle = document.getElementById('heroTitle');
-                const heroDesc = document.getElementById('heroDesc');
-                if(heroTitle) heroTitle.innerHTML = lang === 'ar' ? 'لوحة <span style="color: var(--primary);">الاستجابة السريعة</span>' : 'Rapid <span style="color: var(--primary);">Response Panel</span>';
-                if(heroDesc) heroDesc.innerText = lang === 'ar' ? 'أهلاً بك يا بطل. يمكنك الآن تتبع البلاغات الصحية المباشرة والبدء في إنقاذ الأرواح.' : 'Welcome Hero. You can now track live health reports and start saving lives.';
-                if(heroStartBtn) {
-                    heroStartBtn.innerText = lang === 'ar' ? 'عرض البلاغات النشطة' : 'View Active Reports';
-                    heroStartBtn.href = "active-reports.html";
+                        authZone.innerHTML = `
+                            <a href="profile.html?id=${user.uid}" class="nav-item">${lang === 'ar' ? 'ملفي الطبي' : 'My Profile'}</a>
+                            <button id="logoutBtn" class="nav-item" style="background:none; border:none; cursor:pointer; font-family: inherit; color: #ef4444;">
+                                ${lang === 'ar' ? 'تسجيل خروج' : 'Logout'}
+                            </button>
+                        `;
+                    }
+
+                    if(heroStartBtn) heroStartBtn.href = (userData && userData.role === 'rescuer') ? "active-reports.html" : `profile.html?id=${user.uid}`;
+                    
+                    document.getElementById('logoutBtn').onclick = () => {
+                        const msg = lang === 'ar' ? "هل تريد تسجيل الخروج؟" : "Do you want to logout?";
+                        if(confirm(msg)) signOut(auth).then(() => window.location.reload());
+                    };
+
+                } catch (error) {
+                    console.error("خطأ في جلب بيانات الرتبة:", error);
                 }
-            } 
-            // --- حالة المستخدم العادي (المريض) ---
-            else {
+            } else {
+                // حالة عدم تسجيل الدخول: إظهار الروابط الافتراضية
                 if(specialistsDrop) specialistsDrop.style.display = 'inline-block';
                 if(medicalTipsLink) medicalTipsLink.style.display = 'inline-block';
+
                 authZone.innerHTML = `
-                    <a href="profile.html?id=${user.uid}" class="nav-item">${lang === 'ar' ? 'ملفي الطبي' : 'My Profile'}</a>
-                    <button id="logoutBtn" class="nav-item" style="background:none; border:none; cursor:pointer; font-family: inherit; color: #ef4444;">
-                        ${lang === 'ar' ? 'تسجيل خروج' : 'Logout'}
-                    </button>
+                    <a href="login.html" class="nav-item">${lang === 'ar' ? 'دخول' : 'Login'}</a>
+                    <a href="register.html" class="nav-item">${lang === 'ar' ? 'إنشاء حساب' : 'Register'}</a>
                 `;
-                if(heroStartBtn) heroStartBtn.href = `profile.html?id=${user.uid}`;
+                if(heroStartBtn) heroStartBtn.href = "register.html";
             }
-
-            // تفعيل زر تسجيل الخروج
-            document.getElementById('logoutBtn').onclick = () => {
-                const msg = lang === 'ar' ? "هل تريد تسجيل الخروج؟" : "Do you want to logout?";
-                if(confirm(msg)) signOut(auth).then(() => window.location.reload());
-            };
-
-        } catch (error) {
-            console.error("خطأ:", error);
-        }
-    } else {
-        // حالة عدم تسجيل الدخول (الوضع الافتراضي)
-        authZone.innerHTML = `
-            <a href="login.html" class="nav-item">${lang === 'ar' ? 'دخول' : 'Login'}</a>
-            <a href="register.html" class="nav-item">${lang === 'ar' ? 'إنشاء حساب' : 'Register'}</a>
-        `;
-        if(heroStartBtn) heroStartBtn.href = "register.html";
-    }
-}
-
-     // ابحث عن الجزء الخاص بـ onAuthStateChanged(auth, (user) => { ... })
-onAuthStateChanged(auth, (user) => {
-    const authZone = document.getElementById('auth-zone');
-    const lang = localStorage.getItem('preferred_lang') || 'ar';
-    const isAdmin = localStorage.getItem('adminLoggedIn') === 'true'; // فحص حالة الأدمن
-
-    if (user || isAdmin) { // إذا كان مستخدم عادي أو أدمن
-        if (isAdmin) {
-            // واجهة الأدمن في الناف بار
-            authZone.innerHTML = `
-                <a href="admin.html" class="nav-item">${lang === 'ar' ? 'لوحة التحكم' : 'Admin Panel'}</a>
-                <button id="logoutBtn" class="nav-item" style="background:none; border:none; cursor:pointer; color: #ef4444;">
-                    ${lang === 'ar' ? 'تسجيل خروج' : 'Logout'}
-                </button>
-            `;
-        } else {
-            // واجهة المستخدم العادي (الموجودة لديك حالياً)
-            authZone.innerHTML = `
-                <a href="profile.html?id=${user.uid}" class="nav-item">${lang === 'ar' ? 'ملفي الطبي' : 'My Profile'}</a>
-                <button id="logoutBtn" class="nav-item" style="background:none; border:none; cursor:pointer; color: #ef4444;">
-                    ${lang === 'ar' ? 'تسجيل خروج' : 'Logout'}
-                </button>
-            `;
         }
 
-        // تحديث وظيفة زر تسجيل الخروج ليمسح الـ localStorage أيضاً
-        document.getElementById('logoutBtn').onclick = () => {
-            if(confirm(lang === 'ar' ? "خروج؟" : "Logout?")) {
-                localStorage.removeItem('adminLoggedIn'); // مسح علامة الأدمن
-                signOut(auth).then(() => window.location.reload());
-            }
-        };
-    } else {
-        // حالة عدم تسجيل الدخول (عرض زر دخول وإنشاء حساب)
-        authZone.innerHTML = `...`; 
-    }
-});
+        onAuthStateChanged(auth, (user) => {
+            updateAuthZoneUI(user);
+        });
+
         setLanguage(localStorage.getItem('preferred_lang') || 'ar');
     </script>
 </body>
