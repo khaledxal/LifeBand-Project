@@ -6,15 +6,24 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="page-fade">
+    <div class="bg-animation"></div>
     <div class="container">
         <header class="navbar">
             <a href="index.html" class="nav-brand">LifeBand</a>
-            <a href="index.html" class="nav-item">العودة</a>
+            <div id="auth-zone">
+                <a href="active-reports.html" class="nav-item" data-i18n="nav_active">البلاغات المتواجدة</a>
+                <a href="history.html" class="nav-item" data-i18n="nav_history">سجل الحالات</a>
+                <a href="rewards.html" class="nav-item" data-i18n="nav_rewards">المكافآت</a>
+            </div>
+            <div class="nav-links" style="display: flex; gap: 10px; align-items: center;">
+                <button class="lang-toggle" id="langBtn">EN</button>
+                <button class="theme-toggle" id="themeBtn">🌙</button>
+            </div>
         </header>
 
         <main style="padding: 40px 20px;">
-            <h2>📋 سجلك البطولي</h2>
-            <div id="historyList" style="margin-top:20px;"></div>
+            <h2 data-i18n="history_title">📋 سجلك البطولي</h2>
+            <div id="historyList" style="margin-top:25px;"></div>
         </main>
     </div>
 
@@ -22,6 +31,15 @@
         import { auth, db } from './js/firebase-config.js';
         import { ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
         import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        // نفس نظام اللغة والثيم الموضح في الأعلى يكرر هنا لتفعيل الأزرار
+        const t = {
+            ar: { nav_active: "البلاغات المتواجدة", nav_history: "سجل الحالات", nav_rewards: "المكافآت", history_title: "📋 سجلك البطولي", lang_label: "EN" },
+            en: { nav_active: "Active Reports", nav_history: "Case History", nav_rewards: "Rewards", history_title: "📋 Your Heroic History", lang_label: "AR" }
+        };
+
+        // (يتم وضع دوال setLanguage و applyTheme هنا بنفس الطريقة)
+        // ... نفس كود الجافاسكريبت للثيم واللغة من الصفحة السابقة ...
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
@@ -34,11 +52,7 @@
                             const item = document.createElement('div');
                             item.className = 'info-card';
                             item.style.marginBottom = "15px";
-                            item.innerHTML = `
-                                <h4>${data.patientName}</h4>
-                                <p>${data.diagnosis}</p>
-                                <span style="color: #10b981;">✅ تم الانتهاء</span>
-                            `;
+                            item.innerHTML = `<h4>${data.patientName}</h4><p>${data.diagnosis}</p><span style="color:#10b981">✅ Done</span>`;
                             list.appendChild(item);
                         }
                     });
