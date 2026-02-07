@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>سجل الحالات - LifeBand</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="page-fade">
+    <div class="container">
+        <header class="navbar">
+            <a href="index.html" class="nav-brand">LifeBand</a>
+            <a href="index.html" class="nav-item">العودة</a>
+        </header>
+
+        <main style="padding: 40px 20px;">
+            <h2>📋 سجلك البطولي</h2>
+            <div id="historyList" style="margin-top:20px;"></div>
+        </main>
+    </div>
+
+    <script type="module">
+        import { auth, db } from './js/firebase-config.js';
+        import { ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                onValue(ref(db, 'reports'), (snapshot) => {
+                    const list = document.getElementById('historyList');
+                    list.innerHTML = "";
+                    snapshot.forEach((child) => {
+                        const data = child.val();
+                        if (data.rescuerId === user.uid) {
+                            const item = document.createElement('div');
+                            item.className = 'info-card';
+                            item.style.marginBottom = "15px";
+                            item.innerHTML = `
+                                <h4>${data.patientName}</h4>
+                                <p>${data.diagnosis}</p>
+                                <span style="color: #10b981;">✅ تم الانتهاء</span>
+                            `;
+                            list.appendChild(item);
+                        }
+                    });
+                });
+            }
+        });
+    </script>
+</body>
+</html>

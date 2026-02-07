@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>البلاغات النشطة - LifeBand</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .reports-container { padding: 40px 20px; }
+        .report-card { 
+            background: var(--glass); 
+            border: 1px solid var(--glass-border);
+            padding: 20px; 
+            border-radius: 15px; 
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: fadeIn 0.5s ease;
+        }
+        .report-info h3 { color: var(--primary); margin-bottom: 5px; }
+        .status-badge { background: #f59e0b; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; }
+        .respond-btn { background: #10b981 !important; width: auto !important; padding: 10px 25px !important; }
+    </style>
+</head>
+<body class="page-fade">
+    <div class="bg-animation"></div>
+    <div class="container">
+        <header class="navbar">
+            <a href="index.html" class="nav-brand">LifeBand</a>
+            <div id="auth-zone"></div>
+        </header>
+
+        <main class="reports-container">
+            <h2 id="pageTitle" style="margin-bottom: 30px;">⚠️ البلاغات الحالية</h2>
+            <div id="reportsList">
+                </div>
+        </main>
+    </div>
+
+    <script type="module">
+        import { auth, db } from './js/firebase-config.js';
+        import { ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const reportsList = document.getElementById('reportsList');
+        const lang = localStorage.getItem('preferred_lang') || 'ar';
+
+        onValue(ref(db, 'reports'), (snapshot) => {
+            reportsList.innerHTML = "";
+            snapshot.forEach((child) => {
+                const data = child.val();
+                if (data.status === "قيد الانتظار") {
+                    const card = document.createElement('div');
+                    card.className = 'report-card';
+                    card.innerHTML = `
+                        <div class="report-info">
+                            <h3>${data.patientName || (lang === 'ar' ? 'مريض غير معروف' : 'Unknown Patient')}</h3>
+                            <p>${data.diagnosis}</p>
+                            <small>${new Date(data.timestamp).toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-US')}</small>
+                        </div>
+                        <button class="main-btn respond-btn" onclick="handleResponse('${child.key}')">
+                            ${lang === 'ar' ? 'مباشرة الحالة' : 'Respond'}
+                        </button>
+                    `;
+                    reportsList.appendChild(card);
+                }
+            });
+            if (reportsList.innerHTML === "") {
+                reportsList.innerHTML = `<p style="text-align:center;">${lang === 'ar' ? 'لا توجد بلاغات نشطة حالياً' : 'No active reports'}</p>`;
+            }
+        });
+
+        window.handleResponse = async (id) => {
+            const user = auth.currentUser;
+            if (!user) return;
+            
+            await update(ref(db, `reports/${id}`), {
+                status: "تمت المباشرة",
+                rescuerId: user.uid,
+                rescuerName: user.displayName || "Rescuer"
+            });
+            alert(lang === 'ar' ? "تم استلام الحالة، توجه للموقع فوراً!" : "Case assigned! Move to location.");
+        };
+    </script>
+</body>
+</html>
