@@ -6,92 +6,155 @@
     <title>LifeBand - Admin Panel</title>
     <link rel="stylesheet" href="style.css">
     <style>
+        :root {
+            --primary: #6366f1;
+            --secondary: #a855f7;
+            --glass: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --text-main: #ffffff;
+        }
+
         .admin-layout { display: flex; min-height: 100vh; gap: 20px; padding: 20px; }
-       /* تنسيق السايدبار المطور */
-.sidebar { 
-    width: 280px; 
-    background: var(--glass); 
-    backdrop-filter: blur(15px); 
-    border-radius: 20px; 
-    padding: 25px; 
-    border: 1px solid var(--glass-border);
-    display: flex;
-    flex-direction: column; /* جعل العناصر تحت بعضها */
-    gap: 15px;
-}
 
-.sidebar nav {
-    display: flex;
-    flex-direction: column;
-    gap: 12px; /* مسافة بين الأزرار */
-    margin-top: 20px;
-}
+        /* السايدبار */
+        .sidebar { 
+            width: 280px; 
+            background: var(--glass); 
+            backdrop-filter: blur(15px); 
+            border-radius: 20px; 
+            padding: 25px; 
+            border: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
 
-/* تنسيق الزر "المحترم" */
-.sidebar .nav-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 14px 18px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--glass-border);
-    border-radius: 12px;
-    text-decoration: none;
-    color: var(--text-main);
-    font-weight: 600;
-    transition: all 0.3s ease;
-}
+        .sidebar nav {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 20px;
+        }
 
-/* تأثير عند تمرير الماوس */
-.sidebar .nav-item:hover {
-    background: var(--primary);
-    color: white;
-    transform: translateX(-5px); /* حركة بسيطة لليمين (أو اليسار حسب الاتجاه) */
-    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2);
-}
+        .sidebar .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 18px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            text-decoration: none;
+            color: var(--text-main);
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
 
-/* تنسيق الزر النشط */
-.sidebar .nav-item.active {
-    background: linear-gradient(135deg, var(--primary), var(--secondary));
-    color: white;
-    border: none;
-}
+        .sidebar .nav-item:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateX(-5px);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2);
+        }
 
-/* تنسيق زر اللغة داخل السايدبار */
-.lang-toggle {
-    align-self: flex-start; /* وضعه في البداية */
-    background: var(--glass);
-    border: 1px solid var(--glass-border);
-    color: var(--text-main);
-    width: 45px;
-    height: 45px;
-    border-radius: 50%;
-    cursor: pointer;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 10px;
-    transition: 0.3s;
-}
+        .sidebar .nav-item.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+        }
 
-.lang-toggle:hover {
-    background: var(--primary);
-    color: white;
-}
+        /* محتوى البلاغات */
+        .main-content { flex: 1; }
+
+        .main-content h1 {
+            font-size: 1.8rem;
+            color: var(--text-main);
+            margin-bottom: 30px;
+            display: inline-block;
+            border-bottom: 3px solid var(--primary);
+            padding-bottom: 5px;
+        }
+
+        /* تنسيق كرت البلاغ الجديد */
+        .report-card {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: 0.3s;
+        }
+
+        .report-card:hover { transform: translateY(-3px); }
+
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+        }
+
+        .patient-name { font-size: 1.2rem; font-weight: bold; color: var(--primary); }
+        .report-time { font-size: 0.85rem; opacity: 0.7; }
+
+        .diagnosis-box {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+            border-right: 4px solid var(--primary);
+            margin: 15px 0;
+        }
+
+        .status-badge {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-done { background: #d1fae5; color: #065f46; }
+
+        .action-btns { display: flex; gap: 10px; justify-content: flex-end; }
+        
+        .btn-main {
+            padding: 8px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+
+        .btn-confirm { background: #10b981; color: white; }
+        .btn-delete { background: #ef4444; color: white; }
+        .btn-main:hover { opacity: 0.8; transform: scale(1.05); }
+
+        .lang-toggle {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
     </style>
 </head>
 <body class="page-fade">
     <div class="bg-animation"></div>
-    
     <audio id="emergencySound" src="https://assets.mixkit.co/active_storage/sfx/951/951-preview.mp3" preload="auto"></audio>
 
     <div class="admin-layout">
         <aside class="sidebar">
-            <h2 style="color: var(--primary); margin-bottom: 10px;" data-i18n="adm_title">لوحة الإدارة</h2>
-            
+            <h2 data-i18n="adm_title" style="color: var(--primary);">لوحة الإدارة</h2>
             <button id="langBtn" class="lang-toggle">EN</button>
-            
             <nav>
                 <a href="#" class="nav-item active" data-i18n="adm_nav_reports">📋 قائمة البلاغات</a>
                 <a href="index.html" class="nav-item" data-i18n="nav_home">🏠 العودة للرئيسية</a>
@@ -99,7 +162,7 @@
         </aside>
 
         <main class="main-content">
-            <h1 style="margin-bottom: 20px;" data-i18n="adm_active_reports">البلاغات النشطة</h1>
+            <h1 data-i18n="adm_active_reports">البلاغات النشطة</h1>
             <div id="reportsList">
                 <p data-i18n="adm_loading">جاري تحميل البلاغات...</p>
             </div>
@@ -110,7 +173,6 @@
         import { db } from './js/firebase-config.js';
         import { ref, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // --- نظام الترجمة ---
         const translations = {
             ar: {
                 adm_title: "لوحة الإدارة",
@@ -142,12 +204,12 @@
                 adm_time: "Time",
                 adm_diagnosis: "Diagnosis",
                 adm_status: "Status",
-                adm_btn_confirm: "Confirm Action",
+                adm_btn_confirm: "Confirm",
                 adm_btn_delete: "Delete",
                 status_done: "Done",
                 status_pending: "Pending",
-                confirm_done: "Has the necessary medical action been taken?",
-                confirm_delete: "Are you sure you want to delete this report permanently?",
+                confirm_done: "Has medical action been taken?",
+                confirm_delete: "Are you sure you want to delete this?",
                 lang_label: "AR"
             }
         };
@@ -155,6 +217,7 @@
         const reportsList = document.getElementById('reportsList');
         const alertAudio = document.getElementById('emergencySound');
         const langBtn = document.getElementById('langBtn');
+        let currentData = {};
         let firstLoad = true;
         let lastReportCount = 0;
 
@@ -165,12 +228,11 @@
             
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
-                el.innerText = t[key];
+                if(t[key]) el.innerText = t[key];
             });
 
             langBtn.innerText = t.lang_label;
             localStorage.setItem('preferred_lang', lang);
-            // إعادة رندر القائمة لتحديث اللغات داخل الكروت
             renderReports(); 
         }
 
@@ -179,25 +241,20 @@
             setLanguage(current === 'ar' ? 'en' : 'ar');
         };
 
-        let currentData = {};
-
         const reportsRef = ref(db, 'reports');
         onValue(reportsRef, (snapshot) => {
             if (snapshot.exists()) {
                 currentData = snapshot.val();
                 const keys = Object.keys(currentData);
-                
                 if (!firstLoad && keys.length > lastReportCount) {
-                    alertAudio.play().catch(e => console.log("Audio interaction needed"));
+                    alertAudio.play().catch(e => console.log("Audio play blocked"));
                 }
-                
                 lastReportCount = keys.length;
                 firstLoad = false;
                 renderReports();
             } else {
                 currentData = {};
                 reportsList.innerHTML = `<p>${translations[localStorage.getItem('preferred_lang') || 'ar'].adm_no_reports}</p>`;
-                lastReportCount = 0;
                 firstLoad = false;
             }
         });
@@ -206,55 +263,53 @@
             const lang = localStorage.getItem('preferred_lang') || 'ar';
             const t = translations[lang];
             const keys = Object.keys(currentData);
-            
             if (keys.length === 0) return;
 
             reportsList.innerHTML = "";
             keys.reverse().forEach(key => {
                 const report = currentData[key];
                 const date = new Date(report.timestamp).toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-US');
-                const statusText = report.status === 'تم الإجراء' ? t.status_done : t.status_pending;
+                const isDone = report.status === 'تم الإجراء';
                 
                 const card = document.createElement('div');
                 card.className = 'report-card';
                 card.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                    <div class="report-header">
                         <div>
-                            <h3>${t.adm_patient}: ${report.patientName}</h3>
-                            <p style="font-size: 13px; opacity: 0.7;">${t.adm_time}: ${date}</p>
-                            <p style="margin-top: 10px;"><b>${t.adm_diagnosis}:</b> ${report.diagnosis}</p>
-                            <p>${t.adm_status}: <span class="${report.status === 'تم الإجراء' ? 'status-done' : 'status-pending'}">${statusText}</span></p>
+                            <div class="patient-name">${t.adm_patient}: ${report.patientName}</div>
+                            <div class="report-time">${t.adm_time}: ${date}</div>
                         </div>
-                        <div style="display: flex; gap: 10px;">
-                            ${report.status === 'قيد الانتظار' ? 
-                                `<button onclick="markAsDone('${key}')" class="main-btn" style="width: auto; padding: 8px 15px; background: #10b981;">${t.adm_btn_confirm}</button>` : ''}
-                            <button onclick="deleteReport('${key}')" class="main-btn btn-delete">${t.adm_btn_delete}</button>
-                        </div>
+                        <span class="status-badge ${isDone ? 'status-done' : 'status-pending'}">
+                            ${isDone ? t.status_done : t.status_pending}
+                        </span>
+                    </div>
+                    <div class="diagnosis-box">
+                        <strong>${t.adm_diagnosis}:</strong><br>
+                        ${report.diagnosis}
+                    </div>
+                    <div class="action-btns">
+                        ${!isDone ? `<button onclick="markAsDone('${key}')" class="btn-main btn-confirm">${t.adm_btn_confirm}</button>` : ''}
+                        <button onclick="deleteReport('${key}')" class="btn-main btn-delete">${t.adm_btn_delete}</button>
                     </div>
                 `;
                 reportsList.appendChild(card);
             });
         }
 
-        window.markAsDone = async (reportId) => {
+        window.markAsDone = async (id) => {
             const lang = localStorage.getItem('preferred_lang') || 'ar';
             if(confirm(translations[lang].confirm_done)) {
-                await update(ref(db, `reports/${reportId}`), { status: "تم الإجراء" });
+                await update(ref(db, `reports/${id}`), { status: "تم الإجراء" });
             }
         };
 
-        window.deleteReport = async (reportId) => {
+        window.deleteReport = async (id) => {
             const lang = localStorage.getItem('preferred_lang') || 'ar';
             if(confirm(translations[lang].confirm_delete)) {
-                try {
-                    await remove(ref(db, `reports/${reportId}`));
-                } catch (err) {
-                    alert(err.message);
-                }
+                await remove(ref(db, `reports/${id}`));
             }
         };
 
-        // تشغيل اللغة المحفوظة
         setLanguage(localStorage.getItem('preferred_lang') || 'ar');
     </script>
 </body>
