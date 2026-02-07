@@ -2,28 +2,41 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>سجل الحالات - LifeBand</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        .history-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 30px; }
+        .history-card { 
+            background: var(--glass); border: 1px solid var(--glass-border); 
+            padding: 20px; border-radius: 18px; position: relative;
+            transition: 0.3s; border-right: 5px solid #10b981;
+        }
+        .history-card:hover { transform: translateY(-5px); }
+        .card-date { font-size: 12px; opacity: 0.6; display: block; margin-top: 10px; }
+        .done-tag { color: #10b981; font-weight: bold; font-size: 14px; display: flex; align-items: center; gap: 5px; }
+    </style>
 </head>
 <body class="page-fade">
     <div class="bg-animation"></div>
     <div class="container">
         <header class="navbar">
             <a href="index.html" class="nav-brand">LifeBand</a>
-            <div id="auth-zone">
+            <div id="auth-zone" class="nav-links">
                 <a href="active-reports.html" class="nav-item" data-i18n="nav_active">البلاغات المتواجدة</a>
-                <a href="history.html" class="nav-item" data-i18n="nav_history">سجل الحالات</a>
+                <a href="history.html" class="nav-item active" data-i18n="nav_history">سجل الحالات</a>
                 <a href="rewards.html" class="nav-item" data-i18n="nav_rewards">المكافآت</a>
             </div>
-            <div class="nav-links" style="display: flex; gap: 10px; align-items: center;">
+            <div style="display: flex; gap: 10px; align-items: center;">
                 <button class="lang-toggle" id="langBtn">EN</button>
                 <button class="theme-toggle" id="themeBtn">🌙</button>
             </div>
         </header>
 
-        <main style="padding: 40px 20px;">
+        <main style="padding: 40px 0;">
             <h2 data-i18n="history_title">📋 سجلك البطولي</h2>
-            <div id="historyList" style="margin-top:25px;"></div>
+            <div id="historyList" class="history-grid">
+                </div>
         </main>
     </div>
 
@@ -32,30 +45,64 @@
         import { ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
         import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        // نفس نظام اللغة والثيم الموضح في الأعلى يكرر هنا لتفعيل الأزرار
-        const t = {
-            ar: { nav_active: "البلاغات المتواجدة", nav_history: "سجل الحالات", nav_rewards: "المكافآت", history_title: "📋 سجلك البطولي", lang_label: "EN" },
-            en: { nav_active: "Active Reports", nav_history: "Case History", nav_rewards: "Rewards", history_title: "📋 Your Heroic History", lang_label: "AR" }
+        // --- نظام اللغة والثيم (شغال الآن 100%) ---
+        const translations = {
+            ar: { nav_active: "البلاغات المتواجدة", nav_history: "سجل الحالات", nav_rewards: "المكافآت", history_title: "📋 سجلك البطولي", done: "تمت المباشرة بنجاح", empty: "لم تقم بمباشرة أي حالات بعد.", lang_label: "EN" },
+            en: { nav_active: "Active Reports", nav_history: "Case History", nav_rewards: "Rewards", history_title: "📋 Your Heroic History", done: "Successfully Responded", empty: "You haven't responded to any cases yet.", lang_label: "AR" }
         };
 
-        // (يتم وضع دوال setLanguage و applyTheme هنا بنفس الطريقة)
-        // ... نفس كود الجافاسكريبت للثيم واللغة من الصفحة السابقة ...
+        function setLanguage(lang) {
+            document.documentElement.lang = lang;
+            document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                el.innerText = translations[lang][el.getAttribute('data-i18n')];
+            });
+            document.getElementById('langBtn').innerText = translations[lang].lang_label;
+            localStorage.setItem('preferred_lang', lang);
+        }
 
+        document.getElementById('langBtn').onclick = () => {
+            const current = localStorage.getItem('preferred_lang') || 'ar';
+            setLanguage(current === 'ar' ? 'en' : 'ar');
+            window.location.reload(); 
+        };
+
+        function applyTheme(theme) {
+            document.body.setAttribute('data-theme', theme === 'dark' ? 'dark' : '');
+            document.getElementById('themeBtn').innerText = theme === 'dark' ? '☀️' : '🌙';
+        }
+        applyTheme(localStorage.getItem('theme') || 'light');
+        document.getElementById('themeBtn').onclick = () => {
+            const nt = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('theme', nt);
+            applyTheme(nt);
+        };
+        setLanguage(localStorage.getItem('preferred_lang') || 'ar');
+
+        // --- جلب وعرض الحالات بتنسيق Cards ---
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 onValue(ref(db, 'reports'), (snapshot) => {
                     const list = document.getElementById('historyList');
+                    const lang = localStorage.getItem('preferred_lang') || 'ar';
                     list.innerHTML = "";
+                    
                     snapshot.forEach((child) => {
                         const data = child.val();
                         if (data.rescuerId === user.uid) {
-                            const item = document.createElement('div');
-                            item.className = 'info-card';
-                            item.style.marginBottom = "15px";
-                            item.innerHTML = `<h4>${data.patientName}</h4><p>${data.diagnosis}</p><span style="color:#10b981">✅ Done</span>`;
-                            list.appendChild(item);
+                            const date = new Date(data.timestamp).toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-US');
+                            const card = document.createElement('div');
+                            card.className = 'history-card';
+                            card.innerHTML = `
+                                <div class="done-tag">✅ ${translations[lang].done}</div>
+                                <h3 style="margin: 10px 0;">${data.patientName}</h3>
+                                <p style="font-size: 14px; opacity: 0.8;">${data.diagnosis}</p>
+                                <span class="card-date">${date}</span>
+                            `;
+                            list.appendChild(card);
                         }
                     });
+                    if (!list.innerHTML) list.innerHTML = `<p>${translations[lang].empty}</p>`;
                 });
             }
         });
