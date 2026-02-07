@@ -256,35 +256,64 @@
         const authZone = document.getElementById('auth-zone');
         const heroStartBtn = document.getElementById('heroStartBtn');
 
-        function updateAuthZoneUI(user) {
-            const lang = localStorage.getItem('preferred_lang') || 'ar';
-            if (user) {
-                authZone.innerHTML = `
-                    <a href="profile.html?id=${user.uid}" class="nav-item">${lang === 'ar' ? 'ملفي الطبي' : 'My Profile'}</a>
-                    <button id="logoutBtn" class="nav-item" style="background:none; border:none; cursor:pointer; font-family: inherit; color: #ef4444;">${lang === 'ar' ? 'تسجيل خروج' : 'Logout'}</button>
+   async function updateAuthZoneUI(user) {
+    const lang = localStorage.getItem('preferred_lang') || 'ar';
+    const authZone = document.getElementById('auth-zone'); // تأكد من تعريف العنصر
+    
+    if (user) {
+        try {
+            // 1. جلب بيانات المستخدم من قاعدة البيانات للتحقق من نوع الحساب
+            const snapshot = await get(ref(db, 'users/' + user.uid));
+            const userData = snapshot.val();
+            let volunteerMenu = '';
+
+            // 2. إذا كان نوع الحساب متطوع (rescuer)، نقوم ببناء القائمة الإضافية
+            if (userData && userData.role === 'rescuer') {
+                volunteerMenu = `
+                    <a href="active-reports.html" class="nav-item">${lang === 'ar' ? 'البلاغات المتواجدة' : 'Active Reports'}</a>
+                    <a href="history.html" class="nav-item">${lang === 'ar' ? 'سجل الحالات' : 'Case History'}</a>
+                    <a href="leaderboard.html" class="nav-item">${lang === 'ar' ? 'لوحة المتطوعين' : 'Leaderboard'}</a>
+                    <a href="rewards.html" class="nav-item">${lang === 'ar' ? 'نظام المكافآت' : 'Rewards'}</a>
                 `;
-                if(heroStartBtn) heroStartBtn.href = `profile.html?id=${user.uid}`;
-                
-                document.getElementById('logoutBtn').onclick = () => {
-                    const msg = lang === 'ar' ? "هل تريد تسجيل الخروج؟" : "Do you want to logout?";
-                    if(confirm(msg)) signOut(auth).then(() => window.location.reload());
-                };
-            } else {
-                authZone.innerHTML = `
-                    <a href="login.html" class="nav-item">${lang === 'ar' ? 'دخول' : 'Login'}</a>
-                    <a href="register.html" class="nav-item">${lang === 'ar' ? 'إنشاء حساب' : 'Register'}</a>
-                `;
-                if(heroStartBtn) heroStartBtn.href = "register.html";
             }
+
+            // 3. تحديث واجهة المستخدم بالخيارات الجديدة
+            authZone.innerHTML = `
+                ${volunteerMenu}
+                <a href="profile.html?id=${user.uid}" class="nav-item">${lang === 'ar' ? 'ملفي الطبي' : 'My Profile'}</a>
+                <button id="logoutBtn" class="nav-item" style="background:none; border:none; cursor:pointer; font-family: inherit; color: #ef4444;">
+                    ${lang === 'ar' ? 'تسجيل خروج' : 'Logout'}
+                </button>
+            `;
+
+            if(heroStartBtn) heroStartBtn.href = `profile.html?id=${user.uid}`;
+            
+            // تفعيل زر تسجيل الخروج
+            document.getElementById('logoutBtn').onclick = () => {
+                const msg = lang === 'ar' ? "هل تريد تسجيل الخروج؟" : "Do you want to logout?";
+                if(confirm(msg)) signOut(auth).then(() => window.location.reload());
+            };
+
+        } catch (error) {
+            console.error("Error fetching user data:", error);
         }
+    } else {
+        // حالة عدم وجود مستخدم مسجل
+        authZone.innerHTML = `
+            <a href="login.html" class="nav-item">${lang === 'ar' ? 'دخول' : 'Login'}</a>
+            <a href="register.html" class="nav-item">${lang === 'ar' ? 'إنشاء حساب' : 'Register'}</a>
+        `;
+        if(heroStartBtn) heroStartBtn.href = "register.html";
+    }
+}
 
-        onAuthStateChanged(auth, (user) => {
-            updateAuthZoneUI(user);
-        });
+// مراقبة حالة تسجيل الدخول
+onAuthStateChanged(auth, (user) => {
+    updateAuthZoneUI(user);
+});
 
-        // تشغيل اللغة المحفوظة عند التحميل
-        setLanguage(localStorage.getItem('preferred_lang') || 'ar');
-
+// تشغيل اللغة المحفوظة عند التحميل
+setLanguage(localStorage.getItem('preferred_lang') || 'ar');
     </script>
 </body>
 </html>
