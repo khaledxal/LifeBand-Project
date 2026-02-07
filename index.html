@@ -249,65 +249,51 @@
             };
         }
 
-        async function updateAuthZoneUI(user) {
-            const lang = localStorage.getItem('preferred_lang') || 'ar';
-            const specialistsDrop = document.querySelector('.dropdown');
-            const medicalTipsLink = document.querySelector('a[href="tips.html"]');
-            
-            if (user) {
-                try {
-                    const snapshot = await get(ref(db, 'users/' + user.uid));
-                    const userData = snapshot.val();
-                    
-                    if (userData && userData.role === 'rescuer') {
-                        // إخفاء الروابط غير المطلوبة للمسعف
-                        if(specialistsDrop) specialistsDrop.style.display = 'none';
-                        if(medicalTipsLink) medicalTipsLink.style.display = 'none';
+      // ابحث عن دالة updateAuthZoneUI في ملف index.html وحدثها بهذا الشكل:
 
-                        authZone.innerHTML = `
-                            <a href="active-reports.html" class="nav-item">${lang === 'ar' ? 'البلاغات المتواجدة' : 'Active Reports'}</a>
-                            <a href="history.html" class="nav-item">${lang === 'ar' ? 'سجل الحالات المباشرة' : 'Case History'}</a>
-                            <a href="leaderboard.html" class="nav-item">${lang === 'ar' ? 'لوحة المتطوعين' : 'Leaderboard'}</a>
-                            <a href="rewards.html" class="nav-item">${lang === 'ar' ? 'نظام المكافآت' : 'Rewards'}</a>
-                            <button id="logoutBtn" class="nav-item" style="background:none; border:none; cursor:pointer; font-family: inherit; color: #ef4444;">
-                                ${lang === 'ar' ? 'تسجيل خروج' : 'Logout'}
-                            </button>
-                        `;
-                    } else {
-                        // للمستخدم العادي (مريض): إظهار الروابط بشكل طبيعي
-                        if(specialistsDrop) specialistsDrop.style.display = 'inline-block';
-                        if(medicalTipsLink) medicalTipsLink.style.display = 'inline-block';
+async function updateAuthZoneUI(user) {
+    const authZone = document.getElementById('auth-zone');
+    const heroStartBtn = document.getElementById('heroStartBtn');
+    const lang = localStorage.getItem('preferred_lang') || 'ar';
+    
+    // --- 1. التحقق أولاً من حساب الأدمن (المخزن محلياً) ---
+    const adminLoggedIn = localStorage.getItem('adminLoggedIn');
+    
+    if (adminLoggedIn === 'true') {
+        authZone.innerHTML = `
+            <a href="admin.html" class="nav-item">${lang === 'ar' ? 'لوحة التحكم' : 'Admin Panel'}</a>
+            <button id="logoutBtn" class="nav-item" style="background:none; border:none; cursor:pointer; color: #ef4444;">
+                ${lang === 'ar' ? 'خروج' : 'Logout'}
+            </button>
+        `;
+        
+        if(heroStartBtn) heroStartBtn.href = "admin.html";
 
-                        authZone.innerHTML = `
-                            <a href="profile.html?id=${user.uid}" class="nav-item">${lang === 'ar' ? 'ملفي الطبي' : 'My Profile'}</a>
-                            <button id="logoutBtn" class="nav-item" style="background:none; border:none; cursor:pointer; font-family: inherit; color: #ef4444;">
-                                ${lang === 'ar' ? 'تسجيل خروج' : 'Logout'}
-                            </button>
-                        `;
-                    }
-
-                    if(heroStartBtn) heroStartBtn.href = (userData && userData.role === 'rescuer') ? "active-reports.html" : `profile.html?id=${user.uid}`;
-                    
-                    document.getElementById('logoutBtn').onclick = () => {
-                        const msg = lang === 'ar' ? "هل تريد تسجيل الخروج؟" : "Do you want to logout?";
-                        if(confirm(msg)) signOut(auth).then(() => window.location.reload());
-                    };
-
-                } catch (error) {
-                    console.error("خطأ في جلب بيانات الرتبة:", error);
-                }
-            } else {
-                // حالة عدم تسجيل الدخول: إظهار الروابط الافتراضية
-                if(specialistsDrop) specialistsDrop.style.display = 'inline-block';
-                if(medicalTipsLink) medicalTipsLink.style.display = 'inline-block';
-
-                authZone.innerHTML = `
-                    <a href="login.html" class="nav-item">${lang === 'ar' ? 'دخول' : 'Login'}</a>
-                    <a href="register.html" class="nav-item">${lang === 'ar' ? 'إنشاء حساب' : 'Register'}</a>
-                `;
-                if(heroStartBtn) heroStartBtn.href = "register.html";
+        document.getElementById('logoutBtn').onclick = () => {
+            const msg = lang === 'ar' ? "هل تريد تسجيل الخروج؟" : "Do you want to logout?";
+            if(confirm(msg)) {
+                localStorage.removeItem('adminLoggedIn'); // حذف حالة الأدمن
+                window.location.reload();
             }
-        }
+        };
+        return; // إنهاء الدالة هنا لأننا وجدنا أدمن
+    }
+
+    // --- 2. التحقق من مستخدم Firebase العادي (المسعف أو المريض) ---
+    if (user) {
+        // ... (بقية الكود الأصلي الموجود لديك للمستخدمين العاديين)
+        try {
+            const snapshot = await get(ref(db, 'users/' + user.uid));
+            // ... تكملة كودك الحالي
+        } catch (error) { console.error(error); }
+    } else {
+        // حالة عدم تسجيل الدخول (الوضع الافتراضي)
+        authZone.innerHTML = `
+            <a href="login.html" class="nav-item">${lang === 'ar' ? 'دخول' : 'Login'}</a>
+            <a href="register.html" class="nav-item">${lang === 'ar' ? 'إنشاء حساب' : 'Register'}</a>
+        `;
+    }
+}
 
         onAuthStateChanged(auth, (user) => {
             updateAuthZoneUI(user);
