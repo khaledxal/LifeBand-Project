@@ -166,26 +166,48 @@
         setLanguage(localStorage.getItem('preferred_lang') || 'ar');
 
         // --- 3. منطق تسجيل الدخول ---
-        document.getElementById('loginForm').onsubmit = async (e) => {
-            e.preventDefault();
-            let userInput = document.getElementById('loginEmail').value;
-            let passInput = document.getElementById('loginPassword').value;
-            const lang = localStorage.getItem('preferred_lang') || 'ar';
+    // --- 3. منطق تسجيل الدخول المطور ---
+document.getElementById('loginForm').onsubmit = async (e) => {
+    e.preventDefault();
+    let userInput = document.getElementById('loginEmail').value;
+    let passInput = document.getElementById('loginPassword').value;
+    const lang = localStorage.getItem('preferred_lang') || 'ar';
 
-            try {
-                const userCredential = await signInWithEmailAndPassword(auth, userInput, passInput);
-                const user = userCredential.user;
-                
-                if (user.email === "khaledxalbughdadi@gmail.com") {
-                    window.location.href = "admin.html";
-                } else {
-                    window.location.href = `profile.html?id=${user.uid}`;
-                }
-            } catch (err) { 
-                const errorMsg = lang === 'ar' ? "خطأ في الدخول: تأكد من البيانات" : "Login Error: Check your credentials";
-                alert(errorMsg);
+    // استيراد الأدوات اللازمة لجلب البيانات من قاعدة البيانات
+    const { ref, get } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js");
+    const { db } = await import('./js/firebase-config.js');
+
+    try {
+        const userCredential = await signInWithEmailAndPassword(auth, userInput, passInput);
+        const user = userCredential.user;
+        
+        // التحقق من البريد الإلكتروني للمدير أولاً
+        if (user.email === "khaledxalbughdadi@gmail.com") {
+            window.location.href = "admin.html";
+            return;
+        }
+
+        // جلب بيانات المستخدم لمعرفة رتبته (Role)
+        const snapshot = await get(ref(db, 'users/' + user.uid));
+        if (snapshot.exists()) {
+            const userData = snapshot.val();
+            
+            // إذا كان مسعف/متطوع يذهب للرئيسية، وإذا كان مريض يذهب للبروفايل
+            if (userData.role === 'rescuer') {
+                window.location.href = "index.html";
+            } else {
+                window.location.href = `profile.html?id=${user.uid}`;
             }
-        };
+        } else {
+            // في حال عدم وجود بيانات إضافية، التوجه للبروفايل كافتراضي
+            window.location.href = `profile.html?id=${user.uid}`;
+        }
+
+    } catch (err) { 
+        const errorMsg = lang === 'ar' ? "خطأ في الدخول: تأكد من البيانات" : "Login Error: Check your credentials";
+        alert(errorMsg);
+    }
+};
     </script>
 </body>
 </html>
