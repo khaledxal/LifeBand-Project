@@ -130,15 +130,18 @@ async function activateEmergency() {
                 patientData = snap.val();
                 document.getElementById("patientNameDisplay").innerText = (lang === 'ar' ? "ملف المريض: " : "Patient: ") + patientData.name;
 
-                // 2. إرسال البيانات للسيرفر المحلي ليقوم Gemini بالتحليل
-                const response = await fetch('http://localhost:3000/api/emergency', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        patientName: patientData.name,
-                        history: patientData.diseases || [] // إرسال الأمراض المزمنة للتحليل
-                    })
-                });
+            // داخل دالة activateEmergency في ملف emergency.html
+const response = await fetch('http://localhost:3000/api/emergency', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ 
+        patientName: patientData.name,
+        history: patientData.diseases || [],
+        heartRate: patientData.heartRate || "85", // قيم افتراضية إذا لم تتوفر من الحساس
+        oxygen: patientData.oxygen || "98%",
+        status: "ضيق تنفس حاد" // يمكنك جلب هذه من حقل إدخال أو حساس
+    })
+});
 
                 if (!response.ok) throw new Error("Server Error");
 

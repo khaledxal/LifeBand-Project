@@ -9,47 +9,52 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// استخدام المسار المحلي داخل المشروع لضمان الوصول للملف
+// إعدادات الموديل المحلي
 const MODEL_NAME = 'DeepSeek-R1-Distill-Qwen-7B-Q4_0.gguf';
 const MODEL_PATH = './models'; 
-
-console.log("⏳ جاري تشغيل الموديل من داخل مجلد المشروع...");
 
 let model;
 
 async function initializeAI() {
     try {
-        // تحميل الموديل
+        console.log("⏳ جاري تحميل الموديل المحلي...");
         model = await loadModel(MODEL_NAME, {
             modelPath: MODEL_PATH,
-            device: 'cpu', // الموديل يتطلب 8GB RAM
+            device: 'cpu', // يتطلب 8GB RAM
             verbose: true
         });
-        console.log("✅ تم التشغيل بنجاح! DeepSeek جاهز لتحليل حالات LifeBand.");
+        console.log("✅ DeepSeek جاهز للعمل!");
     } catch (err) {
-        console.error("❌ فشل التحميل: تأكد من نقل الملف إلى مجلد models وإغلاق أي برامج تستخدمه.");
+        console.error("❌ فشل تحميل الموديل:", err.message);
     }
 }
 
 initializeAI();
 
 app.post("/api/emergency", async (req, res) => {
-    if (!model) return res.status(500).json({ success: false, message: "جاري تحميل الموديل..." });
+    if (!model) return res.status(500).json({ success: false, message: "الموديل لا يزال يتحمل..." });
 
     try {
         const { patientName, heartRate, oxygen, status, history } = req.body;
 
-        // تنسيق Prompt لتحسين جودة الرد باللغة العربية
-        const prompt = `### Instruction:
-أنت نظام خبير في طب الطوارئ. حلل الحالة التالية واقترح الإجراء الفوري باللغة العربية:
-اسم المريض: ${patientName}
-النبض: ${heartRate}
-الأكسجين: ${oxygen}
-الحالة: ${status}
-### Response:`;
+        // تنسيق Prompt خاص بموديلات DeepSeek لضمان أفضل نتيجة بالعربية
+        const prompt = `<｜User｜>أنت نظام خبير في طب الطوارئ. حلل الحالة التالية واقترح مستوى الخطورة والإجراء الفوري باللغة العربية باختصار شديد:
+المريض: ${patientName}
+النبض: ${heartRate || "غير متوفر"}
+الأكسجين: ${oxygen || "غير متوفر"}
+التاريخ الطبي: ${history?.join(", ") || "لا يوجد"}
+الحالة الحالية: ${status || "غير معروفة"}<｜Assistant｜>`;
 
-        const chat = await createCompletion(model, [{ role: 'user', content: prompt }]);
-        res.json({ success: true, analysis: chat.choices[0].message.content });
+        const chat = await createCompletion(model, prompt, {
+            max_tokens: 500,
+            temp: 0.6
+        });
+
+        // إزالة "تفكير الموديل" <think> لإعطاء المسعف النتيجة النهائية فقط
+        let text = chat.choices[0].message.content;
+        text = text.replace(/<think>[\s\S]*?<\/think>/, '').trim();
+
+        res.json({ success: true, analysis: text });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }
