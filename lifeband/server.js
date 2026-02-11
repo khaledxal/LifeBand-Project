@@ -1,21 +1,22 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import { GoogleGenerativeAI } from "@google/generative-ai"; // استيراد Gemini
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 dotenv.config();
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// تهيئة Gemini باستخدام المفتاح من ملف .env
+// تهيئة Gemini
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 app.post("/api/emergency", async (req, res) => {
   try {
     const { patientName, history } = req.body;
 
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    // تغيير اسم النموذج هنا إلى gemini-1.5-flash لضمان التوافق
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const prompt = `
       أنت مساعد طبي ذكي لمشروع LifeBand. 
@@ -34,7 +35,6 @@ app.post("/api/emergency", async (req, res) => {
     const response = await result.response;
     const aiText = response.text();
 
-    // إرسال النتيجة للـ Frontend
     res.json({ analysis: aiText });
 
   } catch (error) {
@@ -43,4 +43,5 @@ app.post("/api/emergency", async (req, res) => {
   }
 });
 
-app.listen(3000, () => console.log("✅ السيرفر يعمل بذكاء Gemini على http://localhost:3000"));
+const PORT = 3000;
+app.listen(PORT, () => console.log(`✅ السيرفر يعمل بذكاء Gemini على http://localhost:${PORT}`));
