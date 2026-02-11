@@ -1,6 +1,3 @@
-
-
-// يمكنك أيضاً إضافة دالة للفوتر هنا بنفس الطريقة
 // js/layout.js
 export function injectLayout() {
     const lang = localStorage.getItem('preferred_lang') || 'ar';
@@ -20,10 +17,10 @@ export function injectLayout() {
                 <div class="dropdown-content">
                     <a href="volunteering.html">${isAr ? 'التطوع الصحي' : 'Volunteering'}</a>
                     <a href="innovation.html">${isAr ? 'الابتكار' : 'Innovation'}</a>
+                    <a href="awareness.html">${isAr ? 'التوعية' : 'Awareness'}</a>
                 </div>
             </div>
-            <span id="auth-zone"></span>
-            <button id="langBtn" class="lang-toggle">${isAr ? 'EN' : 'AR'}</button>
+            <span id="auth-zone"></span> <button id="langBtn" class="lang-toggle">${isAr ? 'EN' : 'AR'}</button>
             <button id="themeBtn" class="theme-toggle">🌙</button>
         </div>
     </header>`;
@@ -44,14 +41,44 @@ export function injectLayout() {
                 <p style="margin-top: 10px; font-weight: bold;">📞 911 | 🏥 92002656</p>
             </div>
         </div>
-        <div style="text-align: center; margin-top: 40px; opacity: 0.5; font-size: 0.8rem; border-top: 1px solid var(--glass-border); padding-top: 20px;">
-            © 2026 ${isAr ? 'جميع الحقوق محفوظة لمشروع LifeBand.' : 'All rights reserved to LifeBand project.'}
-        </div>
     </footer>`;
 
     const container = document.querySelector('.container');
     if (container) {
-        container.insertAdjacentHTML('afterbegin', headerHTML); // وضع الهيدر في البداية
-        container.insertAdjacentHTML('beforeend', footerHTML);  // وضع الفوتر في النهاية
+        container.insertAdjacentHTML('afterbegin', headerHTML);
+        container.insertAdjacentHTML('beforeend', footerHTML);
+        
+        // --- تفعيل الأزرار فور الحقن ---
+        initLayoutEvents(); 
+    }
+}
+
+function initLayoutEvents() {
+    // تفعيل زر اللغة
+    const langBtn = document.getElementById('langBtn');
+    if (langBtn) {
+        langBtn.onclick = () => {
+            const current = localStorage.getItem('preferred_lang') || 'ar';
+            localStorage.setItem('preferred_lang', current === 'ar' ? 'en' : 'ar');
+            window.location.reload(); // إعادة التحميل لتطبيق اللغة الجديدة
+        };
+    }
+
+    // تفعيل زر الثيم
+    const themeBtn = document.getElementById('themeBtn');
+    const applyTheme = (theme) => {
+        document.body.setAttribute('data-theme', theme === 'dark' ? 'dark' : '');
+        if(themeBtn) themeBtn.innerText = theme === 'dark' ? '☀️' : '🌙';
+    };
+
+    applyTheme(localStorage.getItem('theme') || 'light');
+
+    if (themeBtn) {
+        themeBtn.onclick = () => {
+            const isDark = document.body.getAttribute('data-theme') === 'dark';
+            const newTheme = isDark ? 'light' : 'dark';
+            localStorage.setItem('theme', newTheme);
+            applyTheme(newTheme);
+        };
     }
 }
