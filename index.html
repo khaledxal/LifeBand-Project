@@ -17,72 +17,24 @@
             padding: 80px 0;
             min-height: 80vh;
         }
-
         .info-card {
             padding: 30px;
             text-align: center;
             transition: transform 0.3s ease;
         }
-
         .info-card:hover { transform: translateY(-10px); }
-
         .feature-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 25px;
             margin-bottom: 80px;
         }
-
-        .lang-toggle {
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            color: var(--text-main);
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 13px;
-            font-weight: bold;
-            transition: 0.3s;
-            backdrop-filter: blur(5px);
-            font-family: sans-serif;
-        }
-        .lang-toggle:hover {
-            background: var(--primary);
-            color: white;
-            transform: scale(1.1);
-        }
     </style>
 </head>
 <body class="page-fade">
 
-    <div class="container">
-        <header class="navbar" data-aos="fade-down">
-            <a href="index.html" class="nav-brand">LifeBand</a>
-            <div class="nav-links">
-                <a href="index.html" class="nav-item active" data-i18n="nav_home">الرئيسية</a> 
-                <a href="tips.html" class="nav-item" data-i18n="nav_tips">نصائح طبية</a>
-                
-                <div class="dropdown">
-                    <button class="nav-item" style="background:none; border:none; cursor:pointer; font-family: inherit;" data-i18n="nav_specialists">للمختصين ▼</button>
-                    <div class="dropdown-content">
-                        <a href="volunteering.html" data-i18n="drop_volunteer">التطوع الصحي</a>
-                        <a href="innovation.html" data-i18n="drop_innovation">الابتكار</a>
-                        <a href="awareness.html" data-i18n="drop_awareness">التوعية والتثقيف</a>
-                        <a href="media.html" data-i18n="drop_media">المركز الإعلامي</a>
-                    </div>
-                </div>
-
-                <span id="auth-zone"></span>
-
-                <button id="langBtn" class="lang-toggle">EN</button>
-                <button id="themeBtn" class="theme-toggle">🌙</button>
-            </div>
-        </header>
-
+    <div class="container" id="main-layout">
+        
         <main class="hero-section">
             <div class="hero-content" style="flex: 1; min-width: 300px;" data-aos="fade-left">
                 <h1 id="heroTitle" style="font-size: clamp(2.5rem, 5vw, 4rem); line-height: 1.1; margin-bottom: 20px;" data-i18n="hero_title">
@@ -122,184 +74,60 @@
             </div>
         </section>
 
-        <footer style="margin-top: 50px; padding: 40px 20px; background: var(--glass); border-radius: 40px 40px 0 0;" data-aos="fade-in">
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 40px;">
-                <div>
-                    <h3 style="color: var(--primary); margin-bottom: 15px;">LifeBand</h3>
-                    <p style="font-size: 14px; opacity: 0.8; line-height: 1.6;" data-i18n="footer_desc">نظام صحي مبتكر لتعزيز الأمان الطبي والارتقاء بجودة الحياة من خلال التقنيات الحديثة.</p>
-                </div>
-                <div>
-                    <h3 style="color: var(--primary); margin-bottom: 15px;" data-i18n="footer_service">خدمة الطوارئ</h3>
-                    <p style="font-size: 14px; line-height: 1.6;" data-i18n="footer_working">نعمل على تقديم خدماتنا الصحية عالية الجودة على مدار 24 ساعة طوال أيام الأسبوع.</p>
-                    <p style="margin-top: 10px; font-weight: bold;">📞 911 | 🏥 92002656</p>
-                </div>
-            </div>
-            <div style="text-align: center; margin-top: 40px; opacity: 0.5; font-size: 0.8rem; border-top: 1px solid var(--glass-border); padding-top: 20px;" data-i18n="footer_copy">
-                © 2026 جميع الحقوق محفوظة لمشروع LifeBand.
-            </div>
-        </footer>
-    </div>
-
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    </div> <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    
     <script type="module">
+        // استيراد وظائف الهيكل الموحد والفايربيس
+        import { injectLayout } from './js/layout.js';
         import { auth, db } from './js/firebase-config.js';
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { ref, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
+        // 1. تشغيل الهيكل الموحد (الهيدر والفوتر)
+        injectLayout();
+
+        // 2. تهيئة الحركات (AOS)
         AOS.init({ duration: 1000, once: true });
 
-        const translations = {
-            ar: {
-                nav_home: "الرئيسية",
-                nav_tips: "نصائح طبية",
-                nav_specialists: "للمختصين ▼",
-                drop_volunteer: "التطوع الصحي",
-                drop_innovation: "الابتكار",
-                drop_awareness: "التوعية والتثقيف",
-                drop_media: "المركز الإعلامي",
-                hero_title: 'أمانك الصحي.. <br><span style="color: var(--primary);">في معصمك.</span>',
-                hero_desc: "نظام LifeBand المتطور يربط ملفك الطبي بتقنية NFC لضمان وصول الرعاية الفورية للمسعفين فوراً عند الطوارئ.",
-                btn_start: "ابدأ الآن",
-                btn_about: "عن سوار الحياة",
-                feat_1_title: "حماية فورية",
-                feat_1_desc: "الوصول لبياناتك الطبية في ثوانٍ معدودة لمساعدة المسعفين في اتخاذ القرار الصحيح.",
-                feat_2_title: "تقنية NFC",
-                feat_2_desc: "لا يحتاج السوار لشحن، يعمل بمجرد تقريب الهاتف منه عبر تقنياتنا المتطورة.",
-                feat_3_title: "خصوصية تامة",
-                feat_3_desc: "تشفير كامل لجميع معلوماتك الحساسة لضمان أعلى مستويات الأمان الطبي.",
-                footer_desc: "نظام صحي مبتكر لتعزيز الأمان الطبي والارتقاء بجودة الحياة من خلال التقنيات الحديثة.",
-                footer_service: "خدمة الطوارئ",
-                footer_working: "نعمل على تقديم خدماتنا الصحية عالية الجودة على مدار 24 ساعة طوال أيام الأسبوع.",
-                footer_copy: "© 2026 جميع الحقوق محفوظة لمشروع LifeBand.",
-                lang_label: "EN"
-            },
-            en: {
-                nav_home: "Home",
-                nav_tips: "Medical Tips",
-                nav_specialists: "Specialists ▼",
-                drop_volunteer: "Health Volunteering",
-                drop_innovation: "Innovation",
-                drop_awareness: "Awareness",
-                drop_media: "Media Center",
-                hero_title: 'Your Health Safety.. <br><span style="color: var(--primary);">On Your Wrist.</span>',
-                hero_desc: "The advanced LifeBand system links your medical profile with NFC technology for instant emergency care.",
-                btn_start: "Start Now",
-                btn_about: "About LifeBand",
-                feat_1_title: "Instant Protection",
-                feat_1_desc: "Access your medical data in seconds to help rescuers make the right decisions.",
-                feat_2_title: "NFC Technology",
-                feat_2_desc: "The band requires no charging; it works simply by bringing a phone close to it.",
-                feat_3_title: "Full Privacy",
-                feat_3_desc: "Full encryption of all your sensitive information for the highest levels of medical security.",
-                footer_desc: "An innovative health system to enhance medical safety and quality of life through modern technology.",
-                footer_service: "Emergency Service",
-                footer_working: "We provide high-quality health services 24 hours a day, 7 days a week.",
-                footer_copy: "© 2026 All rights reserved to LifeBand project.",
-                lang_label: "AR"
-            }
-        };
-
-        const langBtn = document.getElementById('langBtn');
-        const authZone = document.getElementById('auth-zone');
-        const heroStartBtn = document.getElementById('heroStartBtn');
-
-        function setLanguage(lang) {
-            const t = translations[lang];
-            document.documentElement.lang = lang;
-            document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+        // 3. إدارة حالة المستخدم (Auth Zone)
+        async function updateAuthZoneUI(user) {
+            const authZone = document.getElementById('auth-zone');
+            const lang = localStorage.getItem('preferred_lang') || 'ar';
+            const adminLoggedIn = localStorage.getItem('adminLoggedIn');
             
-            document.querySelectorAll('[data-i18n]').forEach(el => {
-                const key = el.getAttribute('data-i18n');
-                if (key === 'hero_title') {
-                    el.innerHTML = t[key];
-                } else {
-                    el.innerText = t[key];
-                }
-            });
+            if (adminLoggedIn === 'true') {
+                authZone.innerHTML = `
+                    <a href="admin.html" class="nav-item">${lang === 'ar' ? 'لوحة التحكم' : 'Admin Panel'}</a>
+                    <button id="logoutBtn" class="nav-item" style="background:none; border:none; cursor:pointer; color: #ef4444;">
+                        ${lang === 'ar' ? 'خروج' : 'Logout'}
+                    </button>
+                `;
+                document.getElementById('logoutBtn').onclick = () => {
+                    localStorage.removeItem('adminLoggedIn');
+                    window.location.reload();
+                };
+                return;
+            }
 
-            langBtn.innerText = t.lang_label;
-            localStorage.setItem('preferred_lang', lang);
-            updateAuthZoneUI(auth.currentUser);
-        }
-
-        langBtn.onclick = () => {
-            const current = localStorage.getItem('preferred_lang') || 'ar';
-            setLanguage(current === 'ar' ? 'en' : 'ar');
-        };
-
-        const themeBtn = document.getElementById('themeBtn');
-        function applyTheme(theme) {
-            if (theme === 'dark') {
-                document.body.setAttribute('data-theme', 'dark');
-                if(themeBtn) themeBtn.innerText = '☀️';
+            if (user) {
+                authZone.innerHTML = `
+                    <a href="profile.html?id=${user.uid}" class="nav-item">${lang === 'ar' ? 'ملفي' : 'Profile'}</a>
+                    <button id="logoutBtn" class="nav-item" style="background:none; border:none; cursor:pointer; color: #ef4444;">
+                        ${lang === 'ar' ? 'خروج' : 'Logout'}
+                    </button>
+                `;
+                document.getElementById('logoutBtn').onclick = () => signOut(auth).then(() => window.location.reload());
             } else {
-                document.body.removeAttribute('data-theme');
-                if(themeBtn) themeBtn.innerText = '🌙';
+                authZone.innerHTML = `
+                    <a href="login.html" class="nav-item">${lang === 'ar' ? 'دخول' : 'Login'}</a>
+                    <a href="register.html" class="nav-item">${lang === 'ar' ? 'إنشاء حساب' : 'Register'}</a>
+                `;
             }
         }
-        
-        applyTheme(localStorage.getItem('theme') || 'light');
-
-        if(themeBtn) {
-            themeBtn.onclick = () => {
-                const isDark = document.body.getAttribute('data-theme') === 'dark';
-                const newTheme = isDark ? 'light' : 'dark';
-                localStorage.setItem('theme', newTheme);
-                applyTheme(newTheme);
-            };
-        }
-
-      // ابحث عن دالة updateAuthZoneUI في ملف index.html وحدثها بهذا الشكل:
-
-async function updateAuthZoneUI(user) {
-    const authZone = document.getElementById('auth-zone');
-    const heroStartBtn = document.getElementById('heroStartBtn');
-    const lang = localStorage.getItem('preferred_lang') || 'ar';
-    
-    // --- 1. التحقق أولاً من حساب الأدمن (المخزن محلياً) ---
-    const adminLoggedIn = localStorage.getItem('adminLoggedIn');
-    
-    if (adminLoggedIn === 'true') {
-        authZone.innerHTML = `
-            <a href="admin.html" class="nav-item">${lang === 'ar' ? 'لوحة التحكم' : 'Admin Panel'}</a>
-            <button id="logoutBtn" class="nav-item" style="background:none; border:none; cursor:pointer; color: #ef4444;">
-                ${lang === 'ar' ? 'خروج' : 'Logout'}
-            </button>
-        `;
-        
-        if(heroStartBtn) heroStartBtn.href = "admin.html";
-
-        document.getElementById('logoutBtn').onclick = () => {
-            const msg = lang === 'ar' ? "هل تريد تسجيل الخروج؟" : "Do you want to logout?";
-            if(confirm(msg)) {
-                localStorage.removeItem('adminLoggedIn'); // حذف حالة الأدمن
-                window.location.reload();
-            }
-        };
-        return; // إنهاء الدالة هنا لأننا وجدنا أدمن
-    }
-
-    // --- 2. التحقق من مستخدم Firebase العادي (المسعف أو المريض) ---
-    if (user) {
-        // ... (بقية الكود الأصلي الموجود لديك للمستخدمين العاديين)
-        try {
-            const snapshot = await get(ref(db, 'users/' + user.uid));
-            // ... تكملة كودك الحالي
-        } catch (error) { console.error(error); }
-    } else {
-        // حالة عدم تسجيل الدخول (الوضع الافتراضي)
-        authZone.innerHTML = `
-            <a href="login.html" class="nav-item">${lang === 'ar' ? 'دخول' : 'Login'}</a>
-            <a href="register.html" class="nav-item">${lang === 'ar' ? 'إنشاء حساب' : 'Register'}</a>
-        `;
-    }
-}
 
         onAuthStateChanged(auth, (user) => {
             updateAuthZoneUI(user);
         });
-
-        setLanguage(localStorage.getItem('preferred_lang') || 'ar');
     </script>
 </body>
 </html>

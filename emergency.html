@@ -3,39 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LifeBand - Emergency</title>
+    <title>LifeBand - Emergency AI Analysis</title>
+    <link rel="stylesheet" href="style.css">
     <style>
-        :root { --primary: #ef4444; --glass: rgba(255, 255, 255, 0.9); --text-main: #333; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f0f2f5; margin: 0; transition: 0.3s; }
-        .emergency-container { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; position: relative; }
+        :root { --primary: #ef4444; --glass: rgba(255, 255, 255, 0.9); }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f0f2f5; margin: 0; }
+        .emergency-container { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
         
-        /* زر اللغة الدائري في ركن الصفحة */
-        .lang-toggle {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: var(--glass);
-            border: 1px solid #ddd;
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-weight: bold;
-            z-index: 100;
-        }
-        [dir="ltr"] .lang-toggle { right: auto; left: 20px; }
-
         .glass-card { background: var(--glass); padding: 30px; border-radius: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); width: 100%; max-width: 500px; text-align: center; }
-        .hold-circle { position: relative; width: 180px; height: 180px; cursor: pointer; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 2px solid #ddd; margin: 0 auto; user-select: none; }
+        
+        /* نظام تصنيف الخطورة الملون (Triage) */
+        .severity-low { border-right: 8px solid #10b981 !important; background: rgba(16, 185, 129, 0.1); }
+        .severity-medium { border-right: 8px solid #f59e0b !important; background: rgba(245, 158, 11, 0.1); }
+        .severity-high { border-right: 8px solid #ef4444 !important; background: rgba(239, 68, 68, 0.1); }
+        .severity-critical { 
+            border-right: 8px solid #7f1d1d !important; 
+            background: rgba(127, 29, 29, 0.1);
+            animation: pulse-red 2s infinite;
+        }
+        @keyframes pulse-red { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+
+        .ai-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            background: #6366f1;
+            color: white;
+        }
+
+        .hold-circle { position: relative; width: 180px; height: 180px; cursor: pointer; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 2px solid #ddd; margin: 0 auto; }
         .progress-ring { position: absolute; top: -5px; left: -5px; transform: rotate(-90deg); }
         .progress-ring__circle { stroke-dasharray: 565.48; stroke-dashoffset: 565.48; transition: stroke-dashoffset 0.1s linear; }
-        .loader { border: 3px solid #f3f3f3; border-top: 3px solid var(--primary); border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; margin: 20px auto; display: none; }
+        
+        .loader { border: 3px solid #f3f3f3; border-top: 3px solid var(--primary); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; display: none; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .main-btn { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        
+        .main-btn { width: 100%; padding: 14px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; margin-top: 10px; color: white; }
     </style>
 </head>
 <body>
-    <button id="langBtn" class="lang-toggle">EN</button>
 
     <div class="emergency-container">
         <div id="triggerSection" class="glass-card">
@@ -50,14 +59,21 @@
         </div>
 
         <div id="infoSection" class="glass-card" style="display: none;">
-            <h3 id="patientNameDisplay" style="color: var(--primary);"></h3>
-            <div id="loader" class="loader"></div>
+            <h3 id="patientNameDisplay" style="color: #333; margin-bottom: 5px;"></h3>
+            
+            <div id="aiLoader">
+                <div class="loader" style="display: block;"></div>
+                <p style="font-size: 14px; color: #666;" data-i18n="ai_analyzing">جاري تحليل التاريخ الطبي بواسطة Gemini AI...</p>
+            </div>
+
             <div id="finalResult" style="display: none;">
-                <div style="background: rgba(16, 185, 129, 0.1); padding: 20px; border-radius: 15px; border-right: 5px solid #10b981; text-align: right;">
-                    <h4 style="color: #10b981;" data-i18n="em_action">الإجراء المطلوب:</h4>
-                    <p id="resultText" data-i18n="em_result">الحالة تتطلب رعاية فورية. جاري تنبيه المسعفين.</p>
+                <div id="severityBox" style="padding: 20px; border-radius: 15px; text-align: right; margin-bottom: 20px;">
+                    <span class="ai-badge">Gemini AI Analysis</span>
+                    <h4 id="actionTitle" style="margin: 5px 0;">الإجراء الطبي المقترح:</h4>
+                    <p id="resultText" style="line-height: 1.6; font-size: 15px; margin-top: 10px;"></p>
                 </div>
-                <button onclick="saveAndExit()" class="main-btn" style="background: #10b981;" data-i18n="btn_save_exit">✅ حفظ التقرير وإنهاء</button>
+                
+                <button id="saveBtn" class="main-btn" style="background: #10b981;" data-i18n="btn_save_exit">✅ حفظ البلاغ وإنهاء</button>
                 <button onclick="location.href='index.html'" class="main-btn" style="background: #6b7280;" data-i18n="btn_cancel">❌ إلغاء والعودة</button>
             </div>
         </div>
@@ -67,58 +83,10 @@
 import { db } from './js/firebase-config.js';
 import { ref, get, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-// --- نظام الترجمة ---
-const translations = {
-    ar: {
-        em_title: "نظام LifeBand للطوارئ",
-        em_hold: "اضغط مطولاً<br>لفتح الملف",
-        btn_back: "العودة للرئيسية",
-        em_action: "الإجراء المطلوب:",
-        em_result: "الحالة تتطلب رعاية فورية. جاري تنبيه المسعفين.",
-        btn_save_exit: "✅ حفظ التقرير وإنهاء",
-        btn_cancel: "❌ إلغاء والعودة",
-        alert_success: "✅ تم حفظ البلاغ بنجاح",
-        lang_label: "EN"
-    },
-    en: {
-        em_title: "LifeBand Emergency System",
-        em_hold: "Hold long<br>to open file",
-        btn_back: "Back to Home",
-        em_action: "Required Action:",
-        em_result: "Condition requires immediate care. Alerting paramedics.",
-        btn_save_exit: "✅ Save & Exit",
-        btn_cancel: "❌ Cancel & Return",
-        alert_success: "✅ Report saved successfully",
-        lang_label: "AR"
-    }
-};
-
-const langBtn = document.getElementById('langBtn');
-
-function setLanguage(lang) {
-    const t = translations[lang];
-    document.documentElement.lang = lang;
-    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
-    
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-        const key = el.getAttribute('data-i18n');
-        if (key === 'em_hold') el.innerHTML = t[key];
-        else el.innerText = t[key];
-    });
-
-    langBtn.innerText = t.lang_label;
-    localStorage.setItem('preferred_lang', lang);
-}
-
-langBtn.onclick = () => {
-    const current = localStorage.getItem('preferred_lang') || 'ar';
-    setLanguage(current === 'ar' ? 'en' : 'ar');
-};
-
-// --- منطق الطوارئ ---
+// --- إعدادات الحساسات والأنيميشن ---
 let progress = 0;
 let holdTimer;
-let patientName = "المريض";
+let patientData = null;
 
 const circle = document.getElementById("progressCircle");
 const holdBtn = document.getElementById("holdBtn");
@@ -128,56 +96,100 @@ const startHold = (e) => {
     holdTimer = setInterval(() => {
         progress += 2;
         circle.style.strokeDashoffset = 565.48 - (progress / 100) * 565.48;
-        if (progress >= 100) { clearInterval(holdTimer); activateEmergency(); }
+        if (progress >= 100) { 
+            clearInterval(holdTimer); 
+            activateEmergency(); 
+        }
     }, 30);
 };
 
-const cancelHold = () => { clearInterval(holdTimer); progress = 0; circle.style.strokeDashoffset = 565.48; };
+const cancelHold = () => { 
+    clearInterval(holdTimer); 
+    progress = 0; 
+    circle.style.strokeDashoffset = 565.48; 
+};
 
 holdBtn.addEventListener("mousedown", startHold);
 holdBtn.addEventListener("touchstart", startHold);
 window.addEventListener("mouseup", cancelHold);
 window.addEventListener("touchend", cancelHold);
 
+// --- وظيفة تفعيل الطوارئ والربط مع Gemini ---
 async function activateEmergency() {
     document.getElementById("triggerSection").style.display = "none";
     document.getElementById("infoSection").style.display = "block";
-    document.getElementById("loader").style.display = "block";
 
     const userId = new URLSearchParams(window.location.search).get("id");
+    const lang = localStorage.getItem('preferred_lang') || 'ar';
+
     if (userId) {
         try {
-            const snap = await get(ref(db, `users/${userId}`)); // تحديث للمسار الجديد users
+            // 1. جلب بيانات المريض من Firebase
+            const snap = await get(ref(db, `users/${userId}`));
             if (snap.exists()) {
-                patientName = snap.val().name;
-                const lang = localStorage.getItem('preferred_lang') || 'ar';
-                document.getElementById("patientNameDisplay").innerText = (lang === 'ar' ? "ملف: " : "File: ") + patientName;
-            }
-        } catch (e) { console.error("Firebase Error"); }
-    }
+                patientData = snap.val();
+                document.getElementById("patientNameDisplay").innerText = (lang === 'ar' ? "ملف المريض: " : "Patient: ") + patientData.name;
 
-    setTimeout(() => {
-        document.getElementById("loader").style.display = "none";
-        document.getElementById("finalResult").style.display = "block";
-    }, 1500);
+                // 2. إرسال البيانات للسيرفر المحلي ليقوم Gemini بالتحليل
+                const response = await fetch('http://localhost:3000/api/emergency', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        patientName: patientData.name,
+                        history: patientData.diseases || [] // إرسال الأمراض المزمنة للتحليل
+                    })
+                });
+
+                if (!response.ok) throw new Error("Server Error");
+
+                const data = await response.json();
+                displayAIAnalysis(data.analysis, lang);
+            }
+        } catch (e) {
+            console.error("Analysis Failed", e);
+            displayAIAnalysis(lang === 'ar' ? "حرج: فشل الاتصال بالذكاء الاصطناعي. اتبع إجراءات الطوارئ القياسية فوراً." : "Critical: AI connection failed. Follow standard emergency protocols immediately.", lang);
+        }
+    }
 }
 
-window.saveAndExit = async () => {
-    const lang = localStorage.getItem('preferred_lang') || 'ar';
+// --- وظيفة عرض النتائج مع نظام الألوان ---
+function displayAIAnalysis(text, lang) {
+    document.getElementById("aiLoader").style.display = "none";
+    document.getElementById("finalResult").style.display = "block";
+    
+    const severityBox = document.getElementById("severityBox");
+    const resultText = document.getElementById("resultText");
+
+    // منطق تحديد مستوى الخطورة بناءً على الكلمات المفتاحية
+    let severityClass = "severity-medium"; // افتراضي
+
+    if (text.includes("حرج") || text.includes("critical") || text.includes("فوراً") || text.includes("إسعاف")) {
+        severityClass = "severity-critical";
+    } else if (text.includes("عالي") || text.includes("high") || text.includes("خطير")) {
+        severityClass = "severity-high";
+    } else if (text.includes("منخفض") || text.includes("low") || text.includes("مستقرة")) {
+        severityClass = "severity-low";
+    }
+
+    severityBox.className = severityClass;
+    resultText.innerText = text;
+}
+
+// --- حفظ التقرير في سجل الحالات ---
+document.getElementById('saveBtn').onclick = async () => {
     try {
         await push(ref(db, "reports"), {
-            patientName,
+            patientName: patientData.name,
             diagnosis: document.getElementById("resultText").innerText,
             timestamp: new Date().toISOString(),
-            status: "قيد الانتظار"
-        });
-        alert(translations[lang].alert_success);
+            status: "قيد الانتظار" // لكي يظهر للمتطوعين في صفحة البلاغات النشطة
+        }); 
+        alert(localStorage.getItem('preferred_lang') === 'en' ? "Report Saved Successfully!" : "تم حفظ البلاغ بنجاح!");
         location.href = "index.html";
-    } catch (e) { alert("Error"); }
+    } catch (e) { 
+        alert("Error saving report"); 
+    }
 };
-
-// تشغيل اللغة المحفوظة
-setLanguage(localStorage.getItem('preferred_lang') || 'ar');
 </script>
 </body>
 </html>

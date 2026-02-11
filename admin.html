@@ -6,92 +6,174 @@
     <title>LifeBand - Admin Panel</title>
     <link rel="stylesheet" href="style.css">
     <style>
+        :root {
+            --primary: #4f46e5; /* أزرق مشبع أكثر للوضوح */
+            --secondary: #7c3aed;
+            --text-dark: #111827; /* أسود كربوني للنصوص */
+            --text-muted: #374151; /* رمادي غامق جداً */
+            --glass-border: rgba(0, 0, 0, 0.1);
+        }
+
         .admin-layout { display: flex; min-height: 100vh; gap: 20px; padding: 20px; }
-       /* تنسيق السايدبار المطور */
-.sidebar { 
-    width: 280px; 
-    background: var(--glass); 
-    backdrop-filter: blur(15px); 
-    border-radius: 20px; 
-    padding: 25px; 
-    border: 1px solid var(--glass-border);
-    display: flex;
-    flex-direction: column; /* جعل العناصر تحت بعضها */
-    gap: 15px;
-}
 
-.sidebar nav {
-    display: flex;
-    flex-direction: column;
-    gap: 12px; /* مسافة بين الأزرار */
-    margin-top: 20px;
-}
+        /* السايدبار */
+        .sidebar { 
+            width: 280px; 
+            background: #ffffff; /* خلفية بيضاء صريحة للوضوح */
+            border-radius: 20px; 
+            padding: 25px; 
+            border: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
 
-/* تنسيق الزر "المحترم" */
-.sidebar .nav-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 14px 18px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--glass-border);
-    border-radius: 12px;
-    text-decoration: none;
-    color: var(--text-main);
-    font-weight: 600;
-    transition: all 0.3s ease;
-}
+        .sidebar nav {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 20px;
+        }
 
-/* تأثير عند تمرير الماوس */
-.sidebar .nav-item:hover {
-    background: var(--primary);
-    color: white;
-    transform: translateX(-5px); /* حركة بسيطة لليمين (أو اليسار حسب الاتجاه) */
-    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2);
-}
+        .sidebar .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 18px;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            text-decoration: none;
+            color: var(--text-dark);
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
 
-/* تنسيق الزر النشط */
-.sidebar .nav-item.active {
-    background: linear-gradient(135deg, var(--primary), var(--secondary));
-    color: white;
-    border: none;
-}
+        .sidebar .nav-item:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateX(-5px);
+        }
 
-/* تنسيق زر اللغة داخل السايدبار */
-.lang-toggle {
-    align-self: flex-start; /* وضعه في البداية */
-    background: var(--glass);
-    border: 1px solid var(--glass-border);
-    color: var(--text-main);
-    width: 45px;
-    height: 45px;
-    border-radius: 50%;
-    cursor: pointer;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 10px;
-    transition: 0.3s;
-}
+        .sidebar .nav-item.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+        }
 
-.lang-toggle:hover {
-    background: var(--primary);
-    color: white;
-}
+        /* محتوى البلاغات */
+        .main-content { flex: 1; }
+
+        .main-content h1 {
+            font-size: 1.8rem;
+            color: #1e1b4b; /* أزرق داكن جداً */
+            margin-bottom: 30px;
+            display: inline-block;
+            border-bottom: 4px solid var(--primary);
+            padding-bottom: 5px;
+            font-weight: 800;
+        }
+
+        /* كرت البلاغ المطور بوضوح عالي */
+        .report-card {
+            background: #ffffff; /* أبيض صريح */
+            border: 2px solid #e5e7eb; /* إطار أوضح */
+            border-radius: 15px; 
+            padding: 25px; 
+            margin-bottom: 25px; 
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            transition: 0.3s;
+        }
+
+        .report-card:hover { transform: translateY(-3px); border-color: var(--primary); }
+
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #f3f4f6;
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+        }
+
+        .patient-name { 
+            font-size: 1.4rem; 
+            font-weight: 900; 
+            color: #1e1b4b; /* لون داكن جداً لاسم المريض */
+        }
+
+        .report-time { 
+            font-size: 0.95rem; 
+            color: #4b5563; /* رمادي غامق جداً */
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        .diagnosis-box {
+            background: #f8fafc; /* خلفية فاتحة لتمييز النص الداكن */
+            padding: 20px; 
+            border-radius: 12px; 
+            border-right: 6px solid var(--primary);
+            margin: 20px 0;
+            color: var(--text-dark);
+            font-size: 1.1rem;
+            line-height: 1.7;
+            font-weight: 500;
+        }
+
+        .diagnosis-box strong {
+            color: #000000;
+            font-weight: 800;
+            font-size: 1.2rem;
+        }
+
+        .status-badge {
+            padding: 8px 18px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            font-weight: 900;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .status-pending { background: #ffedd5; color: #9a3412; } /* برتقالي داكن */
+        .status-done { background: #dcfce7; color: #166534; }    /* أخضر داكن */
+
+        .action-btns { display: flex; gap: 12px; justify-content: flex-end; }
+        
+        .btn-main {
+            padding: 10px 24px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-weight: 800;
+            transition: 0.2s;
+            font-size: 1rem;
+        }
+
+        .btn-confirm { background: #059669; color: white; }
+        .btn-delete { background: #dc2626; color: white; }
+        .btn-main:hover { filter: brightness(1.1); transform: scale(1.05); }
+
+        .lang-toggle {
+            background: #f3f4f6;
+            border: 2px solid #d1d5db;
+            color: var(--text-dark);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-weight: 800;
+            transition: 0.3s;
+        }
     </style>
 </head>
-<body class="page-fade">
-    <div class="bg-animation"></div>
-    
-    <audio id="emergencySound" src="https://assets.mixkit.co/active_storage/sfx/951/951-preview.mp3" preload="auto"></audio>
+<body class="page-fade" style="background-color: #f1f5f9;"> <audio id="emergencySound" src="https://assets.mixkit.co/active_storage/sfx/951/951-preview.mp3" preload="auto"></audio>
 
     <div class="admin-layout">
         <aside class="sidebar">
-            <h2 style="color: var(--primary); margin-bottom: 10px;" data-i18n="adm_title">لوحة الإدارة</h2>
-            
+            <h2 data-i18n="adm_title" style="color: var(--primary); font-weight: 900;">لوحة الإدارة</h2>
             <button id="langBtn" class="lang-toggle">EN</button>
-            
             <nav>
                 <a href="#" class="nav-item active" data-i18n="adm_nav_reports">📋 قائمة البلاغات</a>
                 <a href="index.html" class="nav-item" data-i18n="nav_home">🏠 العودة للرئيسية</a>
@@ -99,10 +181,9 @@
         </aside>
 
         <main class="main-content">
-            <h1 style="margin-bottom: 20px;" data-i18n="adm_active_reports">البلاغات النشطة</h1>
+            <h1 data-i18n="adm_active_reports">البلاغات النشطة</h1>
             <div id="reportsList">
-                <p data-i18n="adm_loading">جاري تحميل البلاغات...</p>
-            </div>
+                </div>
         </main>
     </div>
 
@@ -110,7 +191,6 @@
         import { db } from './js/firebase-config.js';
         import { ref, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // --- نظام الترجمة ---
         const translations = {
             ar: {
                 adm_title: "لوحة الإدارة",
@@ -123,12 +203,12 @@
                 adm_time: "التوقيت",
                 adm_diagnosis: "التشخيص",
                 adm_status: "الحالة",
-                adm_btn_confirm: "تأكيد الإجراء",
-                adm_btn_delete: "حذف",
+                adm_btn_confirm: "تم التعامل مع الحالة",
+                adm_btn_delete: "حذف نهائي",
                 status_done: "تم الإجراء",
                 status_pending: "قيد الانتظار",
                 confirm_done: "هل تم اتخاذ الإجراء الطبي اللازم؟",
-                confirm_delete: "هل أنت متأكد من حذف هذا البلاغ نهائياً؟",
+                confirm_delete: "هل أنت متأكد من حذف هذا البلاغ؟",
                 lang_label: "EN"
             },
             en: {
@@ -137,17 +217,17 @@
                 nav_home: "🏠 Back to Home",
                 adm_active_reports: "Active Reports",
                 adm_loading: "Loading reports...",
-                adm_no_reports: "No active reports currently.",
+                adm_no_reports: "No active reports.",
                 adm_patient: "Patient",
                 adm_time: "Time",
                 adm_diagnosis: "Diagnosis",
                 adm_status: "Status",
-                adm_btn_confirm: "Confirm Action",
+                adm_btn_confirm: "Mark as Done",
                 adm_btn_delete: "Delete",
                 status_done: "Done",
                 status_pending: "Pending",
-                confirm_done: "Has the necessary medical action been taken?",
-                confirm_delete: "Are you sure you want to delete this report permanently?",
+                confirm_done: "Has medical action been taken?",
+                confirm_delete: "Are you sure you want to delete this?",
                 lang_label: "AR"
             }
         };
@@ -155,6 +235,7 @@
         const reportsList = document.getElementById('reportsList');
         const alertAudio = document.getElementById('emergencySound');
         const langBtn = document.getElementById('langBtn');
+        let currentData = {};
         let firstLoad = true;
         let lastReportCount = 0;
 
@@ -165,12 +246,11 @@
             
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
-                el.innerText = t[key];
+                if(t[key]) el.innerText = t[key];
             });
 
             langBtn.innerText = t.lang_label;
             localStorage.setItem('preferred_lang', lang);
-            // إعادة رندر القائمة لتحديث اللغات داخل الكروت
             renderReports(); 
         }
 
@@ -179,25 +259,20 @@
             setLanguage(current === 'ar' ? 'en' : 'ar');
         };
 
-        let currentData = {};
-
         const reportsRef = ref(db, 'reports');
         onValue(reportsRef, (snapshot) => {
             if (snapshot.exists()) {
                 currentData = snapshot.val();
                 const keys = Object.keys(currentData);
-                
                 if (!firstLoad && keys.length > lastReportCount) {
-                    alertAudio.play().catch(e => console.log("Audio interaction needed"));
+                    alertAudio.play().catch(e => console.log("Audio play blocked"));
                 }
-                
                 lastReportCount = keys.length;
                 firstLoad = false;
                 renderReports();
             } else {
                 currentData = {};
-                reportsList.innerHTML = `<p>${translations[localStorage.getItem('preferred_lang') || 'ar'].adm_no_reports}</p>`;
-                lastReportCount = 0;
+                reportsList.innerHTML = `<p style="color:black; font-weight:bold;">${translations[localStorage.getItem('preferred_lang') || 'ar'].adm_no_reports}</p>`;
                 firstLoad = false;
             }
         });
@@ -206,55 +281,53 @@
             const lang = localStorage.getItem('preferred_lang') || 'ar';
             const t = translations[lang];
             const keys = Object.keys(currentData);
-            
             if (keys.length === 0) return;
 
             reportsList.innerHTML = "";
             keys.reverse().forEach(key => {
                 const report = currentData[key];
                 const date = new Date(report.timestamp).toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-US');
-                const statusText = report.status === 'تم الإجراء' ? t.status_done : t.status_pending;
+                const isDone = report.status === 'تم الإجراء';
                 
                 const card = document.createElement('div');
                 card.className = 'report-card';
                 card.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                    <div class="report-header">
                         <div>
-                            <h3>${t.adm_patient}: ${report.patientName}</h3>
-                            <p style="font-size: 13px; opacity: 0.7;">${t.adm_time}: ${date}</p>
-                            <p style="margin-top: 10px;"><b>${t.adm_diagnosis}:</b> ${report.diagnosis}</p>
-                            <p>${t.adm_status}: <span class="${report.status === 'تم الإجراء' ? 'status-done' : 'status-pending'}">${statusText}</span></p>
+                            <div class="patient-name">${t.adm_patient}: ${report.patientName}</div>
+                            <div class="report-time">${t.adm_time}: ${date}</div>
                         </div>
-                        <div style="display: flex; gap: 10px;">
-                            ${report.status === 'قيد الانتظار' ? 
-                                `<button onclick="markAsDone('${key}')" class="main-btn" style="width: auto; padding: 8px 15px; background: #10b981;">${t.adm_btn_confirm}</button>` : ''}
-                            <button onclick="deleteReport('${key}')" class="main-btn btn-delete">${t.adm_btn_delete}</button>
-                        </div>
+                        <span class="status-badge ${isDone ? 'status-done' : 'status-pending'}">
+                            ${isDone ? t.status_done : t.status_pending}
+                        </span>
+                    </div>
+                    <div class="diagnosis-box">
+                        <strong>${t.adm_diagnosis}:</strong><br>
+                        ${report.diagnosis}
+                    </div>
+                    <div class="action-btns">
+                        ${!isDone ? `<button onclick="markAsDone('${key}')" class="btn-main btn-confirm">${t.adm_btn_confirm}</button>` : ''}
+                        <button onclick="deleteReport('${key}')" class="btn-main btn-delete">${t.adm_btn_delete}</button>
                     </div>
                 `;
                 reportsList.appendChild(card);
             });
         }
 
-        window.markAsDone = async (reportId) => {
+        window.markAsDone = async (id) => {
             const lang = localStorage.getItem('preferred_lang') || 'ar';
             if(confirm(translations[lang].confirm_done)) {
-                await update(ref(db, `reports/${reportId}`), { status: "تم الإجراء" });
+                await update(ref(db, `reports/${id}`), { status: "تم الإجراء" });
             }
         };
 
-        window.deleteReport = async (reportId) => {
+        window.deleteReport = async (id) => {
             const lang = localStorage.getItem('preferred_lang') || 'ar';
             if(confirm(translations[lang].confirm_delete)) {
-                try {
-                    await remove(ref(db, `reports/${reportId}`));
-                } catch (err) {
-                    alert(err.message);
-                }
+                await remove(ref(db, `reports/${id}`));
             }
         };
 
-        // تشغيل اللغة المحفوظة
         setLanguage(localStorage.getItem('preferred_lang') || 'ar');
     </script>
 </body>
