@@ -1,24 +1,21 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import { GoogleGenAI } from "@google/genai";
+import pkg from 'gpt4all';
 
 dotenv.config();
+
+const GPT4All = pkg.GPT4All || pkg.default;
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-/* ===============================
-   🔥 Gemini Setup
-================================= */
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY,
+// تحميل نموذج GPT4All
+const gpt = await GPT4All.load({
+  model: "./models/gpt4all-lora-quantized.bin",
 });
 
-/* ===============================
-   🚨 Emergency AI Endpoint
-================================= */
 app.post("/api/emergency", async (req, res) => {
   try {
     const { patientName, heartRate, oxygen, status, history } = req.body;
@@ -28,10 +25,10 @@ app.post("/api/emergency", async (req, res) => {
 
 بيانات المريض:
 الاسم: ${patientName}
-معدل نبض القلب: ${heartRate}
-نسبة الأكسجين: ${oxygen}
+معدل نبض القلب: ${heartRate || "غير معروف"}
+نسبة الأكسجين: ${oxygen || "غير معروف"}
 الأمراض المزمنة: ${history?.join(", ") || "لا يوجد"}
-الحالة الحالية: ${status}
+الحالة الحالية: ${status || "غير معروف"}
 
 المطلوب:
 1- حدد مستوى الخطورة (منخفض / متوسط / عالي / حرج)
@@ -39,32 +36,18 @@ app.post("/api/emergency", async (req, res) => {
 3- الرد يجب أن يكون واضح ومباشر للطبيب أو المسعف
     `;
 
-    const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash",
-      contents: prompt,
+    const response = await gpt.generate({
+      prompt: prompt,
+      max_tokens: 300
     });
 
-    res.json({
-      success: true,
-      analysis: response.text,
-    });
+    res.json({ success: true, analysis: response.text });
 
   } catch (error) {
-    console.error("Gemini Error:", error);
-    res.status(500).json({
-      success: false,
-      message: "AI analysis failed",
-      error: error.message,
-    });
+    console.error(error);
+    res.status(500).json({ success: false, message: "AI analysis failed", error: error.message });
   }
 });
 
-
-/* ===============================
-   🚀 Start Server
-================================= */
 const PORT = 3000;
-
-app.listen(PORT, () => {
-  console.log(`✅ Server running on http://localhost:${PORT}`);
-});
+app.listen(PORT, () => console.log(`✅ Server running on http://localhost:${PORT}`));
