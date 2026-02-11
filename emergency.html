@@ -130,15 +130,18 @@ async function activateEmergency() {
                 patientData = snap.val();
                 document.getElementById("patientNameDisplay").innerText = (lang === 'ar' ? "ملف المريض: " : "Patient: ") + patientData.name;
 
-                // 2. إرسال البيانات للسيرفر المحلي ليقوم Gemini بالتحليل
-                const response = await fetch('http://localhost:3000/api/emergency', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        patientName: patientData.name,
-                        history: patientData.diseases || [] // إرسال الأمراض المزمنة للتحليل
-                    })
-                });
+               const response = await fetch('http://localhost:3000/api/emergency', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ 
+        patientName: patientData.name,
+        heartRate: patientData.heartRate || 95,
+        oxygen: patientData.oxygen || 97,
+        status: "Emergency Triggered",
+        history: patientData.diseases || []
+    })
+});
+
 
                 if (!response.ok) throw new Error("Server Error");
 
@@ -183,7 +186,7 @@ document.getElementById('saveBtn').onclick = async () => {
             diagnosis: document.getElementById("resultText").innerText,
             timestamp: new Date().toISOString(),
             status: "قيد الانتظار" // لكي يظهر للمتطوعين في صفحة البلاغات النشطة
-        });
+        }); 
         alert(localStorage.getItem('preferred_lang') === 'en' ? "Report Saved Successfully!" : "تم حفظ البلاغ بنجاح!");
         location.href = "index.html";
     } catch (e) { 

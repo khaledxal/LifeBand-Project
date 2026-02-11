@@ -1,46 +1,70 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenAI } from "@google/genai";
 
 dotenv.config();
+
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// تهيئة Gemini باستخدام المفتاح من .env
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+/* ===============================
+   🔥 Gemini Setup
+================================= */
+const ai = new GoogleGenAI({
+  apiKey: process.env.GEMINI_API_KEY,
+});
 
+/* ===============================
+   🚨 Emergency AI Endpoint
+================================= */
 app.post("/api/emergency", async (req, res) => {
   try {
-    const { patientName, history } = req.body;
-
-    // استخدام الاسم المستقر للنموذج (بدون كلمة latest)
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const { patientName, heartRate, oxygen, status, history } = req.body;
 
     const prompt = `
-      أنت مساعد طبي ذكي لمشروع LifeBand. حلل حالة المريض التالية:
-      المريض: ${patientName}
-      التاريخ الطبي: ${JSON.stringify(history)}
+أنت نظام ذكاء اصطناعي طبي للطوارئ.
 
-      المطلوب (بالعربية وباختصار شديد):
-      1. تحديد مستوى الخطورة (عادي، متوسط، عالي، حرج).
-      2. الإجراء الطبي الفوري المطلوب.
+بيانات المريض:
+الاسم: ${patientName}
+معدل نبض القلب: ${heartRate}
+نسبة الأكسجين: ${oxygen}
+الأمراض المزمنة: ${history?.join(", ") || "لا يوجد"}
+الحالة الحالية: ${status}
+
+المطلوب:
+1- حدد مستوى الخطورة (منخفض / متوسط / عالي / حرج)
+2- أعطني الإجراء الطبي المقترح فوراً
+3- الرد يجب أن يكون واضح ومباشر للطبيب أو المسعف
     `;
 
-    // طلب توليد المحتوى
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const aiText = response.text();
+    const response = await ai.models.generateContent({
+      model: "gemini-2.0-flash",
+      contents: prompt,
+    });
 
-    res.json({ analysis: aiText });
+    res.json({
+      success: true,
+      analysis: response.text,
+    });
 
   } catch (error) {
     console.error("Gemini Error:", error);
-    // في حال فشل Gemini، نرسل استجابة بديلة لكي لا يتوقف الموقع
-    res.status(500).json({ analysis: "تنبيه: فشل تحليل الذكاء الاصطناعي. اتبع إجراءات الطوارئ القياسية فوراً." });
+    res.status(500).json({
+      success: false,
+      message: "AI analysis failed",
+      error: error.message,
+    });
   }
 });
 
+
+/* ===============================
+   🚀 Start Server
+================================= */
 const PORT = 3000;
-app.listen(PORT, () => console.log(`✅ السيرفر يعمل بذكاء Gemini على http://localhost:${PORT}`));
+
+app.listen(PORT, () => {
+  console.log(`✅ Server running on http://localhost:${PORT}`);
+});
