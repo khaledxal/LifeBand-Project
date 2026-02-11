@@ -1,36 +1,46 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import OpenAI from "openai";
+import { GoogleGenerativeAI } from "@google/generative-ai"; // استيراد Gemini
 
 dotenv.config();
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+// تهيئة Gemini باستخدام المفتاح من ملف .env
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 app.post("/api/emergency", async (req, res) => {
   try {
     const { patientName, history } = req.body;
 
-    const prompt = `أنت مساعد طبي للمشروع LifeBand... المريض: ${patientName} ... تاريخ الإجابات: ${JSON.stringify(history)}`;
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        { role: "system", content: "أنت مساعد طبي متخصص في الطوارئ." },
-        { role: "user", content: prompt }
-      ]
-    });
+    const prompt = `
+      أنت مساعد طبي ذكي لمشروع LifeBand. 
+      حلل حالة المريض الطارئة التالية:
+      اسم المريض: ${patientName}
+      السجل الطبي والأمراض: ${JSON.stringify(history)}
 
-    const aiResponse = JSON.parse(completion.choices[0].message.content.trim());
-    res.json(aiResponse);
+      المطلوب:
+      1. تحديد مستوى الخطورة (عادي، متوسط، عالي، حرج).
+      2. الإجراء الفوري الواجب اتخاذه من قبل المسعف.
+      
+      أجب باختصار شديد وباللغة العربية.
+    `;
+
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const aiText = response.text();
+
+    // إرسال النتيجة للـ Frontend
+    res.json({ analysis: aiText });
 
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "حدث خطأ في السيرفر." });
+    console.error("Gemini Error:", error);
+    res.status(500).json({ error: "حدث خطأ في تحليل الذكاء الاصطناعي." });
   }
 });
 
-app.listen(3000, () => console.log("✅ السيرفر يعمل على http://localhost:3000"));
+app.listen(3000, () => console.log("✅ السيرفر يعمل بذكاء Gemini على http://localhost:3000"));
