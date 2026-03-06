@@ -57,27 +57,15 @@
                     <h4 style="color: #10b981;" data-i18n="em_action">الإجراء المطلوب:</h4>
                     <p id="resultText" data-i18n="em_result">الحالة تتطلب رعاية فورية. جاري تنبيه المسعفين.</p>
                 </div>
-                <!-- تحليل AI الطبي -->
-                <div id="aiAnalysisBox" style="display:none; background: rgba(99,102,241,0.08); border: 1px solid rgba(99,102,241,0.3); border-right: 5px solid #6366f1; padding: 20px; border-radius: 15px; margin-top: 15px; text-align: right;">
-                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
-                        <span style="font-size:20px;">🤖</span>
-                        <h4 style="color:#6366f1; margin:0;" data-i18n="ai_analysis_title">تحليل الذكاء الاصطناعي</h4>
-                    </div>
-                    <div id="aiAnalysisText" style="font-size:14px; line-height:1.8; color: #333;">
-                        <span style="opacity:0.6;">جاري التحليل...</span>
-                    </div>
-                </div>
                 <button onclick="saveAndExit()" class="main-btn" style="background: #10b981;" data-i18n="btn_save_exit">✅ حفظ التقرير وإنهاء</button>
                 <button onclick="location.href='index.html'" class="main-btn" style="background: #6b7280;" data-i18n="btn_cancel">❌ إلغاء والعودة</button>
             </div>
         </div>
     </div>
 
-<script src="config.js"></script>
 <script type="module">
 import { db } from './js/firebase-config.js';
 import { ref, get, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-import { analyzeEmergency } from './js/gemini-ai.js';
 
 // --- نظام الترجمة ---
 const translations = {
@@ -90,7 +78,6 @@ const translations = {
         btn_save_exit: "✅ حفظ التقرير وإنهاء",
         btn_cancel: "❌ إلغاء والعودة",
         alert_success: "✅ تم حفظ البلاغ بنجاح",
-        ai_analysis_title: "تحليل الذكاء الاصطناعي",
         lang_label: "EN"
     },
     en: {
@@ -102,7 +89,6 @@ const translations = {
         btn_save_exit: "✅ Save & Exit",
         btn_cancel: "❌ Cancel & Return",
         alert_success: "✅ Report saved successfully",
-        ai_analysis_title: "AI Analysis",
         lang_label: "AR"
     }
 };
@@ -113,11 +99,13 @@ function setLanguage(lang) {
     const t = translations[lang];
     document.documentElement.lang = lang;
     document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+    
     document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
         if (key === 'em_hold') el.innerHTML = t[key];
         else el.innerText = t[key];
     });
+
     langBtn.innerText = t.lang_label;
     localStorage.setItem('preferred_lang', lang);
 }
@@ -131,7 +119,6 @@ langBtn.onclick = () => {
 let progress = 0;
 let holdTimer;
 let patientName = "المريض";
-let patientData = {};
 
 const circle = document.getElementById("progressCircle");
 const holdBtn = document.getElementById("holdBtn");
@@ -160,46 +147,27 @@ async function activateEmergency() {
     const userId = new URLSearchParams(window.location.search).get("id");
     if (userId) {
         try {
-            const snap = await get(ref(db, `users/${userId}`));
+            const snap = await get(ref(db, `users/${userId}`)); // تحديث للمسار الجديد users
             if (snap.exists()) {
-                patientData = snap.val();
-                patientName = patientData.name;
+                patientName = snap.val().name;
                 const lang = localStorage.getItem('preferred_lang') || 'ar';
                 document.getElementById("patientNameDisplay").innerText = (lang === 'ar' ? "ملف: " : "File: ") + patientName;
             }
         } catch (e) { console.error("Firebase Error"); }
     }
 
-    setTimeout(async () => {
+    setTimeout(() => {
         document.getElementById("loader").style.display = "none";
         document.getElementById("finalResult").style.display = "block";
-
-        // 🤖 تحليل AI الطبي
-        const aiBox = document.getElementById("aiAnalysisBox");
-        const aiText = document.getElementById("aiAnalysisText");
-        aiBox.style.display = "block";
-        
-        try {
-            const analysis = await analyzeEmergency({
-                name: patientName,
-                bloodType: patientData.bloodType || "غير محدد",
-                diseases: patientData.diseases || []
-            });
-            aiText.innerText = analysis;
-        } catch(e) {
-            aiText.innerText = "⚠️ تعذّر تحميل تحليل AI. تأكد من مفتاح Gemini API.";
-        }
     }, 1500);
 }
 
 window.saveAndExit = async () => {
     const lang = localStorage.getItem('preferred_lang') || 'ar';
-    const aiAnalysis = document.getElementById("aiAnalysisText").innerText;
-    const diagnosis = document.getElementById("resultText").innerText + "\n\n🤖 AI: " + aiAnalysis;
     try {
         await push(ref(db, "reports"), {
             patientName,
-            diagnosis,
+            diagnosis: document.getElementById("resultText").innerText,
             timestamp: new Date().toISOString(),
             status: "قيد الانتظار"
         });
@@ -208,6 +176,7 @@ window.saveAndExit = async () => {
     } catch (e) { alert("Error"); }
 };
 
+// تشغيل اللغة المحفوظة
 setLanguage(localStorage.getItem('preferred_lang') || 'ar');
 </script>
 </body>
