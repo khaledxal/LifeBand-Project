@@ -1,7 +1,7 @@
 // LifeBand AI Module - Powered by Google Gemini (Free)
 // استبدل YOUR_GEMINI_API_KEY بمفتاحك من: https://aistudio.google.com/app/apikey
 
-const GEMINI_API_KEY = "AIzaSyCgSg7NIg0e9UUdqcDCpIt814l8-vc5OTE";
+const GEMINI_API_KEY = "AIzaSyCwUtcgAnKYuvu_GQnwJMtfmQ_BT0hIJIA";
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
 
 /**
