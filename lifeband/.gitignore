@@ -11,3 +11,5 @@ node_modules/
 # تجاهل ملفات النظام المؤقتة
 *.part
 .DS_Store
+
+.gemini-ai.js
