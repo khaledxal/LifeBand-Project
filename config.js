@@ -1,2 +1,2 @@
 // ⛔ هذا الملف لا يُرفع على GitHub - تأكد أنه في .gitignore
-window.GEMINI_KEY = "AIzaSyC_2oDtObq9iqj2fPxjvU7AoteaPMhpqX8";
+window.GEMINI_KEY = "AIzaSyAa6xt1_rZIOUYq0ezUI_CSk8pOqdRuKXI";
