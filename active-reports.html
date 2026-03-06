@@ -34,9 +34,11 @@
         </main>
     </div>
 
-    <script type="module">
+    <script src="config.js"></script>
+<script type="module">
         import { auth, db } from './js/firebase-config.js';
         import { ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { suggestDiagnosis } from './js/gemini-ai.js';
 
         // --- نظام اللغة والثيم الموحد ---
         const t = {
@@ -88,8 +90,17 @@
                             <h3>${data.patientName || 'Unknown'}</h3>
                             <p>${data.diagnosis}</p>
                         </div>
-                        <button class="main-btn respond-btn" onclick="handleResponse('${child.key}')">${t[currentLang].btn_respond}</button>
+                        <div style="display:flex; flex-direction:column; gap:8px; align-items:flex-end;">
+                            <button class="main-btn respond-btn" onclick="handleResponse('${child.key}')">${t[currentLang].btn_respond}</button>
+                            <button class="main-btn" style="background:#6366f1; width:auto; padding:8px 16px; font-size:13px;" onclick="showAIDiagnosis('${child.key}', '${data.patientName}', '${JSON.stringify(data.diseases||[]).replace(/'/g,'')}', '${data.bloodType||''}')">🤖 ${currentLang==='ar'?'تحليل AI':'AI Analysis'}</button>
+                        </div>
                     `;
+                    // إضافة صندوق AI قابل للطي
+                    const aiDiv = document.createElement('div');
+                    aiDiv.id = `ai_${child.key}`;
+                    aiDiv.style.cssText = "display:none; background:rgba(99,102,241,0.07); border:1px solid rgba(99,102,241,0.25); border-radius:12px; padding:15px; margin-top:10px; font-size:14px; line-height:1.8;";
+                    aiDiv.innerHTML = `<span style="color:#6366f1; font-weight:bold;">🤖 ${currentLang==='ar'?'تحليل الذكاء الاصطناعي:':'AI Diagnosis:'}</span><br><span id="aitxt_${child.key}">...</span>`;
+                    card.appendChild(aiDiv);
                     reportsList.appendChild(card);
                 }
             });
@@ -99,6 +110,23 @@
         window.handleResponse = async (id) => {
             const user = auth.currentUser;
             if (user) await update(ref(db, `reports/${id}`), { status: "تمت المباشرة", rescuerId: user.uid });
+        };
+
+        window.showAIDiagnosis = async (id, name, diseasesJson, bloodType) => {
+            const aiDiv = document.getElementById(`ai_${id}`);
+            const aiTxt = document.getElementById(`aitxt_${id}`);
+            if (!aiDiv) return;
+            if (aiDiv.style.display === 'block') { aiDiv.style.display = 'none'; return; }
+            aiDiv.style.display = 'block';
+            aiTxt.innerText = '⏳ جاري تحليل الحالة...';
+            try {
+                let diseases = [];
+                try { diseases = JSON.parse(diseasesJson); } catch(e) {}
+                const result = await suggestDiagnosis(name, diseases, bloodType);
+                aiTxt.innerText = result;
+            } catch(e) {
+                aiTxt.innerText = '⚠️ تعذّر الاتصال بـ AI. تأكد من مفتاح Gemini.';
+            }
         };
     </script>
 </body>
