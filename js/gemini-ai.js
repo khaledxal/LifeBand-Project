@@ -80,4 +80,4 @@ export async function getPersonalizedTips(patientData) {
 النصائح يجب أن تكون عملية ومختصرة (جملة لكل نصيحة).
 الصيغة: نقطة، نقطة، نقطة - بالعربية فقط.`;
     return await askGemini(prompt);
-}
+  }
