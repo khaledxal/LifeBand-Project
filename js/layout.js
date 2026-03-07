@@ -13,16 +13,6 @@ export function injectLayout() {
     document.documentElement.lang = lang;
     document.documentElement.dir  = isAr ? 'rtl' : 'ltr';
 
-    // ── TOPBAR HTML ──
-    const topbarHTML = `
-    <div class="topbar" id="formalTopbar">
-        <span>⚕ ${isAr ? 'منصة LifeBand الصحية الرسمية' : 'LifeBand Official Health Platform'}</span>
-        <span style="opacity:0.4;">|</span>
-        <span>📞 ${isAr ? 'الطوارئ: 911' : 'Emergency: 911'}</span>
-        <span style="opacity:0.4;">|</span>
-        <span>🔒 ${isAr ? 'بيانات مشفرة ومحمية' : 'Encrypted & Secure Data'}</span>
-    </div>`;
-
     // ── NAVBAR HTML ──
     const navHTML = `
     <nav class="navbar" id="mainNavbar">
@@ -91,13 +81,12 @@ export function injectLayout() {
     // ── FOOTER HTML ──
     const footerHTML = `
     <footer class="site-footer">
-        <div class="footer-inner" style="padding-top:56px; padding-bottom:40px; display:grid; grid-template-columns:1.8fr 1fr 1fr 1fr; gap:48px; align-items:start;">
+        <div class="footer-inner">
             <div>
                 <div class="footer-brand">⚕ LifeBand</div>
                 <p class="footer-tagline">${isAr
                     ? 'نظام طبي ذكي يربط ملفك الصحي بتقنية NFC لضمان الرعاية الفورية عند الطوارئ.'
                     : 'A smart medical system linking your health file via NFC for instant emergency care.'}</p>
-                <div class="footer-seal">🔒 ${isAr ? 'منصة رسمية معتمدة · 2026' : 'Official Certified Platform · 2026'}</div>
             </div>
             <div class="footer-col">
                 <h4>${isAr?'روابط سريعة':'Quick Links'}</h4>
@@ -117,14 +106,13 @@ export function injectLayout() {
                 <a href="login.html">${isAr?'تسجيل دخول':'Login'}</a>
             </div>
         </div>
-        <div class="footer-bottom" style="width:92%; max-width:1200px; margin:0 auto; padding:20px 16px; display:flex; align-items:center; justify-content:space-between; border-top:1px solid rgba(255,255,255,0.06); font-size:12px; color:rgba(220,228,244,0.40); flex-wrap:wrap; gap:8px;">
-            <span>© 2026 LifeBand · ${isAr?'جميع الحقوق محفوظة':'All rights reserved'}</span>
-            <span>${isAr ? 'مرخص من وزارة الصحة' : 'Licensed by Ministry of Health'}</span>
+        <div class="footer-inner" style="display:block;">
+            <div class="footer-bottom">© 2026 LifeBand · ${isAr?'جميع الحقوق محفوظة':'All rights reserved'}</div>
         </div>
     </footer>`;
 
-    // Inject topbar + nav before container
-    document.body.insertAdjacentHTML('afterbegin', topbarHTML + navHTML);
+    // Inject before container and after
+    document.body.insertAdjacentHTML('afterbegin', navHTML);
     const container = document.querySelector('.container') || document.querySelector('#main-layout');
     if (container) container.insertAdjacentHTML('afterend', footerHTML);
     else document.body.insertAdjacentHTML('beforeend', footerHTML);
