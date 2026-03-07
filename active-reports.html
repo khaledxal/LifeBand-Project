@@ -7,127 +7,332 @@
     <link rel="stylesheet" href="style.css">
     <style>
         .reports-container { padding: 40px 20px; }
-        .report-card { background: var(--glass); border: 1px solid var(--glass-border); padding: 20px; border-radius: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .report-card {
+            background: var(--glass); border: 1px solid var(--glass-border);
+            padding: 20px; border-radius: 18px; margin-bottom: 20px;
+            border-right: 5px solid #ef4444;
+        }
         .respond-btn { background: #10b981 !important; width: auto !important; padding: 10px 25px !important; }
-        .lang-toggle { background: var(--glass); border: 1px solid var(--glass-border); color: var(--text-main); width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; transition: 0.3s; }
+
+        /* ===== نظام الأسئلة داخل البلاغ ===== */
+        .diag-panel {
+            display: none; margin-top: 15px;
+            background: rgba(99,102,241,0.05);
+            border: 1px solid rgba(99,102,241,0.2);
+            border-radius: 14px; padding: 18px;
+        }
+        .diag-panel.open { display: block; }
+        .diag-q { margin-bottom: 14px; }
+        .diag-q label { font-weight: bold; font-size: 13px; display: block; margin-bottom: 6px; }
+        .diag-options { display: flex; flex-wrap: wrap; gap: 7px; }
+        .diag-options button {
+            padding: 7px 14px; border-radius: 20px; border: 2px solid #e5e7eb;
+            background: white; cursor: pointer; font-size: 12px; transition: 0.2s; font-family: inherit;
+        }
+        .diag-options button.selected { background: #6366f1; color: white; border-color: #6366f1; }
+        .diag-options button:hover:not(.selected) { border-color: #6366f1; color: #6366f1; }
+
+        .ai-result-box {
+            background: rgba(99,102,241,0.07); border: 1px solid rgba(99,102,241,0.25);
+            border-right: 5px solid #6366f1; border-radius: 12px; padding: 15px;
+            margin-top: 12px; font-size: 13px; line-height: 1.8; white-space: pre-line; display: none;
+        }
+        .media-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px,1fr)); gap: 8px; margin-top: 12px; }
+        .media-img { width:100%; height:80px; object-fit:cover; border-radius:8px; cursor:pointer; }
+        .yt-thumb { position:relative; border-radius:8px; overflow:hidden; cursor:pointer; }
+        .yt-thumb img { width:100%; height:80px; object-fit:cover; display:block; }
+        .yt-thumb .play-icon { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.35); font-size:24px; }
+
+        #imgModal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:999; align-items:center; justify-content:center; }
+        #imgModal.open { display:flex; }
+        #imgModal img { max-width:90vw; max-height:90vh; border-radius:12px; }
+        #imgModal span { position:absolute; top:20px; right:25px; color:white; font-size:30px; cursor:pointer; }
+
+        .lang-toggle { background: var(--glass); border: 1px solid var(--glass-border); color: var(--text-main); width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; }
     </style>
 </head>
 <body class="page-fade">
-    <div class="bg-animation"></div>
-    <div class="container">
-        <header class="navbar">
-            <a href="index.html" class="nav-brand">LifeBand</a>
-            <div id="auth-zone">
-                <a href="active-reports.html" class="nav-item" data-i18n="nav_active">البلاغات المتواجدة</a>
-                <a href="history.html" class="nav-item" data-i18n="nav_history">سجل الحالات</a>
-                <a href="rewards.html" class="nav-item" data-i18n="nav_rewards">المكافآت</a>
-            </div>
-            <div class="nav-links" style="display: flex; gap: 10px; align-items: center;">
-                <button class="lang-toggle" id="langBtn">EN</button>
-                <button class="theme-toggle" id="themeBtn">🌙</button>
-            </div>
-        </header>
+<div class="bg-animation"></div>
+<div class="container">
+    <header class="navbar">
+        <a href="index.html" class="nav-brand">LifeBand</a>
+        <div id="auth-zone" style="display:flex; gap:8px; align-items:center;">
+            <a href="active-reports.html" class="nav-item" data-i18n="nav_active">البلاغات</a>
+            <a href="history.html" class="nav-item" data-i18n="nav_history">السجل</a>
+            <a href="rewards.html" class="nav-item" data-i18n="nav_rewards">المكافآت</a>
+        </div>
+        <div class="nav-links" style="display:flex; gap:10px; align-items:center;">
+            <button class="lang-toggle" id="langBtn">EN</button>
+            <button class="theme-toggle" id="themeBtn">🌙</button>
+        </div>
+    </header>
 
-        <main class="reports-container">
-            <h2 data-i18n="reports_title">⚠️ البلاغات الحالية</h2>
-            <div id="reportsList" style="margin-top: 25px;"></div>
-        </main>
-    </div>
+    <main class="reports-container">
+        <h2 data-i18n="reports_title">⚠️ البلاغات الحالية</h2>
+        <div id="reportsList" style="margin-top:25px;"></div>
+    </main>
+</div>
 
-    <script src="config.js"></script>
+<!-- Modal للصور -->
+<div id="imgModal" onclick="closeModal()">
+    <span>✕</span>
+    <img id="modalImg" src="" alt="">
+</div>
+
+<script src="config.js"></script>
 <script type="module">
-        import { auth, db } from './js/firebase-config.js';
-        import { ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-        import { suggestDiagnosis } from './js/gemini-ai.js';
+import { auth, db } from './js/firebase-config.js';
+import { ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { askGroq } from './js/gemini-ai.js';
 
-        // --- نظام اللغة والثيم الموحد ---
-        const t = {
-            ar: { nav_active: "البلاغات المتواجدة", nav_history: "سجل الحالات", nav_rewards: "المكافآت", reports_title: "⚠️ البلاغات الحالية", btn_respond: "مباشرة الحالة", empty: "لا توجد بلاغات حالياً", lang_label: "EN" },
-            en: { nav_active: "Active Reports", nav_history: "Case History", nav_rewards: "Rewards", reports_title: "⚠️ Active Reports", btn_respond: "Respond", empty: "No active reports", lang_label: "AR" }
-        };
+const T = {
+    ar: { nav_active:"البلاغات", nav_history:"السجل", nav_rewards:"المكافآت",
+          reports_title:"⚠️ البلاغات الحالية", btn_respond:"مباشرة الحالة",
+          btn_diagnose:"🤖 تشخيص AI", btn_analyze:"🔍 تحليل الأسئلة",
+          empty:"لا توجد بلاغات حالياً", lang_label:"EN",
+          diag_title:"أسئلة تشخيصية للمسعف", media_label:"📚 وسائط مساعدة:",
+          analyzing:"جاري التحليل...", extra_needed:"⚠️ يحتاج معلومات إضافية",
+          btn_extra:"🔄 أسئلة إضافية", btn_reanalyze:"🔄 إعادة التحليل" },
+    en: { nav_active:"Reports", nav_history:"History", nav_rewards:"Rewards",
+          reports_title:"⚠️ Active Reports", btn_respond:"Respond",
+          btn_diagnose:"🤖 AI Diagnosis", btn_analyze:"🔍 Analyze",
+          empty:"No active reports", lang_label:"AR",
+          diag_title:"Diagnostic Questions", media_label:"📚 Support Media:",
+          analyzing:"Analyzing...", extra_needed:"⚠️ Needs more info",
+          btn_extra:"🔄 Extra Questions", btn_reanalyze:"🔄 Re-analyze" }
+};
 
-        function setLanguage(lang) {
-            document.documentElement.lang = lang;
-            document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
-            document.querySelectorAll('[data-i18n]').forEach(el => { el.innerText = t[lang][el.getAttribute('data-i18n')]; });
-            document.getElementById('langBtn').innerText = t[lang].lang_label;
-            localStorage.setItem('preferred_lang', lang);
+const QUESTIONS = {
+    ar:[
+        {id:"q1",text:"الأعراض الظاهرة؟",options:["فقدان الوعي","ألم في الصدر","صعوبة تنفس","نزيف","تشنجات","دوخة شديدة","غثيان","لا شيء واضح"]},
+        {id:"q2",text:"استجابة المريض؟",options:["يتجاوب طبيعي","يتجاوب بضعف","لا يتجاوب"]},
+        {id:"q3",text:"حالة التنفس؟",options:["طبيعي","سريع وضحل","بطيء","متقطع","لا يتنفس"]},
+        {id:"q4",text:"لون/حالة الجلد؟",options:["طبيعي","شاحب","مزرق","متعرق بارد","محمر"]},
+        {id:"q5",text:"هل وقع إصابة أو صدمة؟",options:["نعم، سقوط","نعم، حادث","نعم، ضربة","لا يوجد"]}
+    ],
+    en:[
+        {id:"q1",text:"Visible symptoms?",options:["Unconscious","Chest pain","Breathing difficulty","Bleeding","Seizures","Dizziness","Nausea","Nothing obvious"]},
+        {id:"q2",text:"Patient response?",options:["Normal","Weak","No response"]},
+        {id:"q3",text:"Breathing?",options:["Normal","Fast & shallow","Slow","Irregular","Not breathing"]},
+        {id:"q4",text:"Skin condition?",options:["Normal","Pale","Cyanotic","Cold & sweaty","Flushed"]},
+        {id:"q5",text:"Any trauma?",options:["Yes, fall","Yes, accident","Yes, impact","No"]}
+    ]
+};
+
+const MEDIA_DB = {
+    "قلب":{imgs:["https://images.pexels.com/photos/4386466/pexels-photo-4386466.jpeg?w=300","https://images.pexels.com/photos/7659564/pexels-photo-7659564.jpeg?w=300"],yt:[{id:"587-cZxLvss",t:"CPR"},{id:"n4k7zJnTl78",t:"الذبحة الصدرية"}]},
+    "تنفس":{imgs:["https://images.pexels.com/photos/8942991/pexels-photo-8942991.jpeg?w=300"],yt:[{id:"hizBvK8bA6E",t:"مناورة هيملك"},{id:"0Ks2KRVMQME",t:"التنفس الاصطناعي"}]},
+    "نزيف":{imgs:["https://images.pexels.com/photos/6823568/pexels-photo-6823568.jpeg?w=300"],yt:[{id:"IgCSSbF6hmE",t:"إيقاف النزيف"}]},
+    "تشنج":{imgs:["https://images.pexels.com/photos/3807571/pexels-photo-3807571.jpeg?w=300"],yt:[{id:"0Hf3ZNFCzLA",t:"نوبة صرع"}]},
+    "إغماء":{imgs:["https://images.pexels.com/photos/263337/pexels-photo-263337.jpeg?w=300"],yt:[{id:"4PqsEVgD1gg",t:"وضعية الإفاقة"}]},
+    "default":{imgs:["https://images.pexels.com/photos/1170979/pexels-photo-1170979.jpeg?w=300"],yt:[{id:"587-cZxLvss",t:"إسعافات أولية"}]}
+};
+
+const lang = () => localStorage.getItem('preferred_lang') || 'ar';
+const t = () => T[lang()];
+
+// حالة كل بلاغ منفصلة
+const reportStates = {};
+
+function setLanguage(l) {
+    document.documentElement.lang = l;
+    document.documentElement.dir = l==='ar'?'rtl':'ltr';
+    document.querySelectorAll('[data-i18n]').forEach(el => { if(T[l][el.getAttribute('data-i18n')]) el.innerText = T[l][el.getAttribute('data-i18n')]; });
+    document.getElementById('langBtn').innerText = T[l].lang_label;
+    localStorage.setItem('preferred_lang', l);
+}
+document.getElementById('langBtn').onclick = () => { setLanguage(lang()==='ar'?'en':'ar'); location.reload(); };
+
+const themeBtn = document.getElementById('themeBtn');
+const applyTheme = th => { document.body.setAttribute('data-theme',th==='dark'?'dark':''); themeBtn.innerText=th==='dark'?'☀️':'🌙'; };
+applyTheme(localStorage.getItem('theme')||'light');
+themeBtn.onclick = () => { const nt=document.body.getAttribute('data-theme')==='dark'?'light':'dark'; localStorage.setItem('theme',nt); applyTheme(nt); };
+setLanguage(lang());
+
+// ===== عرض البلاغات =====
+const reportsList = document.getElementById('reportsList');
+const l = lang();
+
+onValue(ref(db,'reports'), snapshot => {
+    reportsList.innerHTML = "";
+    let hasReports = false;
+    snapshot.forEach(child => {
+        const data = child.val();
+        if(data.status==="قيد الانتظار") {
+            hasReports = true;
+            const id = child.key;
+            reportStates[id] = { answers:{}, extraAnswers:{} };
+
+            const card = document.createElement('div');
+            card.className = 'report-card';
+            card.id = `card_${id}`;
+            card.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px;">
+                    <div>
+                        <h3 style="margin:0 0 5px;">${data.patientName||'—'}</h3>
+                        <p style="font-size:13px; opacity:0.7; margin:0;">${data.diagnosis||''}</p>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:8px; align-items:flex-end;">
+                        <button class="main-btn respond-btn" onclick="handleResponse('${id}')">${t().btn_respond}</button>
+                        <button class="main-btn" style="background:#6366f1;width:auto;padding:8px 18px;font-size:13px;" onclick="toggleDiagPanel('${id}','${data.patientName||''}','${data.bloodType||''}','${JSON.stringify(data.diseases||[]).replace(/'/g,'')}')">
+                            ${t().btn_diagnose}
+                        </button>
+                    </div>
+                </div>
+
+                <!-- لوحة الأسئلة -->
+                <div class="diag-panel" id="diagPanel_${id}">
+                    <h4 style="color:#6366f1;margin:0 0 12px;">${t().diag_title}</h4>
+                    <div id="diagForm_${id}"></div>
+                    <button class="main-btn" style="background:#6366f1;margin-top:12px;" onclick="runDiagnosis('${id}','${data.patientName||''}','${data.bloodType||''}','${JSON.stringify(data.diseases||[]).replace(/'/g,'')}',false)">
+                        ${t().btn_analyze}
+                    </button>
+                </div>
+
+                <!-- نتيجة AI -->
+                <div class="ai-result-box" id="aiResult_${id}"></div>
+                <div id="mediaSection_${id}" style="display:none;">
+                    <p style="font-size:13px;font-weight:bold;margin:10px 0 5px;">${t().media_label}</p>
+                    <div class="media-grid" id="mediaGrid_${id}"></div>
+                </div>
+
+                <!-- أسئلة إضافية -->
+                <div id="extraPanel_${id}" style="display:none;margin-top:12px;padding:15px;background:rgba(245,158,11,0.07);border:1px solid rgba(245,158,11,0.3);border-radius:12px;">
+                    <p style="color:#f59e0b;font-weight:bold;margin:0 0 10px;">⚠️ ${t().extra_needed}</p>
+                    <div id="extraForm_${id}"></div>
+                    <button class="main-btn" style="background:#f59e0b;margin-top:10px;" onclick="runDiagnosis('${id}','${data.patientName||''}','${data.bloodType||''}','${JSON.stringify(data.diseases||[]).replace(/'/g,'')}',true)">
+                        ${t().btn_reanalyze}
+                    </button>
+                </div>
+            `;
+            reportsList.appendChild(card);
+            renderDiagForm(id, QUESTIONS[l], 'diagForm');
         }
+    });
+    if(!hasReports) reportsList.innerHTML = `<p style="text-align:center;opacity:0.6;">${t().empty}</p>`;
+});
 
-        document.getElementById('langBtn').onclick = () => {
-            const current = localStorage.getItem('preferred_lang') || 'ar';
-            setLanguage(current === 'ar' ? 'en' : 'ar');
-            window.location.reload(); 
-        };
+function renderDiagForm(reportId, questions, formType) {
+    const containerId = formType==='diagForm' ? `diagForm_${reportId}` : `extraForm_${reportId}`;
+    const state = reportStates[reportId];
+    const answersObj = formType==='diagForm' ? state.answers : state.extraAnswers;
+    const container = document.getElementById(containerId);
+    if(!container) return;
+    container.innerHTML = questions.map((q,i) => `
+        <div class="diag-q">
+            <label><strong>${i+1}.</strong> ${q.text}</label>
+            <div class="diag-options" id="ropts_${reportId}_${q.id}">
+                ${q.options.map(opt=>`
+                    <button type="button"
+                        class="${answersObj[q.id]===opt?'selected':''}"
+                        onclick="selectReportOption('${reportId}','${q.id}','${opt.replace(/'/g,"\\'")}','${formType}')">
+                        ${opt}
+                    </button>`).join('')}
+            </div>
+        </div>
+    `).join('');
+}
 
-        const themeBtn = document.getElementById('themeBtn');
-        function applyTheme(theme) {
-            document.body.setAttribute('data-theme', theme === 'dark' ? 'dark' : '');
-            themeBtn.innerText = theme === 'dark' ? '☀️' : '🌙';
+window.selectReportOption = (reportId, qId, val, formType) => {
+    const state = reportStates[reportId];
+    const answersObj = formType==='diagForm' ? state.answers : state.extraAnswers;
+    answersObj[qId] = val;
+    document.querySelectorAll(`#ropts_${reportId}_${qId} button`).forEach(b => {
+        b.classList.toggle('selected', b.textContent.trim()===val);
+    });
+};
+
+window.toggleDiagPanel = (id) => {
+    const panel = document.getElementById(`diagPanel_${id}`);
+    panel.classList.toggle('open');
+};
+
+window.runDiagnosis = async (id, name, bloodType, diseasesJson, isExtra) => {
+    const aiResult = document.getElementById(`aiResult_${id}`);
+    aiResult.style.display='block';
+    aiResult.innerHTML = `<span style="opacity:0.5;">⏳ ${t().analyzing}</span>`;
+    document.getElementById(`mediaSection_${id}`).style.display='none';
+    document.getElementById(`extraPanel_${id}`).style.display='none';
+    document.getElementById(`diagPanel_${id}`).classList.remove('open');
+
+    let diseases = [];
+    try { diseases = JSON.parse(diseasesJson); } catch(e){}
+
+    const state = reportStates[id];
+    const allAnswers = isExtra ? {...state.answers,...state.extraAnswers} : state.answers;
+    const answerSummary = Object.entries(allAnswers).map(([k,v])=>`${k}: ${v}`).join('\n');
+
+    const prompt = `أنت طبيب طوارئ خبير. لديك المريض:
+- الاسم: ${name}
+- فصيلة الدم: ${bloodType||'غير محدد'}
+- أمراض مزمنة: ${diseases.join('، ')||'لا يوجد'}
+
+إجابات المسعف الميداني:
+${answerSummary || 'لم تُجب على الأسئلة بعد'}
+
+المطلوب:
+1. التشخيص الأرجح
+2. الإجراء الفوري خطوة بخطوة
+3. كلمة تصنيف من: [قلب، تنفس، نزيف، تشنج، إغماء، أخرى]
+4. هل تحتاج معلومات إضافية؟ نعم/لا
+
+الصيغة:
+التشخيص: ...
+الإجراء: ...
+التصنيف: ...
+معلومات_إضافية: نعم/لا`;
+
+    try {
+        const result = await askGroq(prompt);
+        aiResult.innerText = result;
+
+        const catMatch = result.match(/التصنيف:\s*(\S+)/);
+        const category = catMatch ? catMatch[1] : 'default';
+        showReportMedia(id, category);
+
+        const needsMore = result.includes('معلومات_إضافية: نعم') || result.includes('معلومات_إضافية:نعم');
+        if(needsMore && !isExtra) {
+            const extraQs = [
+                {id:"eq1",text:lang()==='ar'?"متى بدأت الأعراض؟":"When did symptoms start?",options:lang()==='ar'?["دقائق","ساعة","أكثر","لا أعلم"]:["Minutes","1 hour","Over 1h","Unknown"]},
+                {id:"eq2",text:lang()==='ar'?"حساسية لأدوية؟":"Drug allergies?",options:lang()==='ar'?["نعم","لا","لا أعلم"]:["Yes","No","Unknown"]},
+                {id:"eq3",text:lang()==='ar'?"أخذ دواء اليوم؟":"Medication today?",options:lang()==='ar'?["نعم","لا","لا أعلم"]:["Yes","No","Unknown"]}
+            ];
+            renderDiagForm(id, extraQs, 'extraForm');
+            document.getElementById(`extraPanel_${id}`).style.display='block';
         }
-        applyTheme(localStorage.getItem('theme') || 'light');
-        themeBtn.onclick = () => {
-            const nt = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-            localStorage.setItem('theme', nt);
-            applyTheme(nt);
-        };
+    } catch(e) {
+        aiResult.innerText = "⚠️ " + e.message;
+    }
+};
 
-        setLanguage(localStorage.getItem('preferred_lang') || 'ar');
+function showReportMedia(id, category) {
+    const mediaKey = Object.keys(MEDIA_DB).find(k => category.includes(k)) || 'default';
+    const media = MEDIA_DB[mediaKey];
+    const grid = document.getElementById(`mediaGrid_${id}`);
+    grid.innerHTML = '';
+    media.imgs.forEach(src => {
+        const img = document.createElement('img');
+        img.src=src; img.className='media-img';
+        img.onclick=()=>openModal(src);
+        grid.appendChild(img);
+    });
+    media.yt.forEach(v => {
+        const div = document.createElement('div');
+        div.className='yt-thumb';
+        div.innerHTML=`<img src="https://img.youtube.com/vi/${v.id}/mqdefault.jpg"><div class="play-icon">▶️</div>`;
+        div.onclick=()=>window.open(`https://www.youtube.com/watch?v=${v.id}`,'_blank');
+        grid.appendChild(div);
+    });
+    document.getElementById(`mediaSection_${id}`).style.display='block';
+}
 
-        // --- جلب البيانات ---
-        const reportsList = document.getElementById('reportsList');
-        const currentLang = localStorage.getItem('preferred_lang') || 'ar';
+window.handleResponse = async (id) => {
+    const user = auth.currentUser;
+    if(user) await update(ref(db,`reports/${id}`),{status:"تمت المباشرة",rescuerId:user.uid});
+};
 
-        onValue(ref(db, 'reports'), (snapshot) => {
-            reportsList.innerHTML = "";
-            snapshot.forEach((child) => {
-                const data = child.val();
-                if (data.status === "قيد الانتظار") {
-                    const card = document.createElement('div');
-                    card.className = 'report-card';
-                    card.innerHTML = `
-                        <div class="report-info">
-                            <h3>${data.patientName || 'Unknown'}</h3>
-                            <p>${data.diagnosis}</p>
-                        </div>
-                        <div style="display:flex; flex-direction:column; gap:8px; align-items:flex-end;">
-                            <button class="main-btn respond-btn" onclick="handleResponse('${child.key}')">${t[currentLang].btn_respond}</button>
-                            <button class="main-btn" style="background:#6366f1; width:auto; padding:8px 16px; font-size:13px;" onclick="showAIDiagnosis('${child.key}', '${data.patientName}', '${JSON.stringify(data.diseases||[]).replace(/'/g,'')}', '${data.bloodType||''}')">🤖 ${currentLang==='ar'?'تحليل AI':'AI Analysis'}</button>
-                        </div>
-                    `;
-                    // إضافة صندوق AI قابل للطي
-                    const aiDiv = document.createElement('div');
-                    aiDiv.id = `ai_${child.key}`;
-                    aiDiv.style.cssText = "display:none; background:rgba(99,102,241,0.07); border:1px solid rgba(99,102,241,0.25); border-radius:12px; padding:15px; margin-top:10px; font-size:14px; line-height:1.8;";
-                    aiDiv.innerHTML = `<span style="color:#6366f1; font-weight:bold;">🤖 ${currentLang==='ar'?'تحليل الذكاء الاصطناعي:':'AI Diagnosis:'}</span><br><span id="aitxt_${child.key}">...</span>`;
-                    card.appendChild(aiDiv);
-                    reportsList.appendChild(card);
-                }
-            });
-            if (!reportsList.innerHTML) reportsList.innerHTML = `<p>${t[currentLang].empty}</p>`;
-        });
-
-        window.handleResponse = async (id) => {
-            const user = auth.currentUser;
-            if (user) await update(ref(db, `reports/${id}`), { status: "تمت المباشرة", rescuerId: user.uid });
-        };
-
-        window.showAIDiagnosis = async (id, name, diseasesJson, bloodType) => {
-            const aiDiv = document.getElementById(`ai_${id}`);
-            const aiTxt = document.getElementById(`aitxt_${id}`);
-            if (!aiDiv) return;
-            if (aiDiv.style.display === 'block') { aiDiv.style.display = 'none'; return; }
-            aiDiv.style.display = 'block';
-            aiTxt.innerText = '⏳ جاري تحليل الحالة...';
-            try {
-                let diseases = [];
-                try { diseases = JSON.parse(diseasesJson); } catch(e) {}
-                const result = await suggestDiagnosis(name, diseases, bloodType);
-                aiTxt.innerText = result;
-            } catch(e) {
-                aiTxt.innerText = '⚠️ تعذّر الاتصال بـ AI. تأكد من مفتاح Gemini.';
-            }
-        };
-    </script>
+window.openModal = src => { document.getElementById("modalImg").src=src; document.getElementById("imgModal").classList.add("open"); };
+window.closeModal = () => document.getElementById("imgModal").classList.remove("open");
+</script>
 </body>
 </html>

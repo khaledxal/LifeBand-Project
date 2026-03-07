@@ -5,210 +5,415 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LifeBand - Emergency</title>
     <style>
-        :root { --primary: #ef4444; --glass: rgba(255, 255, 255, 0.9); --text-main: #333; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f0f2f5; margin: 0; transition: 0.3s; }
-        .emergency-container { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; position: relative; }
-        
-        /* زر اللغة الدائري في ركن الصفحة */
-        .lang-toggle {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: var(--glass);
-            border: 1px solid #ddd;
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-weight: bold;
-            z-index: 100;
-        }
+        :root { --primary: #ef4444; --glass: rgba(255,255,255,0.92); --text-main: #333; --accent: #6366f1; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: linear-gradient(135deg,#fee2e2,#f0f2f5); margin: 0; min-height: 100vh; }
+        .emergency-container { display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 20px; position: relative; }
+        .lang-toggle { position: fixed; top: 20px; right: 20px; background: var(--glass); border: 1px solid #ddd; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; font-weight: bold; z-index: 100; }
         [dir="ltr"] .lang-toggle { right: auto; left: 20px; }
-
-        .glass-card { background: var(--glass); padding: 30px; border-radius: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); width: 100%; max-width: 500px; text-align: center; }
+        .glass-card { background: var(--glass); padding: 30px; border-radius: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.12); width: 100%; max-width: 560px; margin-top: 20px; }
         .hold-circle { position: relative; width: 180px; height: 180px; cursor: pointer; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 2px solid #ddd; margin: 0 auto; user-select: none; }
         .progress-ring { position: absolute; top: -5px; left: -5px; transform: rotate(-90deg); }
         .progress-ring__circle { stroke-dasharray: 565.48; stroke-dashoffset: 565.48; transition: stroke-dashoffset 0.1s linear; }
-        .loader { border: 3px solid #f3f3f3; border-top: 3px solid var(--primary); border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; margin: 20px auto; display: none; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .main-btn { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        .loader { border: 3px solid #f3f3f3; border-top: 3px solid var(--primary); border-radius: 50%; width: 28px; height: 28px; animation: spin 1s linear infinite; margin: 20px auto; display: none; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .main-btn { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; margin-top: 10px; font-size: 15px; transition: 0.2s; }
+        .main-btn:hover { opacity: 0.88; }
+
+        /* ===== نظام الأسئلة ===== */
+        #diagSection { display: none; }
+        .diag-form { text-align: right; }
+        .diag-q { margin-bottom: 18px; }
+        .diag-q label { font-weight: bold; font-size: 14px; color: #444; display: block; margin-bottom: 6px; }
+        .diag-q label .q-num { background: var(--primary); color: white; border-radius: 50%; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; margin-left: 6px; }
+        .diag-options { display: flex; flex-wrap: wrap; gap: 8px; }
+        .diag-options button {
+            padding: 8px 16px; border-radius: 20px; border: 2px solid #e5e7eb;
+            background: white; cursor: pointer; font-size: 13px; transition: 0.2s;
+            font-family: inherit;
+        }
+        .diag-options button.selected { background: var(--primary); color: white; border-color: var(--primary); }
+        .diag-options button:hover:not(.selected) { border-color: var(--primary); color: var(--primary); }
+
+        /* ===== نتيجة التحليل ===== */
+        .result-box { background: rgba(16,185,129,0.08); padding: 18px; border-radius: 15px; border-right: 5px solid #10b981; text-align: right; margin-bottom: 12px; }
+        .ai-box { background: rgba(99,102,241,0.07); border: 1px solid rgba(99,102,241,0.25); border-right: 5px solid var(--accent); padding: 18px; border-radius: 15px; margin-bottom: 12px; text-align: right; }
+        .ai-box h4 { color: var(--accent); margin: 0 0 10px; display: flex; align-items: center; gap: 6px; }
+        #aiAnalysisText { font-size: 14px; line-height: 1.9; white-space: pre-line; }
+
+        /* ===== وسائط داعمة ===== */
+        .media-box { margin-top: 15px; }
+        .media-box h4 { color: #374151; font-size: 14px; margin-bottom: 10px; }
+        .media-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px,1fr)); gap: 10px; }
+        .media-img { width: 100%; height: 100px; object-fit: cover; border-radius: 10px; cursor: pointer; border: 2px solid transparent; transition: 0.2s; }
+        .media-img:hover { border-color: var(--accent); }
+        .yt-thumb { position: relative; cursor: pointer; border-radius: 10px; overflow: hidden; }
+        .yt-thumb img { width: 100%; height: 100px; object-fit: cover; display: block; }
+        .yt-thumb .play-icon { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.35); font-size: 32px; }
+        .yt-thumb:hover .play-icon { background: rgba(0,0,0,0.55); }
+
+        /* ===== Modal للصور ===== */
+        #imgModal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:999; align-items:center; justify-content:center; }
+        #imgModal.open { display:flex; }
+        #imgModal img { max-width:90vw; max-height:90vh; border-radius:12px; }
+        #imgModal span { position:absolute; top:20px; right:25px; color:white; font-size:30px; cursor:pointer; }
+
+        .step-indicator { display: flex; justify-content: center; gap: 8px; margin-bottom: 20px; }
+        .step-dot { width: 10px; height: 10px; border-radius: 50%; background: #e5e7eb; transition: 0.3s; }
+        .step-dot.active { background: var(--primary); transform: scale(1.3); }
+        .step-dot.done { background: #10b981; }
     </style>
 </head>
 <body>
-    <button id="langBtn" class="lang-toggle">EN</button>
+<button id="langBtn" class="lang-toggle">EN</button>
 
-    <div class="emergency-container">
-        <div id="triggerSection" class="glass-card">
-            <h2 style="color: var(--primary);" data-i18n="em_title">نظام LifeBand للطوارئ</h2>
-            <div id="holdBtn" class="hold-circle">
-                <span id="holdText" style="font-weight: bold;" data-i18n="em_hold">اضغط مطولاً<br>لفتح الملف</span>
-                <svg width="190" height="190" class="progress-ring">
-                    <circle id="progressCircle" stroke="#ef4444" stroke-width="10" fill="transparent" r="90" cx="95" cy="95" class="progress-ring__circle"/>
-                </svg>
-            </div>
-            <button onclick="location.href='index.html'" class="main-btn" style="background: #6b7280; margin-top: 30px;" data-i18n="btn_back">العودة للرئيسية</button>
-        </div>
+<div class="emergency-container">
 
-        <div id="infoSection" class="glass-card" style="display: none;">
-            <h3 id="patientNameDisplay" style="color: var(--primary);"></h3>
-            <div id="loader" class="loader"></div>
-            <div id="finalResult" style="display: none;">
-                <div style="background: rgba(16, 185, 129, 0.1); padding: 20px; border-radius: 15px; border-right: 5px solid #10b981; text-align: right;">
-                    <h4 style="color: #10b981;" data-i18n="em_action">الإجراء المطلوب:</h4>
-                    <p id="resultText" data-i18n="em_result">الحالة تتطلب رعاية فورية. جاري تنبيه المسعفين.</p>
-                </div>
-                <!-- تحليل AI الطبي -->
-                <div id="aiAnalysisBox" style="display:none; background: rgba(99,102,241,0.08); border: 1px solid rgba(99,102,241,0.3); border-right: 5px solid #6366f1; padding: 20px; border-radius: 15px; margin-top: 15px; text-align: right;">
-                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
-                        <span style="font-size:20px;">🤖</span>
-                        <h4 style="color:#6366f1; margin:0;" data-i18n="ai_analysis_title">تحليل الذكاء الاصطناعي</h4>
-                    </div>
-                    <div id="aiAnalysisText" style="font-size:14px; line-height:1.8; color: #333;">
-                        <span style="opacity:0.6;">جاري التحليل...</span>
-                    </div>
-                </div>
-                <button onclick="saveAndExit()" class="main-btn" style="background: #10b981;" data-i18n="btn_save_exit">✅ حفظ التقرير وإنهاء</button>
-                <button onclick="location.href='index.html'" class="main-btn" style="background: #6b7280;" data-i18n="btn_cancel">❌ إلغاء والعودة</button>
-            </div>
+    <!-- الخطوة 1: زر الضغط المطوّل -->
+    <div id="triggerSection" class="glass-card" style="text-align:center;">
+        <h2 style="color:var(--primary);" data-i18n="em_title">نظام LifeBand للطوارئ</h2>
+        <div id="holdBtn" class="hold-circle">
+            <span id="holdText" style="font-weight:bold;" data-i18n="em_hold">اضغط مطولاً<br>لفتح الملف</span>
+            <svg width="190" height="190" class="progress-ring">
+                <circle id="progressCircle" stroke="#ef4444" stroke-width="10" fill="transparent" r="90" cx="95" cy="95" class="progress-ring__circle"/>
+            </svg>
         </div>
+        <button onclick="location.href='index.html'" class="main-btn" style="background:#6b7280;margin-top:30px;" data-i18n="btn_back">العودة للرئيسية</button>
     </div>
+
+    <!-- الخطوة 2: أسئلة تشخيصية -->
+    <div id="diagSection" class="glass-card">
+        <h3 id="patientNameDisplay" style="color:var(--primary);text-align:center;margin-bottom:5px;"></h3>
+        <p style="text-align:center;font-size:13px;opacity:0.6;margin-bottom:20px;" data-i18n="diag_sub">أجب على الأسئلة لتحديد الحالة بدقة</p>
+
+        <div class="step-indicator" id="stepDots"></div>
+        <div id="loader" class="loader"></div>
+
+        <div class="diag-form" id="diagForm"></div>
+
+        <button id="analyzeBtn" class="main-btn" style="margin-top:20px;display:none;" data-i18n="btn_analyze">🔍 تحليل الحالة بالذكاء الاصطناعي</button>
+    </div>
+
+    <!-- الخطوة 3: النتيجة -->
+    <div id="resultSection" class="glass-card" style="display:none;">
+        <h3 id="resultPatientName" style="color:var(--primary);text-align:center;margin-bottom:15px;"></h3>
+
+        <div class="result-box">
+            <h4 style="color:#10b981;margin:0 0 8px;" data-i18n="em_action">الإجراء المطلوب:</h4>
+            <p id="resultText" data-i18n="em_result">الحالة تتطلب رعاية فورية.</p>
+        </div>
+
+        <div class="ai-box">
+            <h4><span>🤖</span> <span data-i18n="ai_analysis_title">تحليل الذكاء الاصطناعي</span></h4>
+            <div id="aiAnalysisText"><span style="opacity:0.5;">جاري التحليل...</span></div>
+            <div class="media-box" id="mediaBox" style="display:none;">
+                <h4 data-i18n="media_title">📚 وسائط مساعدة:</h4>
+                <div class="media-grid" id="mediaGrid"></div>
+            </div>
+        </div>
+
+        <!-- أسئلة إضافية إذا ما توصل لحل -->
+        <div id="extraQBox" style="display:none; margin-bottom:12px;">
+            <div class="ai-box" style="border-color:#f59e0b; border-right-color:#f59e0b; background:rgba(245,158,11,0.07);">
+                <h4 style="color:#f59e0b;">⚠️ <span data-i18n="extra_q_title">يحتاج معلومات إضافية</span></h4>
+                <div class="diag-form" id="extraDiagForm"></div>
+                <button id="reAnalyzeBtn" class="main-btn" style="background:#f59e0b;margin-top:10px;" data-i18n="btn_reanalyze">🔄 إعادة التحليل</button>
+            </div>
+        </div>
+
+        <button onclick="saveAndExit()" class="main-btn" style="background:#10b981;" data-i18n="btn_save_exit">✅ حفظ التقرير وإنهاء</button>
+        <button onclick="location.href='index.html'" class="main-btn" style="background:#6b7280;" data-i18n="btn_cancel">❌ إلغاء والعودة</button>
+    </div>
+
+</div>
+
+<!-- Modal للصور -->
+<div id="imgModal" onclick="closeModal()">
+    <span onclick="closeModal()">✕</span>
+    <img id="modalImg" src="" alt="">
+</div>
 
 <script src="config.js"></script>
 <script type="module">
 import { db } from './js/firebase-config.js';
 import { ref, get, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-import { analyzeEmergency } from './js/gemini-ai.js';
+import { askGroq } from './js/gemini-ai.js';
 
-// --- نظام الترجمة ---
-const translations = {
+// ===== ترجمات =====
+const T = {
     ar: {
-        em_title: "نظام LifeBand للطوارئ",
-        em_hold: "اضغط مطولاً<br>لفتح الملف",
-        btn_back: "العودة للرئيسية",
-        em_action: "الإجراء المطلوب:",
-        em_result: "الحالة تتطلب رعاية فورية. جاري تنبيه المسعفين.",
-        btn_save_exit: "✅ حفظ التقرير وإنهاء",
-        btn_cancel: "❌ إلغاء والعودة",
-        alert_success: "✅ تم حفظ البلاغ بنجاح",
-        ai_analysis_title: "تحليل الذكاء الاصطناعي",
-        lang_label: "EN"
+        em_title:"نظام LifeBand للطوارئ", em_hold:"اضغط مطولاً<br>لفتح الملف",
+        btn_back:"العودة للرئيسية", diag_sub:"أجب على الأسئلة لتحديد الحالة بدقة",
+        btn_analyze:"🔍 تحليل الحالة بالذكاء الاصطناعي",
+        em_action:"الإجراء المطلوب:", em_result:"الحالة تتطلب رعاية فورية.",
+        ai_analysis_title:"تحليل الذكاء الاصطناعي", media_title:"📚 وسائط مساعدة:",
+        extra_q_title:"يحتاج معلومات إضافية", btn_reanalyze:"🔄 إعادة التحليل",
+        btn_save_exit:"✅ حفظ التقرير وإنهاء", btn_cancel:"❌ إلغاء والعودة",
+        alert_success:"✅ تم حفظ البلاغ بنجاح", lang_label:"EN",
+        file_prefix:"ملف: ", loading:"جاري التحليل..."
     },
     en: {
-        em_title: "LifeBand Emergency System",
-        em_hold: "Hold long<br>to open file",
-        btn_back: "Back to Home",
-        em_action: "Required Action:",
-        em_result: "Condition requires immediate care. Alerting paramedics.",
-        btn_save_exit: "✅ Save & Exit",
-        btn_cancel: "❌ Cancel & Return",
-        alert_success: "✅ Report saved successfully",
-        ai_analysis_title: "AI Analysis",
-        lang_label: "AR"
+        em_title:"LifeBand Emergency System", em_hold:"Hold to<br>open file",
+        btn_back:"Back to Home", diag_sub:"Answer questions to assess the situation",
+        btn_analyze:"🔍 AI Diagnosis",
+        em_action:"Required Action:", em_result:"Immediate care required.",
+        ai_analysis_title:"AI Analysis", media_title:"📚 Support Media:",
+        extra_q_title:"Needs More Info", btn_reanalyze:"🔄 Re-analyze",
+        btn_save_exit:"✅ Save & Exit", btn_cancel:"❌ Cancel",
+        alert_success:"✅ Report saved", lang_label:"AR",
+        file_prefix:"File: ", loading:"Analyzing..."
     }
 };
 
-const langBtn = document.getElementById('langBtn');
-
-function setLanguage(lang) {
-    const t = translations[lang];
-    document.documentElement.lang = lang;
-    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-        const key = el.getAttribute('data-i18n');
-        if (key === 'em_hold') el.innerHTML = t[key];
-        else el.innerText = t[key];
-    });
-    langBtn.innerText = t.lang_label;
-    localStorage.setItem('preferred_lang', lang);
-}
-
-langBtn.onclick = () => {
-    const current = localStorage.getItem('preferred_lang') || 'ar';
-    setLanguage(current === 'ar' ? 'en' : 'ar');
+// ===== أسئلة التشخيص =====
+const QUESTIONS = {
+    ar: [
+        { id:"q1", text:"ما الأعراض الظاهرة الآن؟", options:["فقدان الوعي","ألم في الصدر","صعوبة تنفس","نزيف","تشنجات","دوخة شديدة","غثيان/تقيؤ","لا شيء واضح"] },
+        { id:"q2", text:"هل المريض يتجاوب مع النداء؟", options:["يتجاوب بشكل طبيعي","يتجاوب بضعف","لا يتجاوب أبداً"] },
+        { id:"q3", text:"حالة التنفس:", options:["طبيعي","سريع وضحل","بطيء","متقطع","لا يتنفس"] },
+        { id:"q4", text:"حالة الجلد:", options:["طبيعي","شاحب","أزرق/مزرق","متعرق بارد","محمر"] },
+        { id:"q5", text:"هل وقع أو أصيب بصدمة؟", options:["نعم، سقوط","نعم، حادث","نعم، ضربة","لا يوجد إصابة"] }
+    ],
+    en: [
+        { id:"q1", text:"Current visible symptoms?", options:["Unconscious","Chest pain","Breathing difficulty","Bleeding","Seizures","Severe dizziness","Nausea/vomiting","Nothing obvious"] },
+        { id:"q2", text:"Does patient respond to voice?", options:["Responds normally","Responds weakly","No response"] },
+        { id:"q3", text:"Breathing status:", options:["Normal","Fast & shallow","Slow","Irregular","Not breathing"] },
+        { id:"q4", text:"Skin condition:", options:["Normal","Pale","Blue/cyanotic","Cold & sweaty","Flushed"] },
+        { id:"q5", text:"Was there trauma/injury?", options:["Yes, fall","Yes, accident","Yes, impact","No injury"] }
+    ]
 };
 
-// --- منطق الطوارئ ---
-let progress = 0;
-let holdTimer;
-let patientName = "المريض";
-let patientData = {};
+// ===== وسائط طبية =====
+const MEDIA_DB = {
+    "قلب":{ imgs:["https://images.pexels.com/photos/4386466/pexels-photo-4386466.jpeg?w=400","https://images.pexels.com/photos/7659564/pexels-photo-7659564.jpeg?w=400"], yt:[{id:"587-cZxLvss",t:"CPR - الإنعاش القلبي"},{id:"n4k7zJnTl78",t:"الذبحة الصدرية"}] },
+    "تنفس":{ imgs:["https://images.pexels.com/photos/8942991/pexels-photo-8942991.jpeg?w=400"], yt:[{id:"hizBvK8bA6E",t:"انسداد مجرى الهواء - مناورة هيملك"},{id:"0Ks2KRVMQME",t:"التنفس الاصطناعي"}] },
+    "نزيف":{ imgs:["https://images.pexels.com/photos/6823568/pexels-photo-6823568.jpeg?w=400","https://images.pexels.com/photos/4021775/pexels-photo-4021775.jpeg?w=400"], yt:[{id:"IgCSSbF6hmE",t:"إيقاف النزيف الشديد"},{id:"O9wTr_sMv8k",t:"ضمادة الجرح"}] },
+    "تشنج":{ imgs:["https://images.pexels.com/photos/3807571/pexels-photo-3807571.jpeg?w=400"], yt:[{id:"0Hf3ZNFCzLA",t:"التعامل مع نوبة الصرع"}] },
+    "إغماء":{ imgs:["https://images.pexels.com/photos/263337/pexels-photo-263337.jpeg?w=400"], yt:[{id:"4PqsEVgD1gg",t:"وضعية الإفاقة - الإسعاف"}] },
+    "default":{ imgs:["https://images.pexels.com/photos/1170979/pexels-photo-1170979.jpeg?w=400"], yt:[{id:"587-cZxLvss",t:"أساسيات الإسعافات الأولية"}] }
+};
 
+// ===== متغيرات عامة =====
+let patientData = {}, patientName = "", answers = {}, extraAnswers = {}, lastAnalysis = "";
+const lang = () => localStorage.getItem('preferred_lang') || 'ar';
+
+// ===== تهيئة اللغة =====
+function applyLang(l) {
+    document.documentElement.lang = l;
+    document.documentElement.dir = l==='ar'?'rtl':'ltr';
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const k = el.getAttribute('data-i18n');
+        if(k==='em_hold') el.innerHTML = T[l][k]; else if(T[l][k]) el.innerText = T[l][k];
+    });
+    document.getElementById('langBtn').innerText = T[l].lang_label;
+    localStorage.setItem('preferred_lang', l);
+}
+document.getElementById('langBtn').onclick = () => applyLang(lang()==='ar'?'en':'ar');
+applyLang(lang());
+
+// ===== زر الضغط المطوّل =====
+let progress=0, holdTimer;
 const circle = document.getElementById("progressCircle");
 const holdBtn = document.getElementById("holdBtn");
 
-const startHold = (e) => {
+const startHold = e => {
     e.preventDefault();
     holdTimer = setInterval(() => {
         progress += 2;
-        circle.style.strokeDashoffset = 565.48 - (progress / 100) * 565.48;
-        if (progress >= 100) { clearInterval(holdTimer); activateEmergency(); }
-    }, 30);
+        circle.style.strokeDashoffset = 565.48 - (progress/100)*565.48;
+        if(progress>=100){ clearInterval(holdTimer); loadPatientAndShowDiag(); }
+    },30);
 };
-
-const cancelHold = () => { clearInterval(holdTimer); progress = 0; circle.style.strokeDashoffset = 565.48; };
-
+const cancelHold = () => { clearInterval(holdTimer); progress=0; circle.style.strokeDashoffset=565.48; };
 holdBtn.addEventListener("mousedown", startHold);
-holdBtn.addEventListener("touchstart", startHold);
+holdBtn.addEventListener("touchstart", startHold, {passive:false});
 window.addEventListener("mouseup", cancelHold);
 window.addEventListener("touchend", cancelHold);
 
-async function activateEmergency() {
-    document.getElementById("triggerSection").style.display = "none";
-    document.getElementById("infoSection").style.display = "block";
-    document.getElementById("loader").style.display = "block";
+// ===== تحميل بيانات المريض وعرض الأسئلة =====
+async function loadPatientAndShowDiag() {
+    document.getElementById("triggerSection").style.display="none";
+    document.getElementById("diagSection").style.display="block";
+    document.getElementById("loader").style.display="block";
 
-    const userId = new URLSearchParams(window.location.search).get("id");
-    if (userId) {
+    const userId = new URLSearchParams(location.search).get("id");
+    if(userId) {
         try {
-            const snap = await get(ref(db, `users/${userId}`));
-            if (snap.exists()) {
-                patientData = snap.val();
-                patientName = patientData.name;
-                const lang = localStorage.getItem('preferred_lang') || 'ar';
-                document.getElementById("patientNameDisplay").innerText = (lang === 'ar' ? "ملف: " : "File: ") + patientName;
-            }
-        } catch (e) { console.error("Firebase Error"); }
+            const snap = await get(ref(db,`users/${userId}`));
+            if(snap.exists()){ patientData=snap.val(); patientName=patientData.name; }
+        } catch(e){}
     }
 
-    setTimeout(async () => {
-        document.getElementById("loader").style.display = "none";
-        document.getElementById("finalResult").style.display = "block";
+    document.getElementById("loader").style.display="none";
+    document.getElementById("patientNameDisplay").innerText = T[lang()].file_prefix + (patientName || "—");
 
-        // 🤖 تحليل AI الطبي
-        const aiBox = document.getElementById("aiAnalysisBox");
-        const aiText = document.getElementById("aiAnalysisText");
-        aiBox.style.display = "block";
-        
-        try {
-            const analysis = await analyzeEmergency({
-                name: patientName,
-                bloodType: patientData.bloodType || "غير محدد",
-                diseases: patientData.diseases || []
-            });
-            aiText.innerText = analysis;
-        } catch(e) {
-            aiText.innerText = "⚠️ تعذّر تحميل تحليل AI. تأكد من مفتاح Gemini API.";
-        }
-    }, 1500);
+    renderDiagForm(QUESTIONS[lang()], 'diagForm', answers);
+    renderStepDots(QUESTIONS[lang()].length);
+    document.getElementById("analyzeBtn").style.display="block";
+    document.getElementById("analyzeBtn").onclick = () => runAnalysis(false);
 }
 
-window.saveAndExit = async () => {
-    const lang = localStorage.getItem('preferred_lang') || 'ar';
-    const aiAnalysis = document.getElementById("aiAnalysisText").innerText;
-    const diagnosis = document.getElementById("resultText").innerText + "\n\n🤖 AI: " + aiAnalysis;
-    try {
-        await push(ref(db, "reports"), {
-            patientName,
-            diagnosis,
-            timestamp: new Date().toISOString(),
-            status: "قيد الانتظار"
-        });
-        alert(translations[lang].alert_success);
-        location.href = "index.html";
-    } catch (e) { alert("Error"); }
+// ===== رسم الأسئلة =====
+function renderDiagForm(questions, containerId, answersObj) {
+    const form = document.getElementById(containerId);
+    form.innerHTML = questions.map((q,i) => `
+        <div class="diag-q" id="qblock_${q.id}">
+            <label><span class="q-num">${i+1}</span>${q.text}</label>
+            <div class="diag-options" id="opts_${q.id}">
+                ${q.options.map(opt=>`
+                    <button type="button"
+                        class="${answersObj[q.id]===opt?'selected':''}"
+                        onclick="selectOption('${q.id}','${opt.replace(/'/g,"\\'")}','${containerId==='diagForm'?'main':'extra'}')">
+                        ${opt}
+                    </button>`).join('')}
+            </div>
+        </div>
+    `).join('');
+}
+
+window.selectOption = (qId, val, type) => {
+    const obj = type==='main' ? answers : extraAnswers;
+    obj[qId] = val;
+    const container = type==='main' ? 'diagForm' : 'extraDiagForm';
+    document.querySelectorAll(`#opts_${qId} button`).forEach(b => {
+        b.classList.toggle('selected', b.textContent.trim()===val);
+    });
+    updateStepDots();
 };
 
-setLanguage(localStorage.getItem('preferred_lang') || 'ar');
+function renderStepDots(count) {
+    const dots = document.getElementById('stepDots');
+    dots.innerHTML = Array.from({length:count},(_,i)=>`<div class="step-dot" id="dot_${i}"></div>`).join('');
+    updateStepDots();
+}
+
+function updateStepDots() {
+    const qs = QUESTIONS[lang()];
+    qs.forEach((q,i) => {
+        const dot = document.getElementById(`dot_${i}`);
+        if(!dot) return;
+        if(answers[q.id]) { dot.classList.add('done'); dot.classList.remove('active'); }
+        else { dot.classList.remove('done'); dot.classList.add('active'); }
+    });
+}
+
+// ===== تشغيل التحليل =====
+async function runAnalysis(isExtra) {
+    const l = lang();
+    document.getElementById("diagSection").style.display="none";
+    document.getElementById("resultSection").style.display="block";
+    document.getElementById("resultPatientName").innerText = T[l].file_prefix + (patientName||"—");
+
+    const aiText = document.getElementById("aiAnalysisText");
+    aiText.innerHTML = `<span style="opacity:0.5;">${T[l].loading}</span>`;
+    document.getElementById("mediaBox").style.display="none";
+    document.getElementById("extraQBox").style.display="none";
+
+    const allAnswers = isExtra ? {...answers,...extraAnswers} : answers;
+    const answerSummary = Object.entries(allAnswers).map(([k,v])=>`${k}: ${v}`).join('\n');
+
+    const prompt = `أنت طبيب طوارئ خبير. لديك المريض التالي:
+- الاسم: ${patientName || 'غير محدد'}
+- فصيلة الدم: ${patientData.bloodType || 'غير محدد'}
+- أمراض مزمنة: ${(patientData.diseases||[]).join('، ') || 'لا يوجد'}
+
+إجابات المسعف عن حالة المريض الآن:
+${answerSummary}
+
+المطلوب منك:
+1. التشخيص الأرجح (جملة واحدة)
+2. الإجراء الفوري خطوة بخطوة (3-4 خطوات)
+3. كلمة تصنيف الحالة من: [قلب، تنفس، نزيف، تشنج، إغماء، أخرى]
+4. هل تحتاج معلومات إضافية؟ أجب بـ "نعم" أو "لا"
+
+الصيغة المطلوبة بالضبط:
+التشخيص: ...
+الإجراء: ...
+التصنيف: ...
+معلومات_إضافية: نعم/لا`;
+
+    try {
+        const result = await askGroq(prompt);
+        lastAnalysis = result;
+        aiText.innerText = result;
+
+        // استخرج التصنيف للوسائط
+        const catMatch = result.match(/التصنيف:\s*(\S+)/);
+        const category = catMatch ? catMatch[1].trim() : 'default';
+        showMedia(category);
+
+        // هل يحتاج معلومات إضافية؟
+        const needsMore = result.includes('معلومات_إضافية: نعم') || result.includes('معلومات_إضافية:نعم');
+        if(needsMore && !isExtra) showExtraQuestions();
+
+    } catch(e) {
+        aiText.innerText = "⚠️ تعذّر الاتصال بـ AI. " + e.message;
+    }
+}
+
+// ===== عرض الوسائط =====
+function showMedia(category) {
+    const mediaKey = Object.keys(MEDIA_DB).find(k => category.includes(k)) || 'default';
+    const media = MEDIA_DB[mediaKey];
+    const grid = document.getElementById("mediaGrid");
+    const l = lang();
+
+    grid.innerHTML = '';
+
+    // صور
+    media.imgs.forEach(src => {
+        const img = document.createElement('img');
+        img.src = src; img.className = 'media-img';
+        img.onclick = () => openModal(src);
+        grid.appendChild(img);
+    });
+
+    // يوتيوب
+    media.yt.forEach(v => {
+        const div = document.createElement('div');
+        div.className = 'yt-thumb';
+        div.innerHTML = `<img src="https://img.youtube.com/vi/${v.id}/mqdefault.jpg" alt="${v.t}"><div class="play-icon">▶️</div>`;
+        div.onclick = () => window.open(`https://www.youtube.com/watch?v=${v.id}`,'_blank');
+        div.title = v.t;
+        grid.appendChild(div);
+    });
+
+    document.getElementById("mediaBox").style.display="block";
+}
+
+// ===== أسئلة إضافية =====
+function showExtraQuestions() {
+    const l = lang();
+    const extraQs = [
+        { id:"eq1", text: l==='ar'?"متى بدأت الأعراض؟":"When did symptoms start?", options: l==='ar'?["منذ دقائق","منذ ساعة","منذ أكثر من ساعة","لا أعلم"]:["Minutes ago","1 hour ago","Over an hour","Unknown"] },
+        { id:"eq2", text: l==='ar'?"هل يعاني من حساسية لأدوية؟":"Any medication allergies?", options: l==='ar'?["نعم","لا","لا أعلم"]:["Yes","No","Unknown"] },
+        { id:"eq3", text: l==='ar'?"هل أخذ أي دواء اليوم؟":"Took any medication today?", options: l==='ar'?["نعم","لا","لا أعلم"]:["Yes","No","Unknown"] }
+    ];
+    renderDiagForm(extraQs, 'extraDiagForm', extraAnswers);
+    document.getElementById("extraQBox").style.display="block";
+    document.getElementById("reAnalyzeBtn").onclick = () => runAnalysis(true);
+}
+
+// ===== Modal الصور =====
+window.openModal = (src) => {
+    document.getElementById("modalImg").src = src;
+    document.getElementById("imgModal").classList.add("open");
+};
+window.closeModal = () => document.getElementById("imgModal").classList.remove("open");
+
+// ===== حفظ التقرير =====
+window.saveAndExit = async () => {
+    const l = lang();
+    const diagnosis = lastAnalysis || document.getElementById("aiAnalysisText").innerText;
+    try {
+        await push(ref(db,"reports"),{
+            patientName, diagnosis,
+            timestamp: new Date().toISOString(),
+            status:"قيد الانتظار"
+        });
+        alert(T[l].alert_success);
+        location.href="index.html";
+    } catch(e){ alert("Error saving report"); }
+};
 </script>
 </body>
 </html>
