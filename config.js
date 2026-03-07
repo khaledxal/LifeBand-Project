@@ -1,0 +1,1 @@
+window.GEMINI_KEY = "AIzaSyDV8TP7r83GHPMAo7ocLmykGFHYe2bUzgA";
