@@ -9,7 +9,7 @@ export async function askGemini(prompt) {
     const GEMINI_API_KEY = window.GEMINI_KEY || "";
 
     // التحقق من وجود المفتاح
-    if (!GEMINI_API_KEY || GEMINI_API_KEY === "YOUR_GEMINI_API_KEY_HERE") {
+    if (!GEMINI_API_KEY || GEMINI_API_KEY === "AIzaSyDoXNIIThBoZwURzG3phlOie8D12_Ot-74") {
         throw new Error(
             "مفتاح Gemini API غير موجود. يرجى:\n" +
             "1. الحصول على مفتاح مجاني من: https://aistudio.google.com/app/apikey\n" +
