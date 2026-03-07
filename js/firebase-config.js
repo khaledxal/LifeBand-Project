@@ -13,15 +13,6 @@ const firebaseConfig = {
   measurementId: "G-1PL4ZTZ1N3"
 };
 
-
-{
-  "hosting": { "public": "." },
-  "functions": {
-    "source": "functions",
-    "runtime": "nodejs20"
-  }
-}
-
 const app = initializeApp(firebaseConfig);
 export const db = getDatabase(app);
 export const auth = getAuth(app);
