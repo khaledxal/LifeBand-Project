@@ -1,14 +1,25 @@
-// LifeBand AI Module - Powered by Google Gemini (Free)
+// LifeBand AI Module - Powered by Google Gemini
 // ⚠️ المفتاح يُقرأ من ملف config.js المحلي فقط - لا يُرفع على GitHub أبداً
-
-// يقرأ المفتاح من window.GEMINI_KEY الذي يُعرَّف في config.js (مستبعد من git)
-const GEMINI_API_KEY = window.GEMINI_KEY || "";
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
 
 /**
  * دالة عامة لاستدعاء Gemini API
  */
 export async function askGemini(prompt) {
+    // قراءة المفتاح من config.js
+    const GEMINI_API_KEY = window.GEMINI_KEY || "";
+
+    // التحقق من وجود المفتاح
+    if (!GEMINI_API_KEY || GEMINI_API_KEY === "YOUR_GEMINI_API_KEY_HERE") {
+        throw new Error(
+            "مفتاح Gemini API غير موجود. يرجى:\n" +
+            "1. الحصول على مفتاح مجاني من: https://aistudio.google.com/app/apikey\n" +
+            "2. فتح ملف config.js\n" +
+            "3. استبدال YOUR_GEMINI_API_KEY_HERE بمفتاحك الحقيقي"
+        );
+    }
+
+    const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+
     const response = await fetch(GEMINI_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -17,8 +28,24 @@ export async function askGemini(prompt) {
             generationConfig: { maxOutputTokens: 500, temperature: 0.4 }
         })
     });
+
+    if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        const errMsg = errData?.error?.message || `HTTP ${response.status}`;
+
+        if (response.status === 400) {
+            throw new Error("مفتاح API غير صالح. تأكد من المفتاح في ملف config.js");
+        } else if (response.status === 403) {
+            throw new Error("تم رفض المفتاح (403). تأكد أن Gemini API مفعّل في مشروعك على Google Cloud.\nالرسالة: " + errMsg);
+        } else if (response.status === 429) {
+            throw new Error("تجاوزت حد الطلبات المسموح (429). انتظر قليلاً ثم حاول مجدداً.");
+        } else {
+            throw new Error(`خطأ من Gemini API (${response.status}): ${errMsg}`);
+        }
+    }
+
     const data = await response.json();
-    return data.candidates?.[0]?.content?.parts?.[0]?.text || "لم يتم الحصول على رد";
+    return data.candidates?.[0]?.content?.parts?.[0]?.text || "لم يتم الحصول على رد من AI";
 }
 
 /**
