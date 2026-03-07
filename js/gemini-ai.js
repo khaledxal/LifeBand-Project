@@ -1,31 +1,66 @@
 // LifeBand AI Module
 // ✅ المفتاح يأتي تلقائياً من GitHub Actions - لا يظهر في الكود أبداً
 
-export async function askGemini(prompt) {
+// Cache to avoid repeated identical requests
+const _cache = new Map();
+// Simple queue to space out requests
+let _lastCallTime = 0;
+const MIN_INTERVAL_MS = 1500; // minimum 1.5s between calls
+
+async function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+export async function askGemini(prompt, retries = 3) {
     const GEMINI_API_KEY = window.GEMINI_KEY || "";
 
     if (!GEMINI_API_KEY) {
         throw new Error("⚠️ مفتاح Gemini غير متوفر");
     }
 
+    // Return cached result if same prompt was asked recently
+    if (_cache.has(prompt)) return _cache.get(prompt);
+
+    // Throttle: ensure minimum gap between calls
+    const now = Date.now();
+    const gap = now - _lastCallTime;
+    if (gap < MIN_INTERVAL_MS) await sleep(MIN_INTERVAL_MS - gap);
+    _lastCallTime = Date.now();
+
     const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
 
-    const response = await fetch(GEMINI_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { maxOutputTokens: 500, temperature: 0.4 }
-        })
-    });
+    for (let attempt = 1; attempt <= retries; attempt++) {
+        const response = await fetch(GEMINI_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: prompt }] }],
+                generationConfig: { maxOutputTokens: 500, temperature: 0.4 }
+            })
+        });
 
-    if (!response.ok) {
-        const err = await response.json().catch(() => ({}));
-        throw new Error(err?.error?.message || `خطأ ${response.status}`);
+        if (response.status === 429) {
+            // Rate limited — wait longer each retry (exponential backoff)
+            const waitMs = attempt * 5000;
+            console.warn(`Gemini rate limit hit. Retrying in ${waitMs/1000}s... (attempt ${attempt}/${retries})`);
+            if (attempt < retries) { await sleep(waitMs); continue; }
+            throw new Error("⚠️ الخادم مشغول حالياً، يرجى المحاولة بعد قليل.");
+        }
+
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            throw new Error(err?.error?.message || `خطأ ${response.status}`);
+        }
+
+        const data = await response.json();
+        const result = data.candidates?.[0]?.content?.parts?.[0]?.text || "لم يتم الحصول على رد";
+        
+        // Cache the result for 5 minutes
+        _cache.set(prompt, result);
+        setTimeout(() => _cache.delete(prompt), 5 * 60 * 1000);
+        
+        return result;
     }
-
-    const data = await response.json();
-    return data.candidates?.[0]?.content?.parts?.[0]?.text || "لم يتم الحصول على رد";
 }
 
 /** 1. تحليل الحالة الطبية عند الطوارئ */
