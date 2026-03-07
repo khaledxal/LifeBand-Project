@@ -1,48 +1,48 @@
-// LifeBand AI Module
+// LifeBand AI Module - Powered by Groq
 // ✅ المفتاح يأتي تلقائياً من GitHub Actions - لا يظهر في الكود أبداً
 
-// Cache to avoid repeated identical requests
 const _cache = new Map();
-// Simple queue to space out requests
 let _lastCallTime = 0;
-const MIN_INTERVAL_MS = 1500; // minimum 1.5s between calls
+const MIN_INTERVAL_MS = 500;
 
 async function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-export async function askGemini(prompt, retries = 3) {
-    const GEMINI_API_KEY = window.GEMINI_KEY || "";
+export async function askGroq(prompt, retries = 3) {
+    const GROQ_API_KEY = window.GROQ_KEY || "";
 
-    if (!GEMINI_API_KEY) {
-        throw new Error("⚠️ مفتاح Gemini غير متوفر");
+    if (!GROQ_API_KEY) {
+        throw new Error("⚠️ مفتاح Groq غير متوفر");
     }
 
-    // Return cached result if same prompt was asked recently
     if (_cache.has(prompt)) return _cache.get(prompt);
 
-    // Throttle: ensure minimum gap between calls
     const now = Date.now();
     const gap = now - _lastCallTime;
     if (gap < MIN_INTERVAL_MS) await sleep(MIN_INTERVAL_MS - gap);
     _lastCallTime = Date.now();
 
-    const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+    const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
 
     for (let attempt = 1; attempt <= retries; attempt++) {
-        const response = await fetch(GEMINI_URL, {
+        const response = await fetch(GROQ_URL, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${GROQ_API_KEY}`
+            },
             body: JSON.stringify({
-                contents: [{ parts: [{ text: prompt }] }],
-                generationConfig: { maxOutputTokens: 500, temperature: 0.4 }
+                model: "llama-3.3-70b-versatile",
+                messages: [{ role: "user", content: prompt }],
+                max_tokens: 500,
+                temperature: 0.4
             })
         });
 
         if (response.status === 429) {
-            // Rate limited — wait longer each retry (exponential backoff)
-            const waitMs = attempt * 5000;
-            console.warn(`Gemini rate limit hit. Retrying in ${waitMs/1000}s... (attempt ${attempt}/${retries})`);
+            const waitMs = attempt * 3000;
+            console.warn(`Groq rate limit hit. Retrying in ${waitMs/1000}s... (attempt ${attempt}/${retries})`);
             if (attempt < retries) { await sleep(waitMs); continue; }
             throw new Error("⚠️ الخادم مشغول حالياً، يرجى المحاولة بعد قليل.");
         }
@@ -53,12 +53,11 @@ export async function askGemini(prompt, retries = 3) {
         }
 
         const data = await response.json();
-        const result = data.candidates?.[0]?.content?.parts?.[0]?.text || "لم يتم الحصول على رد";
-        
-        // Cache the result for 5 minutes
+        const result = data.choices?.[0]?.message?.content || "لم يتم الحصول على رد";
+
         _cache.set(prompt, result);
         setTimeout(() => _cache.delete(prompt), 5 * 60 * 1000);
-        
+
         return result;
     }
 }
@@ -78,7 +77,7 @@ export async function analyzeEmergency(patientData) {
 3. تنبيه طبي مهم خاص بحالته
 
 أجب بالعربية بشكل واضح وعملي.`;
-    return await askGemini(prompt);
+    return await askGroq(prompt);
 }
 
 /** 2. اقتراح تشخيص للمسعف في البلاغات */
@@ -90,7 +89,7 @@ export async function suggestDiagnosis(patientName, diseases, bloodType) {
 - الإجراء الميداني الفوري
 
 أجب بالعربية مباشرة بدون مقدمات.`;
-    return await askGemini(prompt);
+    return await askGroq(prompt);
 }
 
 /** 3. مساعد طبي ذكي (chatbot) */
@@ -103,7 +102,7 @@ export async function medicalChatbot(userMessage, patientData = null) {
 سؤال المستخدم: "${userMessage}"
 
 أجب بالعربية بشكل مفيد وموجز (3-4 جمل). تذكر دائماً أن تنصح بمراجعة طبيب عند الضرورة.`;
-    return await askGemini(prompt);
+    return await askGroq(prompt);
 }
 
 /** 4. نصائح طبية مخصصة بالـ AI */
@@ -114,5 +113,5 @@ export async function getPersonalizedTips(patientData) {
 
 النصائح يجب أن تكون عملية ومختصرة (جملة لكل نصيحة).
 الصيغة: نقطة، نقطة، نقطة - بالعربية فقط.`;
-    return await askGemini(prompt);
-  }
+    return await askGroq(prompt);
+}

@@ -14,9 +14,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Inject Gemini Key into config.js
+      - name: Inject Groq Key into config.js
         run: |
-          echo "window.GEMINI_KEY = \"${{ secrets.GEMINI_KEY }}\";" > config.js
+          echo "window.GROQ_KEY = \"${{ secrets.GROQ_KEY }}\";" > config.js
 
       - name: Commit config.js to main
         run: |
