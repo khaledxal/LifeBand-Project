@@ -47,6 +47,18 @@
                         </select>
                     </div>
 
+                    <!-- ✅ حقل واتساب جهة الطوارئ -->
+                    <div class="input-group" style="margin-top: 15px;">
+                        <label data-i18n="label_wa_contact">📱 رقم واتساب جهة الطوارئ:</label>
+                        <input type="tel" id="regWaContact" class="input-style" 
+                               placeholder="966XXXXXXXXX (بدون + أو 00)" 
+                               pattern="[0-9]{9,15}"
+                               title="أدخل الرقم الدولي بدون + مثال: 966501234567">
+                        <small style="color:var(--text-muted); font-size:12px; margin-top:4px; display:block;" data-i18n="hint_wa">
+                            مثال: 966501234567 — سيصلهم تنبيه واتساب فوري عند فتح ملفك في الطوارئ
+                        </small>
+                    </div>
+
                     <div class="input-group" style="margin-top: 15px;">
                         <label data-i18n="label_type">نوع الحساب:</label>
                         <select id="regUserType" class="input-style" required>
@@ -57,10 +69,10 @@
 
                     <div class="input-group" style="margin-top: 15px;">
                         <label data-i18n="label_pass">كلمة المرور:</label>
-                        <input type="password" id="regPass" class="input-style" placeholder="********" required>
+                        <input type="password" id="regPass" class="input-style" placeholder="********" required minlength="6">
                     </div>
 
-                    <button type="submit" class="main-btn" style="margin-top: 30px;" data-i18n="btn_reg">إنشاء الحساب وبناء الملف</button>
+                    <button type="submit" id="regBtn" class="main-btn" style="margin-top: 30px;" data-i18n="btn_reg">إنشاء الحساب وبناء الملف</button>
                 </form>
                 
                 <p style="text-align: center; margin-top: 20px; font-size: 14px;">
@@ -78,47 +90,52 @@
         import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { ref, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // 1. حقن الهيكل الموحد (الهيدر والفوتر)
         injectLayout();
 
-        // 2. منطق التسجيل وحفظ البيانات
         document.getElementById('regForm').onsubmit = async (e) => {
             e.preventDefault();
             const lang = localStorage.getItem('preferred_lang') || 'ar';
+            const btn = document.getElementById('regBtn');
+
+            // ✅ تعطيل الزر أثناء المعالجة (يمنع الضغط المزدوج)
+            btn.disabled = true;
+            btn.innerText = lang === 'ar' ? '⏳ جاري الإنشاء...' : '⏳ Creating...';
             
-            const email = document.getElementById('regEmail').value;
-            const pass = document.getElementById('regPass').value;
-            const name = document.getElementById('regName').value;
-            const idNo = document.getElementById('regIdNo').value;
+            const email     = document.getElementById('regEmail').value.trim();
+            const pass      = document.getElementById('regPass').value;
+            const name      = document.getElementById('regName').value.trim();
+            const idNo      = document.getElementById('regIdNo').value.trim();
             const bloodType = document.getElementById('regBloodType').value;
-            const userType = document.getElementById('regUserType').value;
+            const userType  = document.getElementById('regUserType').value;
+            const waContact = document.getElementById('regWaContact').value.trim();
 
             try {
                 const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
                 const user = userCredential.user;
 
-                // حفظ بيانات المستخدم الإضافية في Realtime Database
                 await set(ref(db, 'users/' + user.uid), {
-                    name: name,
-                    email: email,
-                    idNo: idNo,
-                    bloodType: bloodType,
-                    role: userType,
-                    createdAt: new Date().toISOString()
+                    name:       name,
+                    email:      email,
+                    idNo:       idNo,
+                    bloodType:  bloodType,
+                    role:       userType,
+                    waContact:  waContact || null,   // ✅ رقم واتساب جهة الطوارئ
+                    diseases:   [],
+                    createdAt:  new Date().toISOString()
                 });
 
                 alert(lang === 'ar' ? "تم إنشاء الحساب بنجاح! 🎉" : "Account created successfully! 🎉");
 
-                // التوجيه التلقائي بناءً على نوع الحساب
-                if (userType === 'admin') {
-                    window.location.href = "admin.html";
-                } else if (userType === 'rescuer') {
+                if (userType === 'rescuer') {
                     window.location.href = "index.html";
                 } else {
                     window.location.href = `profile.html?id=${user.uid}`;
                 }
 
             } catch (error) {
+                // ✅ إعادة تفعيل الزر عند الخطأ
+                btn.disabled = false;
+                btn.innerText = lang === 'ar' ? 'إنشاء الحساب وبناء الملف' : 'Create Account';
                 alert(lang === 'ar' ? "خطأ في التسجيل: " + error.message : "Registration Error: " + error.message);
             }
         };

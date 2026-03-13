@@ -5,10 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LifeBand - Emergency</title>
     <style>
-        :root { --primary: #ef4444; --glass: rgba(255,255,255,0.92); --text-main: #333; --accent: #6366f1; }
+        :root { --primary: #ef4444; --glass: rgba(255,255,255,0.92); --text-main: #333; --accent: #6366f1; --wa-green: #25D366; }
+        [data-theme="dark"] { --glass: rgba(30,32,40,0.95); --text-main: #e2e8f0; }
+        * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: linear-gradient(135deg,#fee2e2,#f0f2f5); margin: 0; min-height: 100vh; }
-        .emergency-container { display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 20px; position: relative; }
-        .lang-toggle { position: fixed; top: 20px; right: 20px; background: var(--glass); border: 1px solid #ddd; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; font-weight: bold; z-index: 100; }
+        [data-theme="dark"] body { background: linear-gradient(135deg,#1a0a0a,#0f1020); }
+        .emergency-container { display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 20px; }
+        .lang-toggle { position: fixed; top: 20px; right: 20px; background: var(--glass); border: 1px solid #ddd; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; font-weight: bold; z-index: 100; color: var(--text-main); }
         [dir="ltr"] .lang-toggle { right: auto; left: 20px; }
         .glass-card { background: var(--glass); padding: 30px; border-radius: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.12); width: 100%; max-width: 560px; margin-top: 20px; }
         .hold-circle { position: relative; width: 180px; height: 180px; cursor: pointer; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 2px solid #ddd; margin: 0 auto; user-select: none; }
@@ -16,51 +19,74 @@
         .progress-ring__circle { stroke-dasharray: 565.48; stroke-dashoffset: 565.48; transition: stroke-dashoffset 0.1s linear; }
         .loader { border: 3px solid #f3f3f3; border-top: 3px solid var(--primary); border-radius: 50%; width: 28px; height: 28px; animation: spin 1s linear infinite; margin: 20px auto; display: none; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .main-btn { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; margin-top: 10px; font-size: 15px; transition: 0.2s; }
-        .main-btn:hover { opacity: 0.88; }
-
-        /* ===== نظام الأسئلة ===== */
+        .main-btn { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; margin-top: 10px; font-size: 15px; transition: 0.2s; font-family: inherit; }
+        .main-btn:hover:not(:disabled) { opacity: 0.88; }
+        .main-btn:disabled { opacity: 0.55; cursor: not-allowed; }
         #diagSection { display: none; }
         .diag-form { text-align: right; }
         .diag-q { margin-bottom: 18px; }
         .diag-q label { font-weight: bold; font-size: 14px; color: #444; display: block; margin-bottom: 6px; }
         .diag-q label .q-num { background: var(--primary); color: white; border-radius: 50%; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; margin-left: 6px; }
         .diag-options { display: flex; flex-wrap: wrap; gap: 8px; }
-        .diag-options button {
-            padding: 8px 16px; border-radius: 20px; border: 2px solid #e5e7eb;
-            background: white; cursor: pointer; font-size: 13px; transition: 0.2s;
-            font-family: inherit;
-        }
+        .diag-options button { padding: 8px 16px; border-radius: 20px; border: 2px solid #e5e7eb; background: white; cursor: pointer; font-size: 13px; transition: 0.2s; font-family: inherit; }
         .diag-options button.selected { background: var(--primary); color: white; border-color: var(--primary); }
         .diag-options button:hover:not(.selected) { border-color: var(--primary); color: var(--primary); }
-
-        /* ===== نتيجة التحليل ===== */
         .result-box { background: rgba(16,185,129,0.08); padding: 18px; border-radius: 15px; border-right: 5px solid #10b981; text-align: right; margin-bottom: 12px; }
         .ai-box { background: rgba(99,102,241,0.07); border: 1px solid rgba(99,102,241,0.25); border-right: 5px solid var(--accent); padding: 18px; border-radius: 15px; margin-bottom: 12px; text-align: right; }
         .ai-box h4 { color: var(--accent); margin: 0 0 10px; display: flex; align-items: center; gap: 6px; }
-        #aiAnalysisText { font-size: 14px; line-height: 1.9; white-space: pre-line; }
-
-        /* ===== وسائط داعمة ===== */
+        #aiAnalysisText { font-size: 14px; line-height: 1.9; white-space: pre-line; color: var(--text-main); }
         .media-box { margin-top: 15px; }
-        .media-box h4 { color: #374151; font-size: 14px; margin-bottom: 10px; }
         .media-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px,1fr)); gap: 10px; }
-        .media-img { width: 100%; height: 100px; object-fit: cover; border-radius: 10px; cursor: pointer; border: 2px solid transparent; transition: 0.2s; }
-        .media-img:hover { border-color: var(--accent); }
+        .media-img { width: 100%; height: 100px; object-fit: cover; border-radius: 10px; cursor: pointer; }
         .yt-thumb { position: relative; cursor: pointer; border-radius: 10px; overflow: hidden; }
         .yt-thumb img { width: 100%; height: 100px; object-fit: cover; display: block; }
         .yt-thumb .play-icon { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.35); font-size: 32px; }
-        .yt-thumb:hover .play-icon { background: rgba(0,0,0,0.55); }
-
-        /* ===== Modal للصور ===== */
         #imgModal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:999; align-items:center; justify-content:center; }
         #imgModal.open { display:flex; }
         #imgModal img { max-width:90vw; max-height:90vh; border-radius:12px; }
         #imgModal span { position:absolute; top:20px; right:25px; color:white; font-size:30px; cursor:pointer; }
-
         .step-indicator { display: flex; justify-content: center; gap: 8px; margin-bottom: 20px; }
         .step-dot { width: 10px; height: 10px; border-radius: 50%; background: #e5e7eb; transition: 0.3s; }
         .step-dot.active { background: var(--primary); transform: scale(1.3); }
         .step-dot.done { background: #10b981; }
+
+        /* ✅ ميزة الواتساب */
+        .wa-section {
+            background: rgba(37,211,102,0.06);
+            border: 1px solid rgba(37,211,102,0.25);
+            border-radius: 16px;
+            padding: 18px;
+            margin-bottom: 12px;
+        }
+        .wa-section h4 { color: var(--wa-green); margin: 0 0 12px; display: flex; align-items: center; gap: 8px; font-size: 15px; }
+        .wa-contact-info { font-size: 13px; color: var(--text-main); opacity: 0.8; margin-bottom: 12px; }
+        .wa-msg-preview {
+            background: rgba(37,211,102,0.08);
+            border-radius: 12px;
+            padding: 12px;
+            font-size: 12px;
+            color: var(--text-main);
+            white-space: pre-line;
+            line-height: 1.7;
+            margin-bottom: 12px;
+            max-height: 160px;
+            overflow-y: auto;
+            border: 1px solid rgba(37,211,102,0.15);
+        }
+        .wa-btn { background: var(--wa-green) !important; }
+        .wa-btn:hover { background: #1da851 !important; }
+        .wa-sent-badge {
+            display: none;
+            background: rgba(37,211,102,0.12);
+            border: 1px solid rgba(37,211,102,0.3);
+            border-radius: 8px;
+            padding: 8px 14px;
+            font-size: 13px;
+            color: #15803d;
+            text-align: center;
+            margin-top: 8px;
+        }
+        .wa-sent-badge.show { display: block; }
     </style>
 </head>
 <body>
@@ -84,16 +110,13 @@
     <div id="diagSection" class="glass-card">
         <h3 id="patientNameDisplay" style="color:var(--primary);text-align:center;margin-bottom:5px;"></h3>
         <p style="text-align:center;font-size:13px;opacity:0.6;margin-bottom:20px;" data-i18n="diag_sub">أجب على الأسئلة لتحديد الحالة بدقة</p>
-
         <div class="step-indicator" id="stepDots"></div>
         <div id="loader" class="loader"></div>
-
         <div class="diag-form" id="diagForm"></div>
-
         <button id="analyzeBtn" class="main-btn" style="margin-top:20px;display:none;" data-i18n="btn_analyze">🔍 تحليل الحالة بالذكاء الاصطناعي</button>
     </div>
 
-    <!-- الخطوة 3: النتيجة -->
+    <!-- الخطوة 3: النتيجة + واتساب -->
     <div id="resultSection" class="glass-card" style="display:none;">
         <h3 id="resultPatientName" style="color:var(--primary);text-align:center;margin-bottom:15px;"></h3>
 
@@ -106,27 +129,42 @@
             <h4><span>🤖</span> <span data-i18n="ai_analysis_title">تحليل الذكاء الاصطناعي</span></h4>
             <div id="aiAnalysisText"><span style="opacity:0.5;">جاري التحليل...</span></div>
             <div class="media-box" id="mediaBox" style="display:none;">
-                <h4 data-i18n="media_title">📚 وسائط مساعدة:</h4>
+                <h4 style="font-size:14px;margin-bottom:10px;" data-i18n="media_title">📚 وسائط مساعدة:</h4>
                 <div class="media-grid" id="mediaGrid"></div>
             </div>
         </div>
 
-        <!-- أسئلة إضافية إذا ما توصل لحل -->
+        <!-- ✅ قسم إرسال واتساب -->
+        <div class="wa-section" id="waSection">
+            <h4>
+                <span style="font-size:20px;">📱</span>
+                <span data-i18n="wa_title">إرسال تنبيه واتساب لجهة الطوارئ</span>
+            </h4>
+            <div class="wa-contact-info" id="waContactInfo"></div>
+            <div class="wa-msg-preview" id="waMsgPreview"></div>
+            <button id="sendWaBtn" class="main-btn wa-btn" data-i18n="btn_send_wa">
+                📲 فتح واتساب وإرسال التنبيه
+            </button>
+            <div class="wa-sent-badge" id="waSentBadge" data-i18n="wa_sent_ok">
+                ✅ تم فتح واتساب — تأكد من الإرسال
+            </div>
+        </div>
+
+        <!-- أسئلة إضافية -->
         <div id="extraQBox" style="display:none; margin-bottom:12px;">
-            <div class="ai-box" style="border-color:#f59e0b; border-right-color:#f59e0b; background:rgba(245,158,11,0.07);">
+            <div class="ai-box" style="border-color:#f59e0b;border-right-color:#f59e0b;background:rgba(245,158,11,0.07);">
                 <h4 style="color:#f59e0b;">⚠️ <span data-i18n="extra_q_title">يحتاج معلومات إضافية</span></h4>
                 <div class="diag-form" id="extraDiagForm"></div>
                 <button id="reAnalyzeBtn" class="main-btn" style="background:#f59e0b;margin-top:10px;" data-i18n="btn_reanalyze">🔄 إعادة التحليل</button>
             </div>
         </div>
 
-        <button onclick="saveAndExit()" class="main-btn" style="background:#10b981;" data-i18n="btn_save_exit">✅ حفظ التقرير وإنهاء</button>
+        <button id="saveExitBtn" class="main-btn" style="background:#10b981;" data-i18n="btn_save_exit">✅ حفظ التقرير وإنهاء</button>
         <button onclick="location.href='index.html'" class="main-btn" style="background:#6b7280;" data-i18n="btn_cancel">❌ إلغاء والعودة</button>
     </div>
 
 </div>
 
-<!-- Modal للصور -->
 <div id="imgModal" onclick="closeModal()">
     <span onclick="closeModal()">✕</span>
     <img id="modalImg" src="" alt="">
@@ -134,6 +172,7 @@
 
 <script src="config.js"></script>
 <script type="module">
+// ✅ مسارات صحيحة
 import { db } from './js/firebase-config.js';
 import { ref, get, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 import { askGroq } from './js/gemini-ai.js';
@@ -149,7 +188,13 @@ const T = {
         extra_q_title:"يحتاج معلومات إضافية", btn_reanalyze:"🔄 إعادة التحليل",
         btn_save_exit:"✅ حفظ التقرير وإنهاء", btn_cancel:"❌ إلغاء والعودة",
         alert_success:"✅ تم حفظ البلاغ بنجاح", lang_label:"EN",
-        file_prefix:"ملف: ", loading:"جاري التحليل..."
+        file_prefix:"ملف: ", loading:"جاري التحليل...",
+        // ✅ واتساب
+        wa_title:"إرسال تنبيه واتساب لجهة الطوارئ",
+        btn_send_wa:"📲 فتح واتساب وإرسال التنبيه",
+        wa_sent_ok:"✅ تم فتح واتساب — تأكد من الإرسال",
+        wa_no_contact:"⚠️ لا توجد جهة طوارئ مسجلة. يمكن للمريض إضافتها من ملفه الشخصي.",
+        wa_contact_label:"جهة الطوارئ: "
     },
     en: {
         em_title:"LifeBand Emergency System", em_hold:"Hold to<br>open file",
@@ -160,7 +205,12 @@ const T = {
         extra_q_title:"Needs More Info", btn_reanalyze:"🔄 Re-analyze",
         btn_save_exit:"✅ Save & Exit", btn_cancel:"❌ Cancel",
         alert_success:"✅ Report saved", lang_label:"AR",
-        file_prefix:"File: ", loading:"Analyzing..."
+        file_prefix:"File: ", loading:"Analyzing...",
+        wa_title:"Send WhatsApp Emergency Alert",
+        btn_send_wa:"📲 Open WhatsApp & Send Alert",
+        wa_sent_ok:"✅ WhatsApp opened — please confirm send",
+        wa_no_contact:"⚠️ No emergency contact registered. Patient can add one from their profile.",
+        wa_contact_label:"Emergency Contact: "
     }
 };
 
@@ -184,16 +234,15 @@ const QUESTIONS = {
 
 // ===== وسائط طبية =====
 const MEDIA_DB = {
-    "قلب":{ imgs:["https://images.pexels.com/photos/4386466/pexels-photo-4386466.jpeg?w=400","https://images.pexels.com/photos/7659564/pexels-photo-7659564.jpeg?w=400"], yt:[{id:"587-cZxLvss",t:"CPR - الإنعاش القلبي"},{id:"n4k7zJnTl78",t:"الذبحة الصدرية"}] },
-    "تنفس":{ imgs:["https://images.pexels.com/photos/8942991/pexels-photo-8942991.jpeg?w=400"], yt:[{id:"hizBvK8bA6E",t:"انسداد مجرى الهواء - مناورة هيملك"},{id:"0Ks2KRVMQME",t:"التنفس الاصطناعي"}] },
-    "نزيف":{ imgs:["https://images.pexels.com/photos/6823568/pexels-photo-6823568.jpeg?w=400","https://images.pexels.com/photos/4021775/pexels-photo-4021775.jpeg?w=400"], yt:[{id:"IgCSSbF6hmE",t:"إيقاف النزيف الشديد"},{id:"O9wTr_sMv8k",t:"ضمادة الجرح"}] },
-    "تشنج":{ imgs:["https://images.pexels.com/photos/3807571/pexels-photo-3807571.jpeg?w=400"], yt:[{id:"0Hf3ZNFCzLA",t:"التعامل مع نوبة الصرع"}] },
-    "إغماء":{ imgs:["https://images.pexels.com/photos/263337/pexels-photo-263337.jpeg?w=400"], yt:[{id:"4PqsEVgD1gg",t:"وضعية الإفاقة - الإسعاف"}] },
-    "default":{ imgs:["https://images.pexels.com/photos/1170979/pexels-photo-1170979.jpeg?w=400"], yt:[{id:"587-cZxLvss",t:"أساسيات الإسعافات الأولية"}] }
+    "قلب":    { imgs:["https://images.pexels.com/photos/4386466/pexels-photo-4386466.jpeg?w=400"], yt:[{id:"587-cZxLvss",t:"CPR الإنعاش القلبي"},{id:"n4k7zJnTl78",t:"الذبحة الصدرية"}] },
+    "تنفس":   { imgs:["https://images.pexels.com/photos/8942991/pexels-photo-8942991.jpeg?w=400"], yt:[{id:"hizBvK8bA6E",t:"مناورة هيملك"},{id:"0Ks2KRVMQME",t:"التنفس الاصطناعي"}] },
+    "نزيف":   { imgs:["https://images.pexels.com/photos/6823568/pexels-photo-6823568.jpeg?w=400"], yt:[{id:"IgCSSbF6hmE",t:"إيقاف النزيف"},{id:"O9wTr_sMv8k",t:"ضمادة الجرح"}] },
+    "تشنج":   { imgs:["https://images.pexels.com/photos/3807571/pexels-photo-3807571.jpeg?w=400"], yt:[{id:"0Hf3ZNFCzLA",t:"التعامل مع نوبة الصرع"}] },
+    "إغماء":  { imgs:["https://images.pexels.com/photos/263337/pexels-photo-263337.jpeg?w=400"], yt:[{id:"4PqsEVgD1gg",t:"وضعية الإفاقة"}] },
+    "default":{ imgs:["https://images.pexels.com/photos/1170979/pexels-photo-1170979.jpeg?w=400"], yt:[{id:"587-cZxLvss",t:"الإسعافات الأولية"}] }
 };
 
-// ===== متغيرات عامة =====
-let patientData = {}, patientName = "", answers = {}, extraAnswers = {}, lastAnalysis = "";
+let patientData = {}, patientName = "", patientWaContact = "", answers = {}, extraAnswers = {}, lastAnalysis = "";
 const lang = () => localStorage.getItem('preferred_lang') || 'ar';
 
 // ===== تهيئة اللغة =====
@@ -202,7 +251,8 @@ function applyLang(l) {
     document.documentElement.dir = l==='ar'?'rtl':'ltr';
     document.querySelectorAll('[data-i18n]').forEach(el => {
         const k = el.getAttribute('data-i18n');
-        if(k==='em_hold') el.innerHTML = T[l][k]; else if(T[l][k]) el.innerText = T[l][k];
+        if(k==='em_hold') el.innerHTML = T[l][k];
+        else if(T[l][k]) el.innerText = T[l][k];
     });
     document.getElementById('langBtn').innerText = T[l].lang_label;
     localStorage.setItem('preferred_lang', l);
@@ -212,7 +262,7 @@ applyLang(lang());
 
 // ===== زر الضغط المطوّل =====
 let progress=0, holdTimer;
-const circle = document.getElementById("progressCircle");
+const circle  = document.getElementById("progressCircle");
 const holdBtn = document.getElementById("holdBtn");
 
 const startHold = e => {
@@ -221,7 +271,7 @@ const startHold = e => {
         progress += 2;
         circle.style.strokeDashoffset = 565.48 - (progress/100)*565.48;
         if(progress>=100){ clearInterval(holdTimer); loadPatientAndShowDiag(); }
-    },30);
+    }, 30);
 };
 const cancelHold = () => { clearInterval(holdTimer); progress=0; circle.style.strokeDashoffset=565.48; };
 holdBtn.addEventListener("mousedown", startHold);
@@ -229,23 +279,26 @@ holdBtn.addEventListener("touchstart", startHold, {passive:false});
 window.addEventListener("mouseup", cancelHold);
 window.addEventListener("touchend", cancelHold);
 
-// ===== تحميل بيانات المريض وعرض الأسئلة =====
+// ===== تحميل بيانات المريض =====
 async function loadPatientAndShowDiag() {
     document.getElementById("triggerSection").style.display="none";
     document.getElementById("diagSection").style.display="block";
     document.getElementById("loader").style.display="block";
 
     const userId = new URLSearchParams(location.search).get("id");
-    if(userId) {
+    if (userId) {
         try {
-            const snap = await get(ref(db,`users/${userId}`));
-            if(snap.exists()){ patientData=snap.val(); patientName=patientData.name; }
-        } catch(e){}
+            const snap = await get(ref(db, `users/${userId}`));
+            if(snap.exists()) {
+                patientData    = snap.val();
+                patientName    = patientData.name    || "";
+                patientWaContact = patientData.waContact || "";
+            }
+        } catch(e) { console.error(e); }
     }
 
     document.getElementById("loader").style.display="none";
     document.getElementById("patientNameDisplay").innerText = T[lang()].file_prefix + (patientName || "—");
-
     renderDiagForm(QUESTIONS[lang()], 'diagForm', answers);
     renderStepDots(QUESTIONS[lang()].length);
     document.getElementById("analyzeBtn").style.display="block";
@@ -254,26 +307,22 @@ async function loadPatientAndShowDiag() {
 
 // ===== رسم الأسئلة =====
 function renderDiagForm(questions, containerId, answersObj) {
-    const form = document.getElementById(containerId);
-    form.innerHTML = questions.map((q,i) => `
-        <div class="diag-q" id="qblock_${q.id}">
+    document.getElementById(containerId).innerHTML = questions.map((q,i) => `
+        <div class="diag-q">
             <label><span class="q-num">${i+1}</span>${q.text}</label>
             <div class="diag-options" id="opts_${q.id}">
                 ${q.options.map(opt=>`
-                    <button type="button"
-                        class="${answersObj[q.id]===opt?'selected':''}"
+                    <button type="button" class="${answersObj[q.id]===opt?'selected':''}"
                         onclick="selectOption('${q.id}','${opt.replace(/'/g,"\\'")}','${containerId==='diagForm'?'main':'extra'}')">
                         ${opt}
                     </button>`).join('')}
             </div>
-        </div>
-    `).join('');
+        </div>`).join('');
 }
 
 window.selectOption = (qId, val, type) => {
     const obj = type==='main' ? answers : extraAnswers;
     obj[qId] = val;
-    const container = type==='main' ? 'diagForm' : 'extraDiagForm';
     document.querySelectorAll(`#opts_${qId} button`).forEach(b => {
         b.classList.toggle('selected', b.textContent.trim()===val);
     });
@@ -281,14 +330,12 @@ window.selectOption = (qId, val, type) => {
 };
 
 function renderStepDots(count) {
-    const dots = document.getElementById('stepDots');
-    dots.innerHTML = Array.from({length:count},(_,i)=>`<div class="step-dot" id="dot_${i}"></div>`).join('');
+    document.getElementById('stepDots').innerHTML =
+        Array.from({length:count},(_,i)=>`<div class="step-dot" id="dot_${i}"></div>`).join('');
     updateStepDots();
 }
-
 function updateStepDots() {
-    const qs = QUESTIONS[lang()];
-    qs.forEach((q,i) => {
+    QUESTIONS[lang()].forEach((q,i) => {
         const dot = document.getElementById(`dot_${i}`);
         if(!dot) return;
         if(answers[q.id]) { dot.classList.add('done'); dot.classList.remove('active'); }
@@ -308,7 +355,7 @@ async function runAnalysis(isExtra) {
     document.getElementById("mediaBox").style.display="none";
     document.getElementById("extraQBox").style.display="none";
 
-    const allAnswers = isExtra ? {...answers,...extraAnswers} : answers;
+    const allAnswers   = isExtra ? {...answers,...extraAnswers} : answers;
     const answerSummary = Object.entries(allAnswers).map(([k,v])=>`${k}: ${v}`).join('\n');
 
     const prompt = `أنت طبيب طوارئ خبير. لديك المريض التالي:
@@ -316,19 +363,13 @@ async function runAnalysis(isExtra) {
 - فصيلة الدم: ${patientData.bloodType || 'غير محدد'}
 - أمراض مزمنة: ${(patientData.diseases||[]).join('، ') || 'لا يوجد'}
 
-إجابات المسعف عن حالة المريض الآن:
+إجابات المسعف:
 ${answerSummary}
 
-المطلوب منك:
-1. التشخيص الأرجح (جملة واحدة)
-2. الإجراء الفوري خطوة بخطوة (3-4 خطوات)
-3. كلمة تصنيف الحالة من: [قلب، تنفس، نزيف، تشنج، إغماء، أخرى]
-4. هل تحتاج معلومات إضافية؟ أجب بـ "نعم" أو "لا"
-
-الصيغة المطلوبة بالضبط:
-التشخيص: ...
-الإجراء: ...
-التصنيف: ...
+المطلوب:
+التشخيص: (جملة واحدة)
+الإجراء: (3-4 خطوات)
+التصنيف: (قلب/تنفس/نزيف/تشنج/إغماء/أخرى)
 معلومات_إضافية: نعم/لا`;
 
     try {
@@ -336,47 +377,109 @@ ${answerSummary}
         lastAnalysis = result;
         aiText.innerText = result;
 
-        // استخرج التصنيف للوسائط
         const catMatch = result.match(/التصنيف:\s*(\S+)/);
-        const category = catMatch ? catMatch[1].trim() : 'default';
-        showMedia(category);
+        showMedia(catMatch ? catMatch[1] : 'default');
 
-        // هل يحتاج معلومات إضافية؟
         const needsMore = result.includes('معلومات_إضافية: نعم') || result.includes('معلومات_إضافية:نعم');
         if(needsMore && !isExtra) showExtraQuestions();
 
+        // ✅ بناء رسالة الواتساب بعد اكتمال التحليل
+        buildWhatsAppMessage(result, l);
+
     } catch(e) {
         aiText.innerText = "⚠️ تعذّر الاتصال بـ AI. " + e.message;
+        buildWhatsAppMessage("", l);
     }
 }
 
-// ===== عرض الوسائط =====
+// ===== ✅ بناء رسالة واتساب الطوارئ =====
+function buildWhatsAppMessage(aiResult, l) {
+    const waSection     = document.getElementById('waSection');
+    const waContactInfo = document.getElementById('waContactInfo');
+    const waMsgPreview  = document.getElementById('waMsgPreview');
+    const sendWaBtn     = document.getElementById('sendWaBtn');
+
+    if (!patientWaContact) {
+        waContactInfo.innerText = T[l].wa_no_contact;
+        waMsgPreview.style.display = "none";
+        sendWaBtn.style.display    = "none";
+        return;
+    }
+
+    // استخراج التشخيص من نتيجة AI
+    const diagMatch   = aiResult.match(/التشخيص:\s*(.+)/);
+    const actionMatch = aiResult.match(/الإجراء:\s*([\s\S]+?)(?:التصنيف:|$)/);
+    const diagnosis   = diagMatch  ? diagMatch[1].trim()  : (l==='ar'?'جاري التحليل':'Being analyzed');
+    const action      = actionMatch? actionMatch[1].trim(): '';
+
+    const diseases    = (patientData.diseases||[]).join('، ') || (l==='ar'?'لا يوجد':'None');
+    const timestamp   = new Date().toLocaleString(l==='ar'?'ar-SA':'en-US');
+
+    const msg = l === 'ar'
+        ? `🚨 *تنبيه طوارئ — LifeBand*
+
+👤 المريض: *${patientName || '—'}*
+🩸 فصيلة الدم: ${patientData.bloodType || '—'}
+💊 أمراض مزمنة: ${diseases}
+
+🔬 التشخيص المبدئي:
+${diagnosis}
+
+⚡ الإجراء الميداني:
+${action || 'يرجى الاتصال فوراً'}
+
+⏰ وقت التنبيه: ${timestamp}
+
+📲 هذا التنبيه أُرسل تلقائياً من نظام LifeBand الطبي`
+        : `🚨 *Emergency Alert — LifeBand*
+
+👤 Patient: *${patientName || '—'}*
+🩸 Blood Type: ${patientData.bloodType || '—'}
+💊 Conditions: ${diseases}
+
+🔬 Initial Diagnosis:
+${diagnosis}
+
+⚡ Field Action:
+${action || 'Please contact immediately'}
+
+⏰ Alert Time: ${timestamp}
+
+📲 This alert was sent automatically by LifeBand`;
+
+    waContactInfo.innerText = T[l].wa_contact_label + patientWaContact;
+    waMsgPreview.innerText  = msg;
+    waMsgPreview.style.display = "block";
+    sendWaBtn.style.display    = "block";
+
+    // ✅ رابط واتساب الفعلي
+    sendWaBtn.onclick = () => {
+        const encoded = encodeURIComponent(msg);
+        const waUrl   = `https://wa.me/${patientWaContact}?text=${encoded}`;
+        window.open(waUrl, '_blank');
+        document.getElementById('waSentBadge').classList.add('show');
+    };
+}
+
+// ===== وسائط طبية =====
 function showMedia(category) {
     const mediaKey = Object.keys(MEDIA_DB).find(k => category.includes(k)) || 'default';
     const media = MEDIA_DB[mediaKey];
-    const grid = document.getElementById("mediaGrid");
-    const l = lang();
-
+    const grid  = document.getElementById("mediaGrid");
     grid.innerHTML = '';
-
-    // صور
     media.imgs.forEach(src => {
         const img = document.createElement('img');
         img.src = src; img.className = 'media-img';
         img.onclick = () => openModal(src);
         grid.appendChild(img);
     });
-
-    // يوتيوب
     media.yt.forEach(v => {
         const div = document.createElement('div');
         div.className = 'yt-thumb';
         div.innerHTML = `<img src="https://img.youtube.com/vi/${v.id}/mqdefault.jpg" alt="${v.t}"><div class="play-icon">▶️</div>`;
-        div.onclick = () => window.open(`https://www.youtube.com/watch?v=${v.id}`,'_blank');
-        div.title = v.t;
+        div.onclick    = () => window.open(`https://www.youtube.com/watch?v=${v.id}`,'_blank');
         grid.appendChild(div);
     });
-
     document.getElementById("mediaBox").style.display="block";
 }
 
@@ -384,9 +487,9 @@ function showMedia(category) {
 function showExtraQuestions() {
     const l = lang();
     const extraQs = [
-        { id:"eq1", text: l==='ar'?"متى بدأت الأعراض؟":"When did symptoms start?", options: l==='ar'?["منذ دقائق","منذ ساعة","منذ أكثر من ساعة","لا أعلم"]:["Minutes ago","1 hour ago","Over an hour","Unknown"] },
+        { id:"eq1", text: l==='ar'?"متى بدأت الأعراض؟":"When did symptoms start?", options: l==='ar'?["منذ دقائق","منذ ساعة","أكثر من ساعة","لا أعلم"]:["Minutes ago","1 hour ago","Over an hour","Unknown"] },
         { id:"eq2", text: l==='ar'?"هل يعاني من حساسية لأدوية؟":"Any medication allergies?", options: l==='ar'?["نعم","لا","لا أعلم"]:["Yes","No","Unknown"] },
-        { id:"eq3", text: l==='ar'?"هل أخذ أي دواء اليوم؟":"Took any medication today?", options: l==='ar'?["نعم","لا","لا أعلم"]:["Yes","No","Unknown"] }
+        { id:"eq3", text: l==='ar'?"هل أخذ أي دواء اليوم؟":"Took medication today?", options: l==='ar'?["نعم","لا","لا أعلم"]:["Yes","No","Unknown"] }
     ];
     renderDiagForm(extraQs, 'extraDiagForm', extraAnswers);
     document.getElementById("extraQBox").style.display="block";
@@ -394,26 +497,34 @@ function showExtraQuestions() {
 }
 
 // ===== Modal الصور =====
-window.openModal = (src) => {
-    document.getElementById("modalImg").src = src;
-    document.getElementById("imgModal").classList.add("open");
-};
-window.closeModal = () => document.getElementById("imgModal").classList.remove("open");
+window.openModal  = (src) => { document.getElementById("modalImg").src = src; document.getElementById("imgModal").classList.add("open"); };
+window.closeModal = ()    => document.getElementById("imgModal").classList.remove("open");
 
 // ===== حفظ التقرير =====
-window.saveAndExit = async () => {
-    const l = lang();
-    const diagnosis = lastAnalysis || document.getElementById("aiAnalysisText").innerText;
+document.getElementById('saveExitBtn').addEventListener('click', async () => {
+    const l          = lang();
+    const btn        = document.getElementById('saveExitBtn');
+    const diagnosis  = lastAnalysis || document.getElementById("aiAnalysisText").innerText;
+    btn.disabled     = true;
+    btn.innerText    = l==='ar'?'⏳ جاري الحفظ...':'⏳ Saving...';
     try {
         await push(ref(db,"reports"),{
-            patientName, diagnosis,
-            timestamp: new Date().toISOString(),
-            status:"قيد الانتظار"
+            patientName,
+            diagnosis,
+            bloodType:  patientData.bloodType || '',
+            diseases:   patientData.diseases  || [],
+            waAlertSent: !!patientWaContact,
+            timestamp:  new Date().toISOString(),
+            status:     "قيد الانتظار"
         });
         alert(T[l].alert_success);
-        location.href="index.html";
-    } catch(e){ alert("Error saving report"); }
-};
+        location.href = "index.html";
+    } catch(e) {
+        btn.disabled  = false;
+        btn.innerText = T[l].btn_save_exit;
+        alert("Error saving report: " + e.message);
+    }
+});
 </script>
 </body>
 </html>

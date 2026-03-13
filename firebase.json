@@ -5,8 +5,14 @@
       "firebase.json",
       "**/.*",
       "**/node_modules/**",
-      "functions/**"
-    ]
+      "functions/**",
+      "database.rules.json"
+    ],
+    "cleanUrls": false,
+    "404": "404.html"
+  },
+  "database": {
+    "rules": "database.rules.json"
   },
   "functions": {
     "source": "functions",
