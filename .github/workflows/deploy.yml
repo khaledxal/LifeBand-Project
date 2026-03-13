@@ -25,13 +25,14 @@ jobs:
 
       - name: Inject Twilio credentials
         run: |
-          sed -i "s|__TWILIO_SID__|${{ secrets.TWILIO_SID }}|g"   functions/index.js
+          sed -i "s|__TWILIO_SID__|${{ secrets.TWILIO_SID }}|g"    functions/index.js
           sed -i "s|__TWILIO_TOKEN__|${{ secrets.TWILIO_TOKEN }}|g" functions/index.js
           sed -i "s|__TWILIO_FROM__|${{ secrets.TWILIO_FROM }}|g"   functions/index.js
 
-      - name: Deploy to Firebase
+      - name: Deploy Functions and Hosting only
         run: |
           firebase deploy \
             --token "${{ secrets.FIREBASE_TOKEN }}" \
             --project lifeband-affa0 \
+            --only functions,hosting \
             --non-interactive
