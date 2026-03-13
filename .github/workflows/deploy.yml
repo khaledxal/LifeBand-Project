@@ -23,8 +23,6 @@ jobs:
       - name: Install Functions dependencies
         run: cd functions && npm install
 
-      # ✅ حقن الـ Secrets في index.js وقت الـ deploy فقط
-      # الكود في GitHub يبقى نظيف — الـ secrets تُضاف مؤقتاً هنا
       - name: Inject Twilio credentials
         run: |
           sed -i "s|__TWILIO_SID__|${{ secrets.TWILIO_SID }}|g"   functions/index.js
@@ -32,4 +30,8 @@ jobs:
           sed -i "s|__TWILIO_FROM__|${{ secrets.TWILIO_FROM }}|g"   functions/index.js
 
       - name: Deploy to Firebase
-        run: firebase deploy --token "${{ secrets.FIREBASE_TOKEN }}" --non-interactive
+        run: |
+          firebase deploy \
+            --token "${{ secrets.FIREBASE_TOKEN }}" \
+            --project lifeband-affa0 \
+            --non-interactive
