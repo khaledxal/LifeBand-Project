@@ -1,4 +1,4 @@
-// js/layout.js — LifeBand v3
+// js/layout.js — LifeBand v4 (Heltro Style)
 import { auth, db } from './firebase-config.js';
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { ref, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
@@ -8,121 +8,179 @@ export function injectLayout() {
     const isAr  = lang === 'ar';
     const theme = localStorage.getItem('theme') || 'light';
 
-    // Apply theme + lang immediately
-    document.body.setAttribute('data-theme', theme === 'dark' ? 'dark' : '');
+    // ── Apply theme + lang immediately (no flash) ──
+    document.documentElement.setAttribute('data-theme', theme);
     document.documentElement.lang = lang;
     document.documentElement.dir  = isAr ? 'rtl' : 'ltr';
 
-    // ── NAVBAR HTML ──
-    const navHTML = `
-    <nav class="navbar" id="mainNavbar">
-
-        <!-- Brand (right on RTL) -->
-        <a href="index.html" class="nav-brand">
-            <div class="nav-brand-icon">⚕</div>
-            LifeBand
-        </a>
-
-        <!-- Center links — absolute positioned for true centering -->
-        <div class="nav-links">
-            <a href="index.html"  class="nav-item" data-page="index.html">🏠 ${isAr?'الرئيسية':'Home'}</a>
-            <a href="tips.html"   class="nav-item" data-page="tips.html">💡 ${isAr?'نصائح طبية':'Medical Tips'}</a>
-            <div class="dropdown">
-                <button class="nav-item">🌿 ${isAr?'للمختصين':'Specialists'} <span class="chevron">▾</span></button>
-                <div class="dropdown-content">
-                    <a href="volunteering.html">🤝 ${isAr?'التطوع الصحي':'Volunteering'}</a>
-                    <a href="innovation.html">🚀 ${isAr?'الابتكار':'Innovation'}</a>
-                </div>
-            </div>
-            <div id="dynamic-links" style="display:contents;"></div>
+    // ── TOP BAR ──
+    const topbarHTML = `
+    <div class="lb-topbar" id="lbTopbar">
+        <div class="lb-topbar-inner">
+            <span class="lb-topbar-item">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                ${isAr ? 'المملكة العربية السعودية' : 'Saudi Arabia'}
+            </span>
+            <span class="lb-topbar-sep">·</span>
+            <span class="lb-topbar-item">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.63A2 2 0 012 .18h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.19-1.16a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 14.92z"/></svg>
+                <a href="tel:911">${isAr ? 'طوارئ: 911' : 'Emergency: 911'}</a>
+            </span>
+            <span class="lb-topbar-sep">·</span>
+            <span class="lb-topbar-item">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                ${isAr ? 'متاح ٢٤/٧' : 'Available 24/7'}
+            </span>
         </div>
+    </div>`;
 
-        <!-- Actions (left on RTL) -->
-        <div class="nav-actions">
-            <span id="auth-zone" style="display:flex;align-items:center;gap:6px;"></span>
-            <button id="langBtn"  class="lang-toggle"  title="Switch language">${isAr?'EN':'AR'}</button>
-            <button id="themeBtn" class="theme-toggle" title="Toggle theme">${theme==='dark'?'☀️':'🌙'}</button>
-            <button id="hamburger" class="nav-hamburger" aria-label="Menu">
-                <span></span><span></span><span></span>
-            </button>
+    // ── NAVBAR ──
+    const navHTML = `
+    <nav class="lb-nav" id="mainNavbar">
+        <div class="lb-nav-inner">
+
+            <!-- Brand -->
+            <a href="index.html" class="lb-brand">
+                <div class="lb-brand-icon">⚕</div>
+                <span>LifeBand</span>
+            </a>
+
+            <!-- Center links -->
+            <div class="lb-nav-links">
+                <a href="index.html"  class="lb-nav-link" data-page="index.html">${isAr ? 'الرئيسية' : 'Home'}</a>
+                <a href="tips.html"   class="lb-nav-link" data-page="tips.html">${isAr ? 'نصائح طبية' : 'Medical Tips'}</a>
+                <div class="lb-dropdown">
+                    <button class="lb-nav-link lb-dropdown-btn">
+                        ${isAr ? 'للمختصين' : 'Specialists'}
+                        <svg class="lb-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="lb-dropdown-menu">
+                        <a href="volunteering.html" class="lb-dropdown-item">
+                            <span class="lb-dropdown-icon">🤝</span>
+                            <div>
+                                <div class="lb-dropdown-title">${isAr ? 'التطوع الصحي' : 'Volunteering'}</div>
+                                <div class="lb-dropdown-sub">${isAr ? 'انضم كمسعف متطوع' : 'Join as a rescuer'}</div>
+                            </div>
+                        </a>
+                        <a href="innovation.html" class="lb-dropdown-item">
+                            <span class="lb-dropdown-icon">🚀</span>
+                            <div>
+                                <div class="lb-dropdown-title">${isAr ? 'الابتكار التقني' : 'Innovation'}</div>
+                                <div class="lb-dropdown-sub">${isAr ? 'تقنية NFC والذكاء الاصطناعي' : 'NFC & AI technology'}</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <div id="lb-dynamic-links" style="display:contents;"></div>
+            </div>
+
+            <!-- Actions -->
+            <div class="lb-nav-actions">
+                <div id="lb-auth-zone" style="display:flex;align-items:center;gap:8px;"></div>
+                <button id="langBtn" class="lb-icon-btn" title="${isAr ? 'Switch to English' : 'التبديل للعربية'}">
+                    ${isAr ? 'EN' : 'AR'}
+                </button>
+                <button id="themeBtn" class="lb-icon-btn lb-theme-btn" title="${isAr ? 'تبديل الوضع' : 'Toggle theme'}">
+                    ${theme === 'dark'
+                        ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`
+                        : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>`
+                    }
+                </button>
+                <button id="lb-hamburger" class="lb-hamburger" aria-label="Menu">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
         </div>
     </nav>
 
-    <!-- Mobile overlay + drawer -->
-    <div id="drawerOverlay" class="nav-drawer-overlay"></div>
-    <div id="navDrawer" class="nav-drawer">
-        <div class="drawer-header">
-            <a href="index.html" class="nav-brand" style="font-size:18px;">⚕ LifeBand</a>
-            <button id="drawerClose" class="drawer-close">✕</button>
-        </div>
-        <span class="drawer-section-label">${isAr?'القائمة':'Navigation'}</span>
-        <a href="index.html"        class="drawer-item"><span class="drawer-icon">🏠</span>${isAr?'الرئيسية':'Home'}</a>
-        <a href="tips.html"         class="drawer-item"><span class="drawer-icon">💡</span>${isAr?'نصائح طبية':'Medical Tips'}</a>
-        <a href="volunteering.html" class="drawer-item"><span class="drawer-icon">🤝</span>${isAr?'التطوع الصحي':'Volunteering'}</a>
-        <a href="innovation.html"   class="drawer-item"><span class="drawer-icon">🚀</span>${isAr?'الابتكار':'Innovation'}</a>
-        <div class="drawer-divider"></div>
-        <span class="drawer-section-label">${isAr?'حسابي':'Account'}</span>
-        <div id="drawer-auth"></div>
-        <div class="drawer-divider"></div>
-        <div style="display:flex;gap:8px;padding:4px 12px;">
-            <button id="drawerTheme" style="flex:1;padding:11px;border-radius:10px;border:1px solid var(--glass-border);background:var(--bg-surface);color:var(--text-body);cursor:pointer;font-size:13px;font-weight:700;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;">
-                ${theme==='dark'?'☀️':'🌙'} ${isAr?(theme==='dark'?'فاتح':'داكن'):(theme==='dark'?'Light':'Dark')}
-            </button>
-            <button id="drawerLang" style="flex:1;padding:11px;border-radius:10px;border:1px solid var(--glass-border);background:var(--bg-surface);color:var(--text-body);cursor:pointer;font-size:13px;font-weight:700;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;">
-                🌐 ${isAr?'EN':'AR'}
-            </button>
-        </div>
-    </div>
+    <!-- Mobile drawer overlay -->
+    <div id="lb-overlay" class="lb-overlay"></div>
 
-    <!-- Decorative blobs -->
-    <div class="bg-blob bg-blob-1" aria-hidden="true"></div>
-    <div class="bg-blob bg-blob-2" aria-hidden="true"></div>`;
+    <!-- Mobile drawer -->
+    <div id="lb-drawer" class="lb-drawer">
+        <div class="lb-drawer-head">
+            <a href="index.html" class="lb-brand" style="font-size:17px;">⚕ LifeBand</a>
+            <button id="lb-drawer-close" class="lb-drawer-close">✕</button>
+        </div>
 
-    // ── FOOTER HTML ──
+        <div class="lb-drawer-section-label">${isAr ? 'التنقل' : 'Navigation'}</div>
+        <a href="index.html"        class="lb-drawer-link"><span>🏠</span>${isAr ? 'الرئيسية' : 'Home'}</a>
+        <a href="tips.html"         class="lb-drawer-link"><span>💡</span>${isAr ? 'نصائح طبية' : 'Medical Tips'}</a>
+        <a href="volunteering.html" class="lb-drawer-link"><span>🤝</span>${isAr ? 'التطوع الصحي' : 'Volunteering'}</a>
+        <a href="innovation.html"   class="lb-drawer-link"><span>🚀</span>${isAr ? 'الابتكار' : 'Innovation'}</a>
+
+        <div class="lb-drawer-divider"></div>
+        <div class="lb-drawer-section-label">${isAr ? 'حسابي' : 'Account'}</div>
+        <div id="lb-drawer-auth"></div>
+
+        <div class="lb-drawer-divider"></div>
+        <div class="lb-drawer-controls">
+            <button id="lb-drawer-theme" class="lb-drawer-ctrl-btn">
+                ${theme === 'dark'
+                    ? `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg> ${isAr ? 'وضع فاتح' : 'Light mode'}`
+                    : `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg> ${isAr ? 'وضع داكن' : 'Dark mode'}`
+                }
+            </button>
+            <button id="lb-drawer-lang" class="lb-drawer-ctrl-btn">
+                🌐 ${isAr ? 'English' : 'العربية'}
+            </button>
+        </div>
+    </div>`;
+
+    // ── FOOTER ──
     const footerHTML = `
-    <footer class="site-footer">
-        <div class="footer-inner">
-            <div>
-                <div class="footer-brand">⚕ LifeBand</div>
-                <p class="footer-tagline">${isAr
+    <footer class="lb-footer">
+        <div class="lb-footer-top">
+            <div class="lb-footer-brand-col">
+                <div class="lb-footer-brand">⚕ LifeBand</div>
+                <p class="lb-footer-tagline">${isAr
                     ? 'نظام طبي ذكي يربط ملفك الصحي بتقنية NFC لضمان الرعاية الفورية عند الطوارئ.'
                     : 'A smart medical system linking your health file via NFC for instant emergency care.'}</p>
+                <div class="lb-footer-contact">
+                    <a href="tel:911">📞 ${isAr ? 'طوارئ: 911' : 'Emergency: 911'}</a>
+                    <a href="mailto:info@lifeband.sa">✉️ info@lifeband.sa</a>
+                </div>
             </div>
-            <div class="footer-col">
-                <h4>${isAr?'روابط سريعة':'Quick Links'}</h4>
-                <a href="index.html">${isAr?'الرئيسية':'Home'}</a>
-                <a href="tips.html">${isAr?'نصائح طبية':'Medical Tips'}</a>
-                <a href="volunteering.html">${isAr?'التطوع':'Volunteering'}</a>
+            <div class="lb-footer-col">
+                <h4>${isAr ? 'روابط سريعة' : 'Quick Links'}</h4>
+                <a href="index.html">${isAr ? 'الرئيسية' : 'Home'}</a>
+                <a href="tips.html">${isAr ? 'نصائح طبية' : 'Medical Tips'}</a>
+                <a href="volunteering.html">${isAr ? 'التطوع' : 'Volunteering'}</a>
+                <a href="innovation.html">${isAr ? 'الابتكار' : 'Innovation'}</a>
             </div>
-            <div class="footer-col">
-                <h4>${isAr?'للمسعفين':'For Rescuers'}</h4>
-                <a href="active-reports.html">${isAr?'البلاغات النشطة':'Active Reports'}</a>
-                <a href="history.html">${isAr?'سجل الحالات':'Case History'}</a>
-                <a href="rewards.html">${isAr?'المكافآت':'Rewards'}</a>
+            <div class="lb-footer-col">
+                <h4>${isAr ? 'للمسعفين' : 'For Rescuers'}</h4>
+                <a href="active-reports.html">${isAr ? 'البلاغات النشطة' : 'Active Reports'}</a>
+                <a href="history.html">${isAr ? 'سجل الحالات' : 'Case History'}</a>
+                <a href="rewards.html">${isAr ? 'المكافآت' : 'Rewards'}</a>
             </div>
-            <div class="footer-col">
-                <h4>${isAr?'الحساب':'Account'}</h4>
-                <a href="register.html">${isAr?'إنشاء حساب':'Register'}</a>
-                <a href="login.html">${isAr?'تسجيل دخول':'Login'}</a>
+            <div class="lb-footer-col">
+                <h4>${isAr ? 'الحساب' : 'Account'}</h4>
+                <a href="register.html">${isAr ? 'إنشاء حساب' : 'Register'}</a>
+                <a href="login.html">${isAr ? 'تسجيل دخول' : 'Login'}</a>
+                <a href="profile.html">${isAr ? 'ملفي الطبي' : 'My Profile'}</a>
             </div>
         </div>
-        <div class="footer-inner" style="display:block;">
-            <div class="footer-bottom">© 2026 LifeBand · ${isAr?'جميع الحقوق محفوظة':'All rights reserved'}</div>
+        <div class="lb-footer-bottom">
+            <span>© 2026 LifeBand · ${isAr ? 'جميع الحقوق محفوظة' : 'All rights reserved'}</span>
+            <span class="lb-footer-badge">${isAr ? 'صُنع بـ ❤️ للمملكة' : 'Made with ❤️ for KSA'}</span>
         </div>
     </footer>`;
 
-    // Inject before container and after
-    document.body.insertAdjacentHTML('afterbegin', navHTML);
+    // ── INJECT ──
+    document.body.insertAdjacentHTML('afterbegin', topbarHTML + navHTML);
+
     const container = document.querySelector('.container') || document.querySelector('#main-layout');
-    if (container) container.insertAdjacentHTML('afterend', footerHTML);
-    else document.body.insertAdjacentHTML('beforeend', footerHTML);
+    if (container) {
+        container.insertAdjacentHTML('afterend', footerHTML);
+        container.classList.add('lb-page-body');
+    } else {
+        document.body.insertAdjacentHTML('beforeend', footerHTML);
+    }
 
-    // Add page-body padding to container
-    if (container) container.classList.add('page-body');
-
-    // Mark active page
+    // ── Mark active page ──
     const page = location.pathname.split('/').pop() || 'index.html';
-    document.querySelectorAll('.nav-item[data-page]').forEach(a => {
+    document.querySelectorAll('.lb-nav-link[data-page]').forEach(a => {
         if (a.getAttribute('data-page') === page) a.classList.add('active');
     });
 
@@ -130,113 +188,127 @@ export function injectLayout() {
     _initAuth();
 }
 
+// ─────────────────────────────────────────────
 function _initEvents() {
-    // Navbar scroll shadow
     const navbar = document.getElementById('mainNavbar');
-    window.addEventListener('scroll', () => {
-        if (!navbar) return;
-        navbar.classList.toggle('scrolled', window.scrollY > 10);
-    }, { passive:true });
 
-    // Theme
-    const applyTheme = t => {
-        document.body.setAttribute('data-theme', t==='dark'?'dark':'');
+    // Scroll shadow
+    window.addEventListener('scroll', () => {
+        navbar?.classList.toggle('scrolled', window.scrollY > 8);
+    }, { passive: true });
+
+    // ── Theme toggle ──
+    const applyTheme = (t) => {
+        document.documentElement.setAttribute('data-theme', t);
         localStorage.setItem('theme', t);
+        const isDark = t === 'dark';
+        const sunSVG = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`;
+        const moonSVG = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>`;
+        const isAr = (localStorage.getItem('preferred_lang') || 'ar') === 'ar';
+
         const btn = document.getElementById('themeBtn');
-        const dBtn = document.getElementById('drawerTheme');
-        const isAr = (localStorage.getItem('preferred_lang')||'ar')==='ar';
-        if(btn)  btn.innerText  = t==='dark'?'☀️':'🌙';
-        if(dBtn) dBtn.innerHTML = `${t==='dark'?'☀️':'🌙'} ${isAr?(t==='dark'?'فاتح':'داكن'):(t==='dark'?'Light':'Dark')}`;
+        if (btn) btn.innerHTML = isDark ? sunSVG : moonSVG;
+
+        const dBtn = document.getElementById('lb-drawer-theme');
+        if (dBtn) dBtn.innerHTML = isDark
+            ? `${sunSVG} ${isAr ? 'وضع فاتح' : 'Light mode'}`
+            : `${moonSVG} ${isAr ? 'وضع داكن' : 'Dark mode'}`;
     };
 
     document.getElementById('themeBtn')?.addEventListener('click', () => {
-        const nt = document.body.getAttribute('data-theme')==='dark'?'light':'dark';
-        applyTheme(nt);
+        const cur = document.documentElement.getAttribute('data-theme') || 'light';
+        applyTheme(cur === 'dark' ? 'light' : 'dark');
     });
-    document.getElementById('drawerTheme')?.addEventListener('click', () => {
-        const nt = document.body.getAttribute('data-theme')==='dark'?'light':'dark';
-        applyTheme(nt);
+    document.getElementById('lb-drawer-theme')?.addEventListener('click', () => {
+        const cur = document.documentElement.getAttribute('data-theme') || 'light';
+        applyTheme(cur === 'dark' ? 'light' : 'dark');
     });
 
-    // Lang
+    // ── Lang toggle ──
     const switchLang = () => {
-        const cur = localStorage.getItem('preferred_lang')||'ar';
-        localStorage.setItem('preferred_lang', cur==='ar'?'en':'ar');
+        const cur = localStorage.getItem('preferred_lang') || 'ar';
+        localStorage.setItem('preferred_lang', cur === 'ar' ? 'en' : 'ar');
         location.reload();
     };
     document.getElementById('langBtn')?.addEventListener('click', switchLang);
-    document.getElementById('drawerLang')?.addEventListener('click', switchLang);
+    document.getElementById('lb-drawer-lang')?.addEventListener('click', switchLang);
 
-    // Drawer
-    const drawer  = document.getElementById('navDrawer');
-    const overlay = document.getElementById('drawerOverlay');
-    const burger  = document.getElementById('hamburger');
-    const close   = document.getElementById('drawerClose');
+    // ── Mobile drawer ──
+    const drawer  = document.getElementById('lb-drawer');
+    const overlay = document.getElementById('lb-overlay');
+    const burger  = document.getElementById('lb-hamburger');
+    const close   = document.getElementById('lb-drawer-close');
 
-    const openDrawer  = () => { drawer?.classList.add('open'); overlay?.classList.add('open'); burger?.classList.add('open'); document.body.style.overflow='hidden'; };
-    const closeDrawer = () => { drawer?.classList.remove('open'); overlay?.classList.remove('open'); burger?.classList.remove('open'); document.body.style.overflow=''; };
+    const openDrawer  = () => { drawer?.classList.add('open'); overlay?.classList.add('open'); burger?.classList.add('open'); document.body.style.overflow = 'hidden'; };
+    const closeDrawer = () => { drawer?.classList.remove('open'); overlay?.classList.remove('open'); burger?.classList.remove('open'); document.body.style.overflow = ''; };
 
     burger?.addEventListener('click', openDrawer);
-    close?.addEventListener('click',  closeDrawer);
+    close?.addEventListener('click', closeDrawer);
     overlay?.addEventListener('click', closeDrawer);
 }
 
+// ─────────────────────────────────────────────
 function _initAuth() {
     onAuthStateChanged(auth, async user => {
-        const dynamicLinks = document.getElementById('dynamic-links');
-        const authZone     = document.getElementById('auth-zone');
-        const drawerAuth   = document.getElementById('drawer-auth');
-        const lang         = localStorage.getItem('preferred_lang')||'ar';
-        const isAr         = lang==='ar';
-        const adminIn      = localStorage.getItem('adminLoggedIn')==='true';
+        const dynamicLinks = document.getElementById('lb-dynamic-links');
+        const authZone     = document.getElementById('lb-auth-zone');
+        const drawerAuth   = document.getElementById('lb-drawer-auth');
+        const lang         = localStorage.getItem('preferred_lang') || 'ar';
+        const isAr         = lang === 'ar';
+        const adminIn      = localStorage.getItem('adminLoggedIn') === 'true';
 
         if (adminIn) {
-            _setLinks(dynamicLinks, `<a href="admin.html" class="nav-item">🛡️ ${isAr?'لوحة التحكم':'Admin'}</a>`);
-            _setLinks(authZone, `<button id="logoutBtn" class="main-btn btn-auto btn-sm btn-danger" style="font-size:13px;">${isAr?'خروج':'Logout'}</button>`);
-            _setLinks(drawerAuth, `<a href="admin.html" class="drawer-item"><span class="drawer-icon">🛡️</span>${isAr?'لوحة التحكم':'Admin'}</a><button class="drawer-item" id="dLogout" style="color:var(--danger);"><span class="drawer-icon">⬅</span>${isAr?'خروج':'Logout'}</button>`);
-            document.getElementById('logoutBtn')?.addEventListener('click',()=>{ localStorage.removeItem('adminLoggedIn'); location.href='index.html'; });
-            document.getElementById('dLogout')?.addEventListener('click',()=>{ localStorage.removeItem('adminLoggedIn'); location.href='index.html'; });
+            _set(dynamicLinks, `<a href="admin.html" class="lb-nav-link">🛡️ ${isAr ? 'لوحة التحكم' : 'Admin'}</a>`);
+            _set(authZone, `<button id="lb-logout" class="lb-btn-danger">${isAr ? 'خروج' : 'Logout'}</button>`);
+            _set(drawerAuth, `
+                <a href="admin.html" class="lb-drawer-link"><span>🛡️</span>${isAr ? 'لوحة التحكم' : 'Admin'}</a>
+                <button id="lb-drawer-logout" class="lb-drawer-link" style="color:var(--lb-danger);border:none;background:none;font-family:inherit;cursor:pointer;width:100%;text-align:${isAr?'right':'left'};">
+                    <span>⬅</span>${isAr ? 'خروج' : 'Logout'}
+                </button>`);
+            const lo = () => { localStorage.removeItem('adminLoggedIn'); location.href = 'index.html'; };
+            document.getElementById('lb-logout')?.addEventListener('click', lo);
+            document.getElementById('lb-drawer-logout')?.addEventListener('click', lo);
             return;
         }
 
         if (user) {
             try {
-                const snap = await get(ref(db,'users/'+user.uid));
+                const snap = await get(ref(db, 'users/' + user.uid));
                 const data = snap.val();
-                const isRescuer = data?.role==='rescuer';
+                const isRescuer = data?.role === 'rescuer';
 
-                _setLinks(dynamicLinks, isRescuer ? `
-                    <a href="active-reports.html" class="nav-item" style="color:var(--danger);">🚨 ${isAr?'البلاغات':'Reports'}</a>
-                    <a href="history.html"  class="nav-item">📋 ${isAr?'السجل':'History'}</a>
-                    <a href="rewards.html"  class="nav-item">🏆 ${isAr?'المكافآت':'Rewards'}</a>
+                _set(dynamicLinks, isRescuer ? `
+                    <a href="active-reports.html" class="lb-nav-link lb-nav-danger">🚨 ${isAr ? 'البلاغات' : 'Reports'}</a>
+                    <a href="history.html"  class="lb-nav-link">📋 ${isAr ? 'السجل' : 'History'}</a>
+                    <a href="rewards.html"  class="lb-nav-link">🏆 ${isAr ? 'المكافآت' : 'Rewards'}</a>
                 ` : `
-                    <a href="profile.html?id=${user.uid}" class="nav-item">👤 ${isAr?'ملفي الطبي':'My File'}</a>
+                    <a href="profile.html?id=${user.uid}" class="lb-nav-link">👤 ${isAr ? 'ملفي' : 'My File'}</a>
                 `);
 
-                _setLinks(authZone, `<button id="logoutBtn" class="main-btn btn-auto btn-sm btn-danger" style="font-size:13px;">⬅ ${isAr?'خروج':'Logout'}</button>`);
+                _set(authZone, `<button id="lb-logout" class="lb-btn-danger">${isAr ? 'خروج' : 'Logout'}</button>`);
 
-                _setLinks(drawerAuth, (isRescuer?`
-                    <a href="active-reports.html" class="drawer-item" style="color:var(--danger);"><span class="drawer-icon">🚨</span>${isAr?'البلاغات':'Reports'}</a>
-                    <a href="history.html" class="drawer-item"><span class="drawer-icon">📋</span>${isAr?'السجل':'History'}</a>
-                    <a href="rewards.html" class="drawer-item"><span class="drawer-icon">🏆</span>${isAr?'المكافآت':'Rewards'}</a>
-                `:`
-                    <a href="profile.html?id=${user.uid}" class="drawer-item"><span class="drawer-icon">👤</span>${isAr?'ملفي الطبي':'My File'}</a>
-                `)+`<button class="drawer-item" id="dLogout" style="color:var(--danger);"><span class="drawer-icon">⬅</span>${isAr?'تسجيل الخروج':'Logout'}</button>`);
+                _set(drawerAuth, (isRescuer ? `
+                    <a href="active-reports.html" class="lb-drawer-link" style="color:var(--lb-danger);"><span>🚨</span>${isAr ? 'البلاغات' : 'Reports'}</a>
+                    <a href="history.html" class="lb-drawer-link"><span>📋</span>${isAr ? 'السجل' : 'History'}</a>
+                    <a href="rewards.html" class="lb-drawer-link"><span>🏆</span>${isAr ? 'المكافآت' : 'Rewards'}</a>
+                ` : `
+                    <a href="profile.html?id=${user.uid}" class="lb-drawer-link"><span>👤</span>${isAr ? 'ملفي الطبي' : 'My Profile'}</a>
+                `) + `<button id="lb-drawer-logout" class="lb-drawer-link" style="color:var(--lb-danger);border:none;background:none;font-family:inherit;cursor:pointer;width:100%;text-align:${isAr?'right':'left'};"><span>⬅</span>${isAr ? 'تسجيل الخروج' : 'Logout'}</button>`);
 
-                const logout = () => confirm(isAr?'هل تريد الخروج؟':'Logout?') && signOut(auth).then(()=>location.href='index.html');
-                document.getElementById('logoutBtn')?.addEventListener('click', logout);
-                document.getElementById('dLogout')?.addEventListener('click', logout);
+                const logout = () => confirm(isAr ? 'هل تريد الخروج؟' : 'Logout?') && signOut(auth).then(() => location.href = 'index.html');
+                document.getElementById('lb-logout')?.addEventListener('click', logout);
+                document.getElementById('lb-drawer-logout')?.addEventListener('click', logout);
 
-            } catch(e){ console.error(e); }
+            } catch (e) { console.error(e); }
         } else {
-            _setLinks(authZone, `
-                <a href="login.html"    class="nav-item">🔑 ${isAr?'دخول':'Login'}</a>
-                <a href="register.html" class="main-btn btn-auto btn-sm" style="text-decoration:none;font-size:13px;">${isAr?'إنشاء حساب':'Register'}</a>`);
-            _setLinks(drawerAuth, `
-                <a href="login.html"    class="drawer-item"><span class="drawer-icon">🔑</span>${isAr?'تسجيل دخول':'Login'}</a>
-                <a href="register.html" class="drawer-item"><span class="drawer-icon">✨</span>${isAr?'إنشاء حساب':'Register'}</a>`);
+            _set(authZone, `
+                <a href="login.html"    class="lb-nav-link">${isAr ? 'دخول' : 'Login'}</a>
+                <a href="register.html" class="lb-btn-primary" style="text-decoration:none;">${isAr ? 'إنشاء حساب' : 'Register'}</a>`);
+            _set(drawerAuth, `
+                <a href="login.html"    class="lb-drawer-link"><span>🔑</span>${isAr ? 'تسجيل دخول' : 'Login'}</a>
+                <a href="register.html" class="lb-drawer-link"><span>✨</span>${isAr ? 'إنشاء حساب' : 'Register'}</a>`);
         }
     });
 }
 
-function _setLinks(el, html) { if(el) el.innerHTML = html; }
+function _set(el, html) { if (el) el.innerHTML = html; }
