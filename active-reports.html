@@ -167,14 +167,21 @@ onValue(ref(db,'reports'), snapshot => {
             card.className = 'report-card';
             card.id = `card_${id}`;
             card.innerHTML = `
-                <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px;">
+               <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px;">
                     <div>
                         <h3 style="margin:0 0 5px;">${data.patientName||'—'}</h3>
                         <p style="font-size:13px; opacity:0.7; margin:0;">${data.diagnosis||''}</p>
                     </div>
                     <div style="display:flex; flex-direction:column; gap:8px; align-items:flex-end;">
+                        <button class="main-btn" style="background:#ef4444; width:auto; padding:8px 18px; font-size:13px;" 
+                                onclick="window.location.href='emergency.html?id=${data.patientId || ''}'">
+                            🚨 ملف الطوارئ (NFC)
+                        </button>
+                        
                         <button class="main-btn respond-btn" onclick="handleResponse('${id}')">${t().btn_respond}</button>
-                        <button class="main-btn" style="background:#6366f1;width:auto;padding:8px 18px;font-size:13px;" onclick="toggleDiagPanel('${id}','${data.patientName||''}','${data.bloodType||''}','${JSON.stringify(data.diseases||[]).replace(/'/g,'')}')">
+                        
+                        <button class="main-btn" style="background:#6366f1;width:auto;padding:8px 18px;font-size:13px;" 
+                                onclick="toggleDiagPanel('${id}','${data.patientName||''}','${data.bloodType||''}','${JSON.stringify(data.diseases||[]).replace(/'/g,'')}')">
                             ${t().btn_diagnose}
                         </button>
                     </div>
