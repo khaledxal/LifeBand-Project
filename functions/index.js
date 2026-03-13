@@ -8,21 +8,21 @@ const querystring = require("querystring");
 admin.initializeApp();
 
 // ══════════════════════════════════════════════
-// Secrets — محفوظة في Firebase Secret Manager
-// لا تظهر في الكود ولا في GitHub أبداً
-// أضفها بهذا الأمر:
-//   firebase functions:secrets:set TWILIO_SID
-//   firebase functions:secrets:set TWILIO_TOKEN
-//   firebase functions:secrets:set TWILIO_FROM
-//   firebase functions:secrets:set GEMINI_KEY
+// Gemini Key — Secret Manager
 // ══════════════════════════════════════════════
-const geminiKey   = defineSecret("GEMINI_KEY");
-const twilioSid   = defineSecret("TWILIO_SID");
-const twilioToken = defineSecret("TWILIO_TOKEN");
-const twilioFrom  = defineSecret("TWILIO_FROM");
+const geminiKey = defineSecret("GEMINI_KEY");
 
 // ══════════════════════════════════════════════
-// Function 1: askGemini (موجودة من قبل)
+// Twilio credentials
+// يُستبدل __TWILIO_*__ تلقائياً من GitHub Actions
+// لا تضع القيم الحقيقية هنا أبداً
+// ══════════════════════════════════════════════
+const TWILIO_SID   = "__TWILIO_SID__";
+const TWILIO_TOKEN = "__TWILIO_TOKEN__";
+const TWILIO_FROM  = "__TWILIO_FROM__";
+
+// ══════════════════════════════════════════════
+// Function 1: askGemini
 // ══════════════════════════════════════════════
 exports.askGemini = onRequest(
   { secrets: [geminiKey], cors: true },
@@ -31,9 +31,8 @@ exports.askGemini = onRequest(
       return res.status(405).json({ error: "Method Not Allowed" });
     }
     const { prompt } = req.body;
-    if (!prompt) {
-      return res.status(400).json({ error: "prompt is required" });
-    }
+    if (!prompt) return res.status(400).json({ error: "prompt is required" });
+
     const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey.value()}`;
     try {
       const response = await fetch(GEMINI_URL, {
@@ -57,23 +56,23 @@ exports.askGemini = onRequest(
 );
 
 // ══════════════════════════════════════════════
-// Function 2: sendEmergencySMS (جديدة - SMS تلقائي)
+// Function 2: sendEmergencySMS
 // ══════════════════════════════════════════════
-function twilioSendSMS(sid, token, from, toNumber, message) {
+function twilioSendSMS(toNumber, message) {
   return new Promise((resolve, reject) => {
     const body = querystring.stringify({
       To:   toNumber.startsWith("+") ? toNumber : "+" + toNumber,
-      From: from,
+      From: TWILIO_FROM,
       Body: message,
     });
     const options = {
       hostname: "api.twilio.com",
-      path:     `/2010-04-01/Accounts/${sid}/Messages.json`,
+      path:     `/2010-04-01/Accounts/${TWILIO_SID}/Messages.json`,
       method:   "POST",
       headers:  {
         "Content-Type":   "application/x-www-form-urlencoded",
         "Content-Length": Buffer.byteLength(body),
-        "Authorization":  "Basic " + Buffer.from(`${sid}:${token}`).toString("base64"),
+        "Authorization":  "Basic " + Buffer.from(`${TWILIO_SID}:${TWILIO_TOKEN}`).toString("base64"),
       },
     };
     const req = https.request(options, (res) => {
@@ -94,7 +93,7 @@ function twilioSendSMS(sid, token, from, toNumber, message) {
 }
 
 exports.sendEmergencySMS = onRequest(
-  { secrets: [twilioSid, twilioToken, twilioFrom], cors: true },
+  { cors: true },
   async (req, res) => {
     if (req.method === "OPTIONS") return res.status(204).send("");
     if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
@@ -103,10 +102,10 @@ exports.sendEmergencySMS = onRequest(
     if (!patientId) return res.status(400).json({ error: "patientId required" });
 
     try {
-      const snapshot = await admin.database().ref(`users/${patientId}`).once("value");
-      if (!snapshot.exists()) return res.status(404).json({ error: "Patient not found" });
+      const patientSnap = await admin.database().ref(`users/${patientId}`).once("value");
+      if (!patientSnap.exists()) return res.status(404).json({ error: "Patient not found" });
 
-      const patient   = snapshot.val();
+      const patient   = patientSnap.val();
       const waContact = patient.waContact;
 
       if (!waContact) {
@@ -128,13 +127,7 @@ Conditions: ${diseaseTxt}
 Time: ${timestamp}
 -- LifeBand Auto Alert --`;
 
-      const result = await twilioSendSMS(
-        twilioSid.value(),
-        twilioToken.value(),
-        twilioFrom.value(),
-        waContact,
-        smsMessage
-      );
+      const result = await twilioSendSMS(waContact, smsMessage);
 
       await admin.database().ref(`sms_logs/${patientId}`).push({
         to: waContact, message: smsMessage,
@@ -148,7 +141,7 @@ Time: ${timestamp}
       });
 
     } catch (err) {
-      console.error("SMS error:", err);
+      console.error("SMS error:", err.message);
       try {
         await admin.database().ref(`sms_logs/${patientId || "unknown"}`).push({
           error: err.message, sentAt: new Date().toISOString(), status: "failed",
