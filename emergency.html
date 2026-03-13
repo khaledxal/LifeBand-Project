@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LifeBand - Emergency</title>
     <style>
-        :root { --primary: #ef4444; --glass: rgba(255,255,255,0.92); --text-main: #333; --accent: #6366f1; --wa-green: #25D366; }
+        :root { --primary: #ef4444; --glass: rgba(255,255,255,0.92); --text-main: #333; --accent: #6366f1; }
         [data-theme="dark"] { --glass: rgba(30,32,40,0.95); --text-main: #e2e8f0; }
         * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: linear-gradient(135deg,#fee2e2,#f0f2f5); margin: 0; min-height: 100vh; }
@@ -19,6 +19,7 @@
         .progress-ring__circle { stroke-dasharray: 565.48; stroke-dashoffset: 565.48; transition: stroke-dashoffset 0.1s linear; }
         .loader { border: 3px solid #f3f3f3; border-top: 3px solid var(--primary); border-radius: 50%; width: 28px; height: 28px; animation: spin 1s linear infinite; margin: 20px auto; display: none; }
         @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
         .main-btn { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; margin-top: 10px; font-size: 15px; transition: 0.2s; font-family: inherit; }
         .main-btn:hover:not(:disabled) { opacity: 0.88; }
         .main-btn:disabled { opacity: 0.55; cursor: not-allowed; }
@@ -49,52 +50,24 @@
         .step-dot { width: 10px; height: 10px; border-radius: 50%; background: #e5e7eb; transition: 0.3s; }
         .step-dot.active { background: var(--primary); transform: scale(1.3); }
         .step-dot.done { background: #10b981; }
-
-        /* ✅ ميزة الواتساب */
-        .wa-section {
-            background: rgba(37,211,102,0.06);
-            border: 1px solid rgba(37,211,102,0.25);
-            border-radius: 16px;
-            padding: 18px;
-            margin-bottom: 12px;
-        }
-        .wa-section h4 { color: var(--wa-green); margin: 0 0 12px; display: flex; align-items: center; gap: 8px; font-size: 15px; }
-        .wa-contact-info { font-size: 13px; color: var(--text-main); opacity: 0.8; margin-bottom: 12px; }
-        .wa-msg-preview {
-            background: rgba(37,211,102,0.08);
-            border-radius: 12px;
-            padding: 12px;
-            font-size: 12px;
-            color: var(--text-main);
-            white-space: pre-line;
-            line-height: 1.7;
-            margin-bottom: 12px;
-            max-height: 160px;
-            overflow-y: auto;
-            border: 1px solid rgba(37,211,102,0.15);
-        }
-        .wa-btn { background: var(--wa-green) !important; }
-        .wa-btn:hover { background: #1da851 !important; }
-        .wa-sent-badge {
-            display: none;
-            background: rgba(37,211,102,0.12);
-            border: 1px solid rgba(37,211,102,0.3);
-            border-radius: 8px;
-            padding: 8px 14px;
-            font-size: 13px;
-            color: #15803d;
-            text-align: center;
-            margin-top: 8px;
-        }
-        .wa-sent-badge.show { display: block; }
+        .sms-card { border-radius: 16px; padding: 16px 18px; margin-bottom: 14px; display: flex; align-items: flex-start; gap: 14px; border: 1.5px solid rgba(99,102,241,0.2); background: rgba(99,102,241,0.05); transition: all 0.5s ease; }
+        .sms-card.sent   { background: rgba(16,185,129,0.08); border-color: rgba(16,185,129,0.35); }
+        .sms-card.failed { background: rgba(239,68,68,0.07);  border-color: rgba(239,68,68,0.3); }
+        .sms-card.no-num { background: rgba(245,158,11,0.07); border-color: rgba(245,158,11,0.3); }
+        .sms-emoji { font-size: 28px; flex-shrink: 0; }
+        .sms-body { flex: 1; min-width: 0; }
+        .sms-title { font-weight: bold; font-size: 14px; margin-bottom: 4px; color: #6366f1; }
+        .sms-card.sent   .sms-title { color: #10b981; }
+        .sms-card.failed .sms-title { color: #ef4444; }
+        .sms-card.no-num .sms-title { color: #f59e0b; }
+        .sms-detail { font-size: 12px; opacity: 0.75; line-height: 1.6; color: var(--text-main); }
+        .pulsing { animation: pulse 1.1s ease-in-out infinite; }
     </style>
 </head>
 <body>
 <button id="langBtn" class="lang-toggle">EN</button>
-
 <div class="emergency-container">
 
-    <!-- الخطوة 1: زر الضغط المطوّل -->
     <div id="triggerSection" class="glass-card" style="text-align:center;">
         <h2 style="color:var(--primary);" data-i18n="em_title">نظام LifeBand للطوارئ</h2>
         <div id="holdBtn" class="hold-circle">
@@ -106,7 +79,6 @@
         <button onclick="location.href='index.html'" class="main-btn" style="background:#6b7280;margin-top:30px;" data-i18n="btn_back">العودة للرئيسية</button>
     </div>
 
-    <!-- الخطوة 2: أسئلة تشخيصية -->
     <div id="diagSection" class="glass-card">
         <h3 id="patientNameDisplay" style="color:var(--primary);text-align:center;margin-bottom:5px;"></h3>
         <p style="text-align:center;font-size:13px;opacity:0.6;margin-bottom:20px;" data-i18n="diag_sub">أجب على الأسئلة لتحديد الحالة بدقة</p>
@@ -116,9 +88,16 @@
         <button id="analyzeBtn" class="main-btn" style="margin-top:20px;display:none;" data-i18n="btn_analyze">🔍 تحليل الحالة بالذكاء الاصطناعي</button>
     </div>
 
-    <!-- الخطوة 3: النتيجة + واتساب -->
     <div id="resultSection" class="glass-card" style="display:none;">
         <h3 id="resultPatientName" style="color:var(--primary);text-align:center;margin-bottom:15px;"></h3>
+
+        <div class="sms-card" id="smsCard">
+            <div class="sms-emoji pulsing" id="smsEmoji">📤</div>
+            <div class="sms-body">
+                <div class="sms-title" id="smsTitle">جاري إرسال SMS لجهة الطوارئ...</div>
+                <div class="sms-detail" id="smsDetail"></div>
+            </div>
+        </div>
 
         <div class="result-box">
             <h4 style="color:#10b981;margin:0 0 8px;" data-i18n="em_action">الإجراء المطلوب:</h4>
@@ -134,23 +113,6 @@
             </div>
         </div>
 
-        <!-- ✅ قسم إرسال واتساب -->
-        <div class="wa-section" id="waSection">
-            <h4>
-                <span style="font-size:20px;">📱</span>
-                <span data-i18n="wa_title">إرسال تنبيه واتساب لجهة الطوارئ</span>
-            </h4>
-            <div class="wa-contact-info" id="waContactInfo"></div>
-            <div class="wa-msg-preview" id="waMsgPreview"></div>
-            <button id="sendWaBtn" class="main-btn wa-btn" data-i18n="btn_send_wa">
-                📲 فتح واتساب وإرسال التنبيه
-            </button>
-            <div class="wa-sent-badge" id="waSentBadge" data-i18n="wa_sent_ok">
-                ✅ تم فتح واتساب — تأكد من الإرسال
-            </div>
-        </div>
-
-        <!-- أسئلة إضافية -->
         <div id="extraQBox" style="display:none; margin-bottom:12px;">
             <div class="ai-box" style="border-color:#f59e0b;border-right-color:#f59e0b;background:rgba(245,158,11,0.07);">
                 <h4 style="color:#f59e0b;">⚠️ <span data-i18n="extra_q_title">يحتاج معلومات إضافية</span></h4>
@@ -162,7 +124,6 @@
         <button id="saveExitBtn" class="main-btn" style="background:#10b981;" data-i18n="btn_save_exit">✅ حفظ التقرير وإنهاء</button>
         <button onclick="location.href='index.html'" class="main-btn" style="background:#6b7280;" data-i18n="btn_cancel">❌ إلغاء والعودة</button>
     </div>
-
 </div>
 
 <div id="imgModal" onclick="closeModal()">
@@ -172,12 +133,13 @@
 
 <script src="config.js"></script>
 <script type="module">
-// ✅ مسارات صحيحة
 import { db } from './js/firebase-config.js';
 import { ref, get, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 import { askGroq } from './js/gemini-ai.js';
 
-// ===== ترجمات =====
+// ✅ رابط الـ Function — يتحدث تلقائياً بعد firebase deploy
+const FUNCTION_URL = "https://us-central1-lifeband-affa0.cloudfunctions.net/sendEmergencySMS";
+
 const T = {
     ar: {
         em_title:"نظام LifeBand للطوارئ", em_hold:"اضغط مطولاً<br>لفتح الملف",
@@ -189,12 +151,13 @@ const T = {
         btn_save_exit:"✅ حفظ التقرير وإنهاء", btn_cancel:"❌ إلغاء والعودة",
         alert_success:"✅ تم حفظ البلاغ بنجاح", lang_label:"EN",
         file_prefix:"ملف: ", loading:"جاري التحليل...",
-        // ✅ واتساب
-        wa_title:"إرسال تنبيه واتساب لجهة الطوارئ",
-        btn_send_wa:"📲 فتح واتساب وإرسال التنبيه",
-        wa_sent_ok:"✅ تم فتح واتساب — تأكد من الإرسال",
-        wa_no_contact:"⚠️ لا توجد جهة طوارئ مسجلة. يمكن للمريض إضافتها من ملفه الشخصي.",
-        wa_contact_label:"جهة الطوارئ: "
+        sms_sending:"📤 جاري إرسال SMS لجهة الطوارئ...",
+        sms_sent:"✅ SMS أُرسل تلقائياً",
+        sms_failed:"⚠️ تعذّر إرسال SMS",
+        sms_no_num:"ℹ️ لا توجد جهة طوارئ مسجلة",
+        sms_no_num_detail:"يمكن للمريض إضافة رقم طوارئ من ملفه الشخصي",
+        sms_sent_detail:"وصلت رسالة SMS تلقائية تتضمن الحالة الصحية",
+        sms_fail_detail:"تحقق من اتصال الإنترنت أو أعد المحاولة"
     },
     en: {
         em_title:"LifeBand Emergency System", em_hold:"Hold to<br>open file",
@@ -206,15 +169,16 @@ const T = {
         btn_save_exit:"✅ Save & Exit", btn_cancel:"❌ Cancel",
         alert_success:"✅ Report saved", lang_label:"AR",
         file_prefix:"File: ", loading:"Analyzing...",
-        wa_title:"Send WhatsApp Emergency Alert",
-        btn_send_wa:"📲 Open WhatsApp & Send Alert",
-        wa_sent_ok:"✅ WhatsApp opened — please confirm send",
-        wa_no_contact:"⚠️ No emergency contact registered. Patient can add one from their profile.",
-        wa_contact_label:"Emergency Contact: "
+        sms_sending:"📤 Sending SMS to emergency contact...",
+        sms_sent:"✅ SMS sent automatically",
+        sms_failed:"⚠️ SMS delivery failed",
+        sms_no_num:"ℹ️ No emergency contact registered",
+        sms_no_num_detail:"Patient can add an emergency number from their profile",
+        sms_sent_detail:"Automatic SMS with health details was delivered",
+        sms_fail_detail:"Check internet connection or try again"
     }
 };
 
-// ===== أسئلة التشخيص =====
 const QUESTIONS = {
     ar: [
         { id:"q1", text:"ما الأعراض الظاهرة الآن؟", options:["فقدان الوعي","ألم في الصدر","صعوبة تنفس","نزيف","تشنجات","دوخة شديدة","غثيان/تقيؤ","لا شيء واضح"] },
@@ -232,27 +196,25 @@ const QUESTIONS = {
     ]
 };
 
-// ===== وسائط طبية =====
 const MEDIA_DB = {
-    "قلب":    { imgs:["https://images.pexels.com/photos/4386466/pexels-photo-4386466.jpeg?w=400"], yt:[{id:"587-cZxLvss",t:"CPR الإنعاش القلبي"},{id:"n4k7zJnTl78",t:"الذبحة الصدرية"}] },
-    "تنفس":   { imgs:["https://images.pexels.com/photos/8942991/pexels-photo-8942991.jpeg?w=400"], yt:[{id:"hizBvK8bA6E",t:"مناورة هيملك"},{id:"0Ks2KRVMQME",t:"التنفس الاصطناعي"}] },
-    "نزيف":   { imgs:["https://images.pexels.com/photos/6823568/pexels-photo-6823568.jpeg?w=400"], yt:[{id:"IgCSSbF6hmE",t:"إيقاف النزيف"},{id:"O9wTr_sMv8k",t:"ضمادة الجرح"}] },
-    "تشنج":   { imgs:["https://images.pexels.com/photos/3807571/pexels-photo-3807571.jpeg?w=400"], yt:[{id:"0Hf3ZNFCzLA",t:"التعامل مع نوبة الصرع"}] },
-    "إغماء":  { imgs:["https://images.pexels.com/photos/263337/pexels-photo-263337.jpeg?w=400"], yt:[{id:"4PqsEVgD1gg",t:"وضعية الإفاقة"}] },
-    "default":{ imgs:["https://images.pexels.com/photos/1170979/pexels-photo-1170979.jpeg?w=400"], yt:[{id:"587-cZxLvss",t:"الإسعافات الأولية"}] }
+    "قلب":   { imgs:["https://images.pexels.com/photos/4386466/pexels-photo-4386466.jpeg?w=400"], yt:[{id:"587-cZxLvss",t:"CPR"},{id:"n4k7zJnTl78",t:"الذبحة"}] },
+    "تنفس":  { imgs:["https://images.pexels.com/photos/8942991/pexels-photo-8942991.jpeg?w=400"], yt:[{id:"hizBvK8bA6E",t:"هيملك"},{id:"0Ks2KRVMQME",t:"تنفس اصطناعي"}] },
+    "نزيف":  { imgs:["https://images.pexels.com/photos/6823568/pexels-photo-6823568.jpeg?w=400"], yt:[{id:"IgCSSbF6hmE",t:"إيقاف النزيف"}] },
+    "تشنج":  { imgs:["https://images.pexels.com/photos/3807571/pexels-photo-3807571.jpeg?w=400"], yt:[{id:"0Hf3ZNFCzLA",t:"نوبة الصرع"}] },
+    "إغماء": { imgs:["https://images.pexels.com/photos/263337/pexels-photo-263337.jpeg?w=400"], yt:[{id:"4PqsEVgD1gg",t:"وضعية الإفاقة"}] },
+    "default":{ imgs:["https://images.pexels.com/photos/1170979/pexels-photo-1170979.jpeg?w=400"], yt:[{id:"587-cZxLvss",t:"إسعافات أولية"}] }
 };
 
-let patientData = {}, patientName = "", patientWaContact = "", answers = {}, extraAnswers = {}, lastAnalysis = "";
+let patientData={}, patientName="", patientId="", answers={}, extraAnswers={}, lastAnalysis="";
 const lang = () => localStorage.getItem('preferred_lang') || 'ar';
 
-// ===== تهيئة اللغة =====
 function applyLang(l) {
     document.documentElement.lang = l;
-    document.documentElement.dir = l==='ar'?'rtl':'ltr';
+    document.documentElement.dir  = l==='ar'?'rtl':'ltr';
     document.querySelectorAll('[data-i18n]').forEach(el => {
         const k = el.getAttribute('data-i18n');
         if(k==='em_hold') el.innerHTML = T[l][k];
-        else if(T[l][k]) el.innerText = T[l][k];
+        else if(T[l][k])  el.innerText  = T[l][k];
     });
     document.getElementById('langBtn').innerText = T[l].lang_label;
     localStorage.setItem('preferred_lang', l);
@@ -260,11 +222,9 @@ function applyLang(l) {
 document.getElementById('langBtn').onclick = () => applyLang(lang()==='ar'?'en':'ar');
 applyLang(lang());
 
-// ===== زر الضغط المطوّل =====
 let progress=0, holdTimer;
 const circle  = document.getElementById("progressCircle");
 const holdBtn = document.getElementById("holdBtn");
-
 const startHold = e => {
     e.preventDefault();
     holdTimer = setInterval(() => {
@@ -279,33 +239,27 @@ holdBtn.addEventListener("touchstart", startHold, {passive:false});
 window.addEventListener("mouseup", cancelHold);
 window.addEventListener("touchend", cancelHold);
 
-// ===== تحميل بيانات المريض =====
 async function loadPatientAndShowDiag() {
     document.getElementById("triggerSection").style.display="none";
     document.getElementById("diagSection").style.display="block";
     document.getElementById("loader").style.display="block";
 
-    const userId = new URLSearchParams(location.search).get("id");
-    if (userId) {
+    patientId = new URLSearchParams(location.search).get("id") || "";
+    if (patientId) {
         try {
-            const snap = await get(ref(db, `users/${userId}`));
-            if(snap.exists()) {
-                patientData    = snap.val();
-                patientName    = patientData.name    || "";
-                patientWaContact = patientData.waContact || "";
-            }
-        } catch(e) { console.error(e); }
+            const snap = await get(ref(db, `users/${patientId}`));
+            if(snap.exists()){ patientData=snap.val(); patientName=patientData.name||""; }
+        } catch(e){ console.error(e); }
     }
 
     document.getElementById("loader").style.display="none";
-    document.getElementById("patientNameDisplay").innerText = T[lang()].file_prefix + (patientName || "—");
+    document.getElementById("patientNameDisplay").innerText = T[lang()].file_prefix + (patientName||"—");
     renderDiagForm(QUESTIONS[lang()], 'diagForm', answers);
     renderStepDots(QUESTIONS[lang()].length);
     document.getElementById("analyzeBtn").style.display="block";
     document.getElementById("analyzeBtn").onclick = () => runAnalysis(false);
 }
 
-// ===== رسم الأسئلة =====
 function renderDiagForm(questions, containerId, answersObj) {
     document.getElementById(containerId).innerHTML = questions.map((q,i) => `
         <div class="diag-q">
@@ -321,51 +275,45 @@ function renderDiagForm(questions, containerId, answersObj) {
 }
 
 window.selectOption = (qId, val, type) => {
-    const obj = type==='main' ? answers : extraAnswers;
+    const obj = type==='main'?answers:extraAnswers;
     obj[qId] = val;
-    document.querySelectorAll(`#opts_${qId} button`).forEach(b => {
-        b.classList.toggle('selected', b.textContent.trim()===val);
-    });
+    document.querySelectorAll(`#opts_${qId} button`).forEach(b => b.classList.toggle('selected', b.textContent.trim()===val));
     updateStepDots();
 };
 
 function renderStepDots(count) {
-    document.getElementById('stepDots').innerHTML =
-        Array.from({length:count},(_,i)=>`<div class="step-dot" id="dot_${i}"></div>`).join('');
+    document.getElementById('stepDots').innerHTML = Array.from({length:count},(_,i)=>`<div class="step-dot" id="dot_${i}"></div>`).join('');
     updateStepDots();
 }
 function updateStepDots() {
     QUESTIONS[lang()].forEach((q,i) => {
         const dot = document.getElementById(`dot_${i}`);
         if(!dot) return;
-        if(answers[q.id]) { dot.classList.add('done'); dot.classList.remove('active'); }
-        else { dot.classList.remove('done'); dot.classList.add('active'); }
+        dot.classList.toggle('done',   !!answers[q.id]);
+        dot.classList.toggle('active', !answers[q.id]);
     });
 }
 
-// ===== تشغيل التحليل =====
 async function runAnalysis(isExtra) {
     const l = lang();
     document.getElementById("diagSection").style.display="none";
     document.getElementById("resultSection").style.display="block";
     document.getElementById("resultPatientName").innerText = T[l].file_prefix + (patientName||"—");
-
-    const aiText = document.getElementById("aiAnalysisText");
-    aiText.innerHTML = `<span style="opacity:0.5;">${T[l].loading}</span>`;
+    document.getElementById("aiAnalysisText").innerHTML = `<span style="opacity:0.5;">${T[l].loading}</span>`;
     document.getElementById("mediaBox").style.display="none";
     document.getElementById("extraQBox").style.display="none";
 
-    const allAnswers   = isExtra ? {...answers,...extraAnswers} : answers;
+    // ✅ إرسال SMS فوري — لا ينتظر AI
+    sendEmergencySMS(l);
+
+    const allAnswers    = isExtra?{...answers,...extraAnswers}:answers;
     const answerSummary = Object.entries(allAnswers).map(([k,v])=>`${k}: ${v}`).join('\n');
-
-    const prompt = `أنت طبيب طوارئ خبير. لديك المريض التالي:
-- الاسم: ${patientName || 'غير محدد'}
-- فصيلة الدم: ${patientData.bloodType || 'غير محدد'}
-- أمراض مزمنة: ${(patientData.diseases||[]).join('، ') || 'لا يوجد'}
-
+    const prompt = `أنت طبيب طوارئ خبير. المريض:
+- الاسم: ${patientName||'غير محدد'}
+- فصيلة الدم: ${patientData.bloodType||'غير محدد'}
+- أمراض مزمنة: ${(patientData.diseases||[]).join('، ')||'لا يوجد'}
 إجابات المسعف:
 ${answerSummary}
-
 المطلوب:
 التشخيص: (جملة واحدة)
 الإجراء: (3-4 خطوات)
@@ -375,154 +323,124 @@ ${answerSummary}
     try {
         const result = await askGroq(prompt);
         lastAnalysis = result;
-        aiText.innerText = result;
-
+        document.getElementById("aiAnalysisText").innerText = result;
         const catMatch = result.match(/التصنيف:\s*(\S+)/);
-        showMedia(catMatch ? catMatch[1] : 'default');
-
-        const needsMore = result.includes('معلومات_إضافية: نعم') || result.includes('معلومات_إضافية:نعم');
-        if(needsMore && !isExtra) showExtraQuestions();
-
-        // ✅ بناء رسالة الواتساب بعد اكتمال التحليل
-        buildWhatsAppMessage(result, l);
-
+        showMedia(catMatch?catMatch[1]:'default');
+        if((result.includes('معلومات_إضافية: نعم')||result.includes('معلومات_إضافية:نعم'))&&!isExtra) showExtraQuestions();
     } catch(e) {
-        aiText.innerText = "⚠️ تعذّر الاتصال بـ AI. " + e.message;
-        buildWhatsAppMessage("", l);
+        document.getElementById("aiAnalysisText").innerText = "⚠️ تعذّر الاتصال بـ AI. " + e.message;
     }
 }
 
-// ===== ✅ بناء رسالة واتساب الطوارئ =====
-function buildWhatsAppMessage(aiResult, l) {
-    const waSection     = document.getElementById('waSection');
-    const waContactInfo = document.getElementById('waContactInfo');
-    const waMsgPreview  = document.getElementById('waMsgPreview');
-    const sendWaBtn     = document.getElementById('sendWaBtn');
+// ✅ إرسال SMS تلقائي عبر Firebase Function
+async function sendEmergencySMS(l) {
+    const card   = document.getElementById('smsCard');
+    const title  = document.getElementById('smsTitle');
+    const detail = document.getElementById('smsDetail');
+    const emoji  = document.getElementById('smsEmoji');
 
-    if (!patientWaContact) {
-        waContactInfo.innerText = T[l].wa_no_contact;
-        waMsgPreview.style.display = "none";
-        sendWaBtn.style.display    = "none";
+    if (!patientData.waContact) {
+        card.className  = 'sms-card no-num';
+        emoji.className = 'sms-emoji';
+        emoji.innerText = 'ℹ️';
+        title.innerText  = T[l].sms_no_num;
+        detail.innerText = T[l].sms_no_num_detail;
         return;
     }
 
-    // استخراج التشخيص من نتيجة AI
-    const diagMatch   = aiResult.match(/التشخيص:\s*(.+)/);
-    const actionMatch = aiResult.match(/الإجراء:\s*([\s\S]+?)(?:التصنيف:|$)/);
-    const diagnosis   = diagMatch  ? diagMatch[1].trim()  : (l==='ar'?'جاري التحليل':'Being analyzed');
-    const action      = actionMatch? actionMatch[1].trim(): '';
+    title.innerText  = T[l].sms_sending;
+    detail.innerText = patientData.waContact.replace(/\d(?=\d{4})/g, '*');
 
-    const diseases    = (patientData.diseases||[]).join('، ') || (l==='ar'?'لا يوجد':'None');
-    const timestamp   = new Date().toLocaleString(l==='ar'?'ar-SA':'en-US');
+    try {
+        const resp = await fetch(FUNCTION_URL, {
+            method:  'POST',
+            headers: {'Content-Type':'application/json'},
+            body:    JSON.stringify({
+                patientId,
+                patientName,
+                bloodType: patientData.bloodType||'',
+                diseases:  patientData.diseases||[]
+            })
+        });
+        const data = await resp.json();
 
-    const msg = l === 'ar'
-        ? `🚨 *تنبيه طوارئ — LifeBand*
-
-👤 المريض: *${patientName || '—'}*
-🩸 فصيلة الدم: ${patientData.bloodType || '—'}
-💊 أمراض مزمنة: ${diseases}
-
-🔬 التشخيص المبدئي:
-${diagnosis}
-
-⚡ الإجراء الميداني:
-${action || 'يرجى الاتصال فوراً'}
-
-⏰ وقت التنبيه: ${timestamp}
-
-📲 هذا التنبيه أُرسل تلقائياً من نظام LifeBand الطبي`
-        : `🚨 *Emergency Alert — LifeBand*
-
-👤 Patient: *${patientName || '—'}*
-🩸 Blood Type: ${patientData.bloodType || '—'}
-💊 Conditions: ${diseases}
-
-🔬 Initial Diagnosis:
-${diagnosis}
-
-⚡ Field Action:
-${action || 'Please contact immediately'}
-
-⏰ Alert Time: ${timestamp}
-
-📲 This alert was sent automatically by LifeBand`;
-
-    waContactInfo.innerText = T[l].wa_contact_label + patientWaContact;
-    waMsgPreview.innerText  = msg;
-    waMsgPreview.style.display = "block";
-    sendWaBtn.style.display    = "block";
-
-    // ✅ رابط واتساب الفعلي
-    sendWaBtn.onclick = () => {
-        const encoded = encodeURIComponent(msg);
-        const waUrl   = `https://wa.me/${patientWaContact}?text=${encoded}`;
-        window.open(waUrl, '_blank');
-        document.getElementById('waSentBadge').classList.add('show');
-    };
+        if (data.sent) {
+            card.className  = 'sms-card sent';
+            emoji.className = 'sms-emoji';
+            emoji.innerText = '✅';
+            title.innerText  = T[l].sms_sent;
+            detail.innerText = `${T[l].sms_sent_detail} → ${data.to}`;
+        } else {
+            card.className  = 'sms-card no-num';
+            emoji.className = 'sms-emoji';
+            emoji.innerText = 'ℹ️';
+            title.innerText  = T[l].sms_no_num;
+            detail.innerText = T[l].sms_no_num_detail;
+        }
+    } catch(err) {
+        card.className  = 'sms-card failed';
+        emoji.className = 'sms-emoji';
+        emoji.innerText = '⚠️';
+        title.innerText  = T[l].sms_failed;
+        detail.innerText = T[l].sms_fail_detail;
+        console.error('SMS error:', err);
+    }
 }
 
-// ===== وسائط طبية =====
 function showMedia(category) {
-    const mediaKey = Object.keys(MEDIA_DB).find(k => category.includes(k)) || 'default';
-    const media = MEDIA_DB[mediaKey];
+    const key  = Object.keys(MEDIA_DB).find(k=>category.includes(k))||'default';
+    const media = MEDIA_DB[key];
     const grid  = document.getElementById("mediaGrid");
     grid.innerHTML = '';
     media.imgs.forEach(src => {
         const img = document.createElement('img');
-        img.src = src; img.className = 'media-img';
-        img.onclick = () => openModal(src);
+        img.src=src; img.className='media-img'; img.onclick=()=>openModal(src);
         grid.appendChild(img);
     });
     media.yt.forEach(v => {
         const div = document.createElement('div');
-        div.className = 'yt-thumb';
-        div.innerHTML = `<img src="https://img.youtube.com/vi/${v.id}/mqdefault.jpg" alt="${v.t}"><div class="play-icon">▶️</div>`;
-        div.onclick    = () => window.open(`https://www.youtube.com/watch?v=${v.id}`,'_blank');
+        div.className='yt-thumb';
+        div.innerHTML=`<img src="https://img.youtube.com/vi/${v.id}/mqdefault.jpg" alt="${v.t}"><div class="play-icon">▶️</div>`;
+        div.onclick=()=>window.open(`https://www.youtube.com/watch?v=${v.id}`,'_blank');
         grid.appendChild(div);
     });
     document.getElementById("mediaBox").style.display="block";
 }
 
-// ===== أسئلة إضافية =====
 function showExtraQuestions() {
     const l = lang();
     const extraQs = [
-        { id:"eq1", text: l==='ar'?"متى بدأت الأعراض؟":"When did symptoms start?", options: l==='ar'?["منذ دقائق","منذ ساعة","أكثر من ساعة","لا أعلم"]:["Minutes ago","1 hour ago","Over an hour","Unknown"] },
-        { id:"eq2", text: l==='ar'?"هل يعاني من حساسية لأدوية؟":"Any medication allergies?", options: l==='ar'?["نعم","لا","لا أعلم"]:["Yes","No","Unknown"] },
-        { id:"eq3", text: l==='ar'?"هل أخذ أي دواء اليوم؟":"Took medication today?", options: l==='ar'?["نعم","لا","لا أعلم"]:["Yes","No","Unknown"] }
+        {id:"eq1", text:l==='ar'?"متى بدأت الأعراض؟":"When did symptoms start?", options:l==='ar'?["منذ دقائق","منذ ساعة","أكثر من ساعة","لا أعلم"]:["Minutes ago","1 hour ago","Over an hour","Unknown"]},
+        {id:"eq2", text:l==='ar'?"هل يعاني من حساسية لأدوية؟":"Any medication allergies?", options:l==='ar'?["نعم","لا","لا أعلم"]:["Yes","No","Unknown"]},
+        {id:"eq3", text:l==='ar'?"هل أخذ أي دواء اليوم؟":"Took medication today?", options:l==='ar'?["نعم","لا","لا أعلم"]:["Yes","No","Unknown"]}
     ];
-    renderDiagForm(extraQs, 'extraDiagForm', extraAnswers);
+    renderDiagForm(extraQs,'extraDiagForm',extraAnswers);
     document.getElementById("extraQBox").style.display="block";
-    document.getElementById("reAnalyzeBtn").onclick = () => runAnalysis(true);
+    document.getElementById("reAnalyzeBtn").onclick=()=>runAnalysis(true);
 }
 
-// ===== Modal الصور =====
-window.openModal  = (src) => { document.getElementById("modalImg").src = src; document.getElementById("imgModal").classList.add("open"); };
-window.closeModal = ()    => document.getElementById("imgModal").classList.remove("open");
+window.openModal  = src => { document.getElementById("modalImg").src=src; document.getElementById("imgModal").classList.add("open"); };
+window.closeModal = ()  => document.getElementById("imgModal").classList.remove("open");
 
-// ===== حفظ التقرير =====
 document.getElementById('saveExitBtn').addEventListener('click', async () => {
-    const l          = lang();
-    const btn        = document.getElementById('saveExitBtn');
-    const diagnosis  = lastAnalysis || document.getElementById("aiAnalysisText").innerText;
-    btn.disabled     = true;
-    btn.innerText    = l==='ar'?'⏳ جاري الحفظ...':'⏳ Saving...';
+    const l   = lang();
+    const btn = document.getElementById('saveExitBtn');
+    btn.disabled=true; btn.innerText=l==='ar'?'⏳ جاري الحفظ...':'⏳ Saving...';
     try {
         await push(ref(db,"reports"),{
             patientName,
-            diagnosis,
-            bloodType:  patientData.bloodType || '',
-            diseases:   patientData.diseases  || [],
-            waAlertSent: !!patientWaContact,
-            timestamp:  new Date().toISOString(),
-            status:     "قيد الانتظار"
+            diagnosis:   lastAnalysis||document.getElementById("aiAnalysisText").innerText,
+            bloodType:   patientData.bloodType||'',
+            diseases:    patientData.diseases||[],
+            smsAlertSent:!!patientData.waContact,
+            timestamp:   new Date().toISOString(),
+            status:      "قيد الانتظار"
         });
         alert(T[l].alert_success);
-        location.href = "index.html";
+        location.href="index.html";
     } catch(e) {
-        btn.disabled  = false;
-        btn.innerText = T[l].btn_save_exit;
-        alert("Error saving report: " + e.message);
+        btn.disabled=false; btn.innerText=T[l].btn_save_exit;
+        alert("Error: "+e.message);
     }
 });
 </script>
