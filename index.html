@@ -3,429 +3,937 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LifeBand — أمانك الصحي في معصمك</title>
+    <title>LifeBand — الرعاية الطبية الذكية</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        /* ── Hero ── */
+        /* ─── PAGE-LEVEL OVERRIDES (Heltro style) ─── */
+        :root {
+            --lb-green:   #1a7a5e;
+            --lb-green-l: #e8f5f1;
+            --lb-navy:    #0a1628;
+            --lb-slate:   #2d3f55;
+            --lb-gold:    #c8a84b;
+            --lb-light:   #f7f9fc;
+            --lb-border:  #e4e9f0;
+        }
+
+        body { background: #fff; font-family: 'Tajawal', sans-serif; }
+
+        /* ── TOP BAR ── */
+        .topbar {
+            background: var(--lb-navy);
+            color: rgba(255,255,255,0.75);
+            font-size: 13px;
+            padding: 9px 0;
+            display: flex; align-items: center; justify-content: center;
+            gap: 32px;
+        }
+        .topbar a { color: var(--lb-gold); text-decoration: none; }
+        .topbar span { display: flex; align-items: center; gap: 6px; }
+
+        /* ── HERO ── */
         .hero {
             min-height: 92vh;
-            display: flex;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             align-items: center;
-            justify-content: center;
-            padding: 40px 0 60px;
+            gap: 0;
+            padding-top: var(--nav-h);
+            overflow: hidden;
             position: relative;
         }
-        .hero-inner {
-            display: flex;
-            align-items: center;
-            gap: 60px;
-            width: 100%;
+        .hero-left {
+            padding: clamp(40px, 6vw, 100px) clamp(24px, 5vw, 80px) 60px;
+            z-index: 2;
         }
-        .hero-text { flex: 1; min-width: 280px; }
-        .hero-visual { flex: 1; min-width: 280px; display: flex; justify-content: center; align-items: center; }
-
-        .hero-badge {
+        .hero-tag {
             display: inline-flex; align-items: center; gap: 8px;
-            background: rgba(59,91,219,0.09);
-            border: 1px solid rgba(59,91,219,0.2);
-            border-radius: var(--r-pill);
-            padding: 7px 18px;
-            font-size: 13px; font-weight: 700;
-            color: var(--primary);
-            margin-bottom: 24px;
-            animation: badgePulse 3s ease-in-out infinite;
+            background: var(--lb-green-l); color: var(--lb-green);
+            font-size: 12.5px; font-weight: 700; letter-spacing: 1.2px;
+            text-transform: uppercase;
+            padding: 6px 14px; border-radius: 999px;
+            margin-bottom: 28px;
+            border: 1px solid rgba(26,122,94,0.2);
         }
-        @keyframes badgePulse { 0%,100%{box-shadow:0 0 0 0 rgba(59,91,219,0.15);} 50%{box-shadow:0 0 0 8px rgba(59,91,219,0);} }
+        .hero-tag::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--lb-green); display: block; animation: pulse 2s ease-in-out infinite; }
+        @keyframes pulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.4);opacity:0.6} }
 
-        .hero-title {
-            font-size: clamp(2.4rem, 5vw, 4rem);
+        .hero h1 {
+            font-size: clamp(2.4rem, 5.5vw, 4.2rem);
             font-weight: 900;
-            line-height: 1.15;
-            color: var(--text-h);
-            margin-bottom: 20px;
-            letter-spacing: -0.5px;
+            line-height: 1.12;
+            color: var(--lb-navy);
+            margin-bottom: 22px;
+            letter-spacing: -1px;
         }
-        .hero-title .gradient-text {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .hero-desc {
-            font-size: 1.1rem;
-            color: var(--text-muted);
-            max-width: 480px;
-            margin-bottom: 36px;
-            line-height: 1.8;
-        }
-
-        .hero-btns { display: flex; gap: 14px; flex-wrap: wrap; }
-        .hero-btns .main-btn { width: auto; padding: 15px 40px; border-radius: var(--r-pill); font-size: 16px; }
-
-        /* Hero stats row */
-        .hero-stats {
-            display: flex; gap: 32px;
-            margin-top: 48px;
-            padding-top: 32px;
-            border-top: 1px solid var(--glass-border);
-        }
-        .hero-stat-num { font-size: 28px; font-weight: 900; color: var(--primary); line-height: 1; }
-        .hero-stat-label { font-size: 12px; color: var(--text-muted); font-weight: 600; margin-top: 4px; }
-
-        /* Floating device visual */
-        .device-wrap {
+        .hero h1 em {
+            font-style: normal;
+            color: var(--lb-green);
             position: relative;
-            width: 100%;
-            max-width: 420px;
         }
-        .device-img {
-            width: 100%;
-            filter: drop-shadow(0 20px 60px rgba(59,91,219,0.25));
-            animation: floatDevice 5s ease-in-out infinite;
-        }
-        @keyframes floatDevice {
-            0%,100%{ transform: translateY(0) rotate(-1deg); }
-            50%    { transform: translateY(-18px) rotate(1deg); }
-        }
-
-        /* Floating pills */
-        .pill {
+        .hero h1 em::after {
+            content: '';
             position: absolute;
-            background: var(--glass);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--r-pill);
-            padding: 10px 18px;
-            font-size: 13px; font-weight: 700;
-            display: flex; align-items: center; gap: 8px;
-            box-shadow: var(--shadow-md);
-            white-space: nowrap;
-            animation: pillFloat 4s ease-in-out infinite;
-            color: var(--text-h);
+            bottom: -2px; right: 0; left: 0;
+            height: 3px;
+            background: var(--lb-green);
+            border-radius: 2px;
+            opacity: 0.3;
         }
-        .pill-1 { top: 12%; right: -10%; animation-delay: 0s; }
-        .pill-2 { bottom: 20%; left: -8%; animation-delay: -2s; }
-        .pill-3 { top: 55%; right: -12%; animation-delay: -3.5s; }
-        @keyframes pillFloat {
-            0%,100%{ transform:translateY(0); }
-            50%    { transform:translateY(-8px); }
+        .hero-desc {
+            font-size: 16px; line-height: 1.8;
+            color: #5a6a82; max-width: 480px;
+            margin-bottom: 36px;
         }
-
-        /* Pulse ring */
-        .pulse-ring {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%,-50%);
-            width: 120%; height: 120%;
-            border-radius: 50%;
-            border: 1.5px solid rgba(59,91,219,0.15);
-            animation: pulseRing 3s ease-out infinite;
-        }
-        .pulse-ring:nth-child(2) { animation-delay: -1s; width:130%;height:130%; }
-        .pulse-ring:nth-child(3) { animation-delay: -2s; width:140%;height:140%; }
-        @keyframes pulseRing {
-            0%  { opacity:0.6; transform:translate(-50%,-50%) scale(0.9); }
-            100%{ opacity:0;   transform:translate(-50%,-50%) scale(1.1); }
-        }
-
-        /* ── Features ── */
-        .section { padding: 80px 0; }
-        .section-header { text-align: center; margin-bottom: 56px; }
-        .section-label {
+        .hero-btns { display: flex; gap: 14px; flex-wrap: wrap; }
+        .btn-primary {
             display: inline-flex; align-items: center; gap: 8px;
-            font-size: 12px; font-weight: 800; letter-spacing: 1.5px;
-            text-transform: uppercase; color: var(--primary);
-            background: rgba(59,91,219,0.08); border: 1px solid rgba(59,91,219,0.18);
-            padding: 6px 16px; border-radius: var(--r-pill);
+            background: var(--lb-navy); color: #fff;
+            padding: 14px 30px; border-radius: 8px;
+            font-weight: 700; font-size: 14.5px;
+            text-decoration: none; border: none; cursor: pointer;
+            font-family: inherit;
+            transition: all 0.22s;
+            box-shadow: 0 4px 18px rgba(10,22,40,0.25);
+        }
+        .btn-primary:hover { background: var(--lb-green); transform: translateY(-2px); box-shadow: 0 8px 28px rgba(26,122,94,0.35); }
+        .btn-secondary {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: transparent; color: var(--lb-navy);
+            padding: 13px 28px; border-radius: 8px;
+            font-weight: 700; font-size: 14.5px;
+            text-decoration: none; border: 1.5px solid var(--lb-border);
+            cursor: pointer; font-family: inherit;
+            transition: all 0.22s;
+        }
+        .btn-secondary:hover { border-color: var(--lb-navy); background: var(--lb-light); }
+
+        /* Hero mini-stats */
+        .hero-stats {
+            display: flex; gap: 32px; margin-top: 48px;
+            padding-top: 32px; border-top: 1px solid var(--lb-border);
+        }
+        .hero-stat-val { font-size: 28px; font-weight: 900; color: var(--lb-navy); line-height: 1; }
+        .hero-stat-lbl { font-size: 12.5px; color: #8899aa; margin-top: 4px; }
+
+        /* Hero right — image mosaic */
+        .hero-right {
+            position: relative;
+            height: 100%;
+            min-height: 580px;
+            overflow: hidden;
+        }
+        .hero-img-main {
+            position: absolute;
+            inset: 0;
+            background: url('https://images.pexels.com/photos/3376790/pexels-photo-3376790.jpeg?auto=compress&cs=tinysrgb&w=900') center/cover;
+        }
+        .hero-img-main::after {
+            content: '';
+            position: absolute; inset: 0;
+            background: linear-gradient(to right, #fff 0%, transparent 18%),
+                        linear-gradient(to top, rgba(10,22,40,0.4) 0%, transparent 50%);
+        }
+        .hero-badge {
+            position: absolute; bottom: 40px; right: 40px; z-index: 10;
+            background: #fff; border-radius: 16px;
+            padding: 18px 22px;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.14);
+            display: flex; align-items: center; gap: 14px;
+            min-width: 220px;
+        }
+        .hero-badge-icon {
+            width: 48px; height: 48px; border-radius: 12px;
+            background: var(--lb-green-l); display: flex;
+            align-items: center; justify-content: center;
+            font-size: 22px; flex-shrink: 0;
+        }
+        .hero-badge-num { font-size: 22px; font-weight: 900; color: var(--lb-navy); line-height: 1; }
+        .hero-badge-txt { font-size: 12px; color: #8899aa; margin-top: 2px; }
+
+        .hero-badge-2 {
+            position: absolute; top: 40px; left: 40px; z-index: 10;
+            background: var(--lb-navy); color: #fff;
+            border-radius: 16px; padding: 16px 20px;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.2);
+            display: flex; align-items: center; gap: 12px;
+        }
+        .hero-badge-2 .icon { font-size: 20px; }
+        .hero-badge-2 .txt { font-size: 13px; font-weight: 700; }
+        .hero-badge-2 .sub { font-size: 11px; opacity: 0.6; margin-top: 2px; }
+
+        /* ── TICKER ── */
+        .ticker-bar {
+            background: var(--lb-navy);
+            padding: 14px 0;
+            overflow: hidden;
+        }
+        .ticker-track {
+            display: flex; gap: 0;
+            animation: tickAr 25s linear infinite;
+            white-space: nowrap;
+        }
+        @keyframes tickAr { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+        [dir="ltr"] .ticker-track { animation-name: tickEn; }
+        @keyframes tickEn { 0%{transform:translateX(-50%)} 100%{transform:translateX(0)} }
+        .ticker-item {
+            display: inline-flex; align-items: center; gap: 10px;
+            padding: 0 36px;
+            font-size: 13.5px; font-weight: 700;
+            color: rgba(255,255,255,0.75);
+            letter-spacing: 0.3px;
+        }
+        .ticker-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--lb-gold); flex-shrink: 0; }
+
+        /* ── SECTION LABEL ── */
+        .sec-label {
+            display: inline-flex; align-items: center; gap: 8px;
+            font-size: 11.5px; font-weight: 800; letter-spacing: 1.5px;
+            text-transform: uppercase; color: var(--lb-green);
             margin-bottom: 16px;
         }
-        .section-title {
-            font-size: clamp(1.8rem, 3.5vw, 2.8rem);
-            font-weight: 900; color: var(--text-h); line-height: 1.2;
-            letter-spacing: -0.3px;
-        }
-        .section-desc { font-size: 1rem; color: var(--text-muted); max-width: 560px; margin: 14px auto 0; line-height: 1.8; }
+        .sec-label::before { content: ''; width: 20px; height: 2px; background: var(--lb-green); border-radius: 2px; }
 
-        .features-grid {
+        .sec-title {
+            font-size: clamp(1.7rem, 3.5vw, 2.6rem);
+            font-weight: 900; color: var(--lb-navy);
+            line-height: 1.18; letter-spacing: -0.5px;
+        }
+
+        /* ── ABOUT SECTION ── */
+        .about-section {
+            padding: 100px 0;
+            background: #fff;
+        }
+        .about-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px,1fr));
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+        }
+        .about-imgs {
+            position: relative;
+            height: 500px;
+        }
+        .about-img-main {
+            position: absolute;
+            top: 0; right: 0;
+            width: 75%; height: 80%;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+        }
+        .about-img-main img { width: 100%; height: 100%; object-fit: cover; }
+        .about-img-sm {
+            position: absolute;
+            bottom: 0; left: 0;
+            width: 52%; height: 52%;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 5px solid #fff;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.1);
+        }
+        .about-img-sm img { width: 100%; height: 100%; object-fit: cover; }
+        .about-exp-badge {
+            position: absolute;
+            top: 50%; right: -20px;
+            transform: translateY(-50%);
+            background: var(--lb-green);
+            color: #fff;
+            border-radius: 14px;
+            padding: 20px 16px;
+            text-align: center;
+            box-shadow: 0 8px 30px rgba(26,122,94,0.3);
+        }
+        .about-exp-num { font-size: 30px; font-weight: 900; line-height: 1; }
+        .about-exp-txt { font-size: 11px; opacity: 0.85; margin-top: 4px; line-height: 1.4; }
+
+        .about-content { padding-right: 20px; }
+        .about-desc { font-size: 15.5px; line-height: 1.85; color: #5a6a82; margin: 20px 0 32px; }
+        .about-list { list-style: none; display: flex; flex-direction: column; gap: 14px; margin-bottom: 36px; }
+        .about-list li {
+            display: flex; align-items: flex-start; gap: 12px;
+            font-size: 14.5px; color: var(--lb-slate); font-weight: 500;
+        }
+        .about-list .check {
+            width: 22px; height: 22px; border-radius: 50%;
+            background: var(--lb-green-l); color: var(--lb-green);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 11px; flex-shrink: 0; margin-top: 1px;
+        }
+
+        /* ── STATS STRIP ── */
+        .stats-strip {
+            background: var(--lb-light);
+            border-top: 1px solid var(--lb-border);
+            border-bottom: 1px solid var(--lb-border);
+            padding: 60px 0;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0;
+        }
+        .stat-item {
+            text-align: center;
+            padding: 0 24px;
+            border-left: 1px solid var(--lb-border);
+        }
+        .stat-item:last-child { border-right: 1px solid var(--lb-border); }
+        .stat-num {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 900; color: var(--lb-navy);
+            line-height: 1; margin-bottom: 8px;
+        }
+        .stat-num span { color: var(--lb-green); }
+        .stat-label { font-size: 13.5px; color: #8899aa; font-weight: 500; }
+        .stat-icon { font-size: 28px; margin-bottom: 12px; }
+
+        /* ── SERVICES SECTION ── */
+        .services-section {
+            padding: 100px 0;
+            background: #fff;
+        }
+        .services-head {
+            display: flex; justify-content: space-between; align-items: flex-end;
+            margin-bottom: 50px; gap: 24px;
+        }
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
             gap: 24px;
         }
-
-        /* ── How it works ── */
-        .steps-wrap {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
-            gap: 32px;
-            position: relative;
-        }
-        .step-card {
-            text-align: center;
-            padding: 36px 24px;
-            background: var(--bg-surface);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--r-xl);
-            box-shadow: var(--shadow-sm);
+        .service-card {
+            border-radius: 18px;
+            overflow: hidden;
+            border: 1px solid var(--lb-border);
             transition: all 0.3s;
-            position: relative;
+            cursor: pointer;
+            background: #fff;
         }
-        .step-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); }
-        .step-num {
-            width: 52px; height: 52px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white; font-size: 20px; font-weight: 900;
-            display: flex; align-items: center; justify-content: center;
-            margin: 0 auto 20px;
-            box-shadow: 0 6px 20px rgba(59,91,219,0.35);
+        .service-card:hover { transform: translateY(-6px); box-shadow: 0 20px 60px rgba(0,0,0,0.1); border-color: transparent; }
+        .service-card-img {
+            width: 100%; height: 210px; object-fit: cover;
+            display: block;
+            transition: transform 0.4s;
         }
-        .step-card h3 { font-size: 17px; font-weight: 800; color: var(--text-h); margin-bottom: 10px; }
-        .step-card p  { font-size: 13.5px; color: var(--text-muted); line-height: 1.7; }
+        .service-card:hover .service-card-img { transform: scale(1.04); }
+        .service-card-img-wrap { overflow: hidden; position: relative; }
+        .service-tag-badge {
+            position: absolute; top: 14px; right: 14px;
+            background: rgba(255,255,255,0.92);
+            font-size: 11.5px; font-weight: 700; color: var(--lb-green);
+            padding: 4px 12px; border-radius: 999px;
+        }
+        [dir="ltr"] .service-tag-badge { right: auto; left: 14px; }
+        .service-card-body { padding: 22px; }
+        .service-card-title {
+            font-size: 17px; font-weight: 800; color: var(--lb-navy);
+            margin-bottom: 8px;
+        }
+        .service-card-desc { font-size: 13.5px; color: #8899aa; line-height: 1.7; margin-bottom: 18px; }
+        .service-card-list { list-style: none; display: flex; flex-direction: column; gap: 6px; margin-bottom: 20px; }
+        .service-card-list li {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 13px; color: var(--lb-slate); font-weight: 500;
+        }
+        .service-card-list li::before { content: '+'; color: var(--lb-green); font-weight: 900; font-size: 14px; }
+        .service-link {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 13px; font-weight: 700; color: var(--lb-navy);
+            text-decoration: none;
+            border-bottom: 1.5px solid var(--lb-border);
+            padding-bottom: 2px;
+            transition: all 0.2s;
+        }
+        .service-link:hover { color: var(--lb-green); border-color: var(--lb-green); gap: 10px; }
 
-        /* ── CTA Banner ── */
-        .cta-banner {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            border-radius: var(--r-xl);
-            padding: 64px 48px;
-            text-align: center;
+        /* ── NFC FEATURE STRIP ── */
+        .nfc-strip {
+            background: var(--lb-navy);
+            padding: 80px 0;
             position: relative;
             overflow: hidden;
-            margin-bottom: 80px;
         }
-        .cta-banner::before {
-            content:'';
-            position:absolute; inset:0;
-            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        .nfc-strip::before {
+            content: '';
+            position: absolute; top: -100px; right: -100px;
+            width: 500px; height: 500px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(26,122,94,0.25), transparent 70%);
         }
-        .cta-banner h2 { font-size: clamp(1.6rem, 3vw, 2.5rem); font-weight: 900; color: white; margin-bottom: 14px; position:relative; }
-        .cta-banner p  { font-size: 1rem; color: rgba(255,255,255,0.8); max-width:500px; margin:0 auto 32px; position:relative; }
-        .cta-banner .main-btn {
-            width: auto; padding: 15px 48px;
-            background: white; color: var(--primary);
-            font-size: 16px; border-radius: var(--r-pill);
-            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        .nfc-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+        }
+        .nfc-content .sec-label { color: var(--lb-gold); }
+        .nfc-content .sec-label::before { background: var(--lb-gold); }
+        .nfc-content .sec-title { color: #fff; }
+        .nfc-desc { font-size: 15px; line-height: 1.8; color: rgba(255,255,255,0.65); margin: 20px 0 36px; }
+        .nfc-features { display: flex; flex-direction: column; gap: 20px; }
+        .nfc-feat {
+            display: flex; gap: 16px; align-items: flex-start;
+        }
+        .nfc-feat-icon {
+            width: 44px; height: 44px; border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.06);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px; flex-shrink: 0;
+        }
+        .nfc-feat-title { font-size: 14.5px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+        .nfc-feat-desc { font-size: 13px; color: rgba(255,255,255,0.55); line-height: 1.6; }
+
+        .nfc-visual {
+            display: flex; align-items: center; justify-content: center;
             position: relative;
         }
-        .cta-banner .main-btn:hover { background: white; opacity: 0.95; }
+        .nfc-band-mockup {
+            width: 280px; height: 280px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(26,122,94,0.3), rgba(200,168,75,0.2));
+            border: 1px solid rgba(255,255,255,0.1);
+            display: flex; align-items: center; justify-content: center;
+            position: relative;
+        }
+        .nfc-band-inner {
+            width: 190px; height: 190px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.12);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 64px;
+        }
+        .nfc-ring {
+            position: absolute; border-radius: 50%;
+            border: 1px solid rgba(26,122,94,0.3);
+            animation: ringPulse 3s ease-in-out infinite;
+        }
+        .nfc-ring:nth-child(1) { width: 320px; height: 320px; animation-delay: 0s; }
+        .nfc-ring:nth-child(2) { width: 380px; height: 380px; animation-delay: 0.8s; }
+        .nfc-ring:nth-child(3) { width: 440px; height: 440px; animation-delay: 1.6s; }
+        @keyframes ringPulse { 0%{opacity:0.4;transform:scale(0.95)} 50%{opacity:0.15;transform:scale(1)} 100%{opacity:0.4;transform:scale(0.95)} }
 
-        /* scroll reveal */
-        .reveal { opacity:0; transform:translateY(30px); transition:opacity 0.65s var(--ease), transform 0.65s var(--ease); }
-        .reveal.visible { opacity:1; transform:translateY(0); }
+        /* ── TIPS PREVIEW ── */
+        .tips-section {
+            padding: 100px 0;
+            background: var(--lb-light);
+        }
+        .tips-grid {
+            display: grid;
+            grid-template-columns: 1.4fr 1fr 1fr;
+            grid-template-rows: auto auto;
+            gap: 20px;
+            margin-top: 50px;
+        }
+        .tip-card {
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            background: #fff;
+            border: 1px solid var(--lb-border);
+            transition: all 0.3s;
+        }
+        .tip-card:hover { transform: translateY(-4px); box-shadow: 0 16px 50px rgba(0,0,0,0.09); }
+        .tip-card-big { grid-row: span 2; }
+        .tip-card-img {
+            width: 100%; height: 200px; object-fit: cover; display: block;
+        }
+        .tip-card-big .tip-card-img { height: 100%; min-height: 360px; }
+        .tip-card-body { padding: 20px; }
+        .tip-card-icon { font-size: 24px; margin-bottom: 10px; }
+        .tip-card-title { font-size: 16px; font-weight: 800; color: var(--lb-navy); margin-bottom: 6px; }
+        .tip-card-desc { font-size: 13px; color: #8899aa; line-height: 1.65; }
+        .tip-card-tag {
+            display: inline-block; font-size: 11px; font-weight: 700;
+            background: var(--lb-green-l); color: var(--lb-green);
+            padding: 3px 10px; border-radius: 999px; margin-bottom: 10px;
+        }
 
-        /* responsive */
-        @media (max-width:768px) {
-            .hero-inner { flex-direction: column-reverse; gap: 32px; }
-            .hero-text { text-align: center; }
-            .hero-desc { margin: 0 auto 32px; }
-            .hero-btns { justify-content: center; }
-            .hero-stats { justify-content: center; }
-            .pill-1,.pill-2,.pill-3 { display:none; }
-            .section { padding: 60px 0; }
-            .cta-banner { padding: 48px 24px; }
+        /* ── TESTIMONIALS ── */
+        .testimonials-section {
+            padding: 100px 0;
+            background: #fff;
+            overflow: hidden;
+        }
+        .testimonials-track {
+            display: flex; gap: 22px;
+            margin-top: 50px;
+            animation: slideTestimonials 28s linear infinite;
+        }
+        @keyframes slideTestimonials { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+        .testimonial-card {
+            flex-shrink: 0;
+            width: 360px;
+            background: var(--lb-light);
+            border: 1px solid var(--lb-border);
+            border-radius: 18px;
+            padding: 28px;
+        }
+        .testimonial-stars { color: var(--lb-gold); font-size: 15px; margin-bottom: 14px; letter-spacing: 2px; }
+        .testimonial-text { font-size: 14px; line-height: 1.8; color: var(--lb-slate); margin-bottom: 22px; }
+        .testimonial-author { display: flex; align-items: center; gap: 12px; }
+        .testimonial-avatar {
+            width: 44px; height: 44px; border-radius: 50%;
+            background: var(--lb-green-l);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px; flex-shrink: 0;
+        }
+        .testimonial-name { font-size: 14px; font-weight: 800; color: var(--lb-navy); }
+        .testimonial-role { font-size: 12px; color: #8899aa; }
+
+        /* ── CTA SECTION ── */
+        .cta-section {
+            padding: 100px 0;
+            background: var(--lb-light);
+        }
+        .cta-inner {
+            background: var(--lb-navy);
+            border-radius: 28px;
+            padding: clamp(40px, 6vw, 80px);
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 40px;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .cta-inner::before {
+            content: '';
+            position: absolute;
+            bottom: -80px; left: -80px;
+            width: 400px; height: 400px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(26,122,94,0.25), transparent 70%);
+        }
+        .cta-title { font-size: clamp(1.6rem, 3vw, 2.4rem); font-weight: 900; color: #fff; line-height: 1.2; margin-bottom: 12px; }
+        .cta-desc { font-size: 15px; color: rgba(255,255,255,0.6); line-height: 1.7; }
+        .cta-btns { display: flex; flex-direction: column; gap: 12px; flex-shrink: 0; }
+        .btn-gold {
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            background: var(--lb-gold); color: var(--lb-navy);
+            padding: 14px 30px; border-radius: 8px;
+            font-weight: 800; font-size: 14px; white-space: nowrap;
+            text-decoration: none; border: none; cursor: pointer; font-family: inherit;
+            transition: all 0.22s;
+        }
+        .btn-gold:hover { filter: brightness(1.08); transform: translateY(-2px); }
+        .btn-ghost {
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            background: transparent; color: rgba(255,255,255,0.8);
+            padding: 13px 28px; border-radius: 8px;
+            font-weight: 700; font-size: 14px; white-space: nowrap;
+            text-decoration: none; border: 1.5px solid rgba(255,255,255,0.2);
+            cursor: pointer; font-family: inherit;
+            transition: all 0.22s;
+        }
+        .btn-ghost:hover { border-color: rgba(255,255,255,0.5); color: #fff; }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 900px) {
+            .hero { grid-template-columns: 1fr; min-height: auto; }
+            .hero-right { min-height: 320px; }
+            .hero-img-main::after { background: linear-gradient(to bottom, #fff 0%, transparent 20%), linear-gradient(to top, rgba(10,22,40,0.3) 0%, transparent 50%); }
+            .about-grid { grid-template-columns: 1fr; gap: 40px; }
+            .about-imgs { height: 300px; }
+            .nfc-grid { grid-template-columns: 1fr; }
+            .nfc-visual { display: none; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .stat-item { padding: 20px; border: none; border-bottom: 1px solid var(--lb-border); }
+            .stat-item:last-child { border-right: none; }
+            .services-grid { grid-template-columns: 1fr; }
+            .services-head { flex-direction: column; align-items: flex-start; }
+            .tips-grid { grid-template-columns: 1fr; }
+            .tip-card-big { grid-row: span 1; }
+            .cta-inner { grid-template-columns: 1fr; text-align: center; }
+            .cta-btns { flex-direction: row; justify-content: center; flex-wrap: wrap; }
+            .topbar { display: none; }
+        }
+        @media (max-width: 600px) {
+            .hero h1 { font-size: 2rem; }
+            .hero-stats { gap: 20px; }
+            .hero-btns { flex-direction: column; }
+            .testimonials-section { padding: 60px 0; }
         }
     </style>
 </head>
 <body class="page-fade">
 
-<div class="container" id="main-layout">
-
-    <!-- ══ HERO ══ -->
-    <section class="hero">
-        <div class="hero-inner">
-
-            <!-- Text side -->
-            <div class="hero-text">
-                <div class="hero-badge">
-                    <span>✨</span>
-                    <span data-i18n="hero_badge">نظام طبي ذكي — الجيل القادم</span>
-                </div>
-                <h1 class="hero-title">
-                    <span data-i18n="hero_t1">أمانك الصحي</span><br>
-                    <span class="gradient-text" data-i18n="hero_t2">في معصمك.</span>
-                </h1>
-                <p class="hero-desc" data-i18n="hero_desc">
-                    نظام LifeBand يربط ملفك الطبي الكامل بتقنية NFC ليضمن وصول المسعفين لبياناتك في ثوانٍ معدودة.
-                </p>
-                <div class="hero-btns">
-                    <a href="register.html" class="main-btn" data-i18n="btn_start">ابدأ الآن</a>
-                    <a href="#features"     class="main-btn btn-outline btn-pill" style="width:auto;padding:15px 36px;" data-i18n="btn_about">اكتشف المزيد</a>
-                </div>
-                <div class="hero-stats">
-                    <div>
-                        <div class="hero-stat-num">+500</div>
-                        <div class="hero-stat-label" data-i18n="stat_users">مستخدم نشط</div>
-                    </div>
-                    <div>
-                        <div class="hero-stat-num">3s</div>
-                        <div class="hero-stat-label" data-i18n="stat_speed">متوسط وقت الوصول</div>
-                    </div>
-                    <div>
-                        <div class="hero-stat-num">100%</div>
-                        <div class="hero-stat-label" data-i18n="stat_secure">مشفّر وآمن</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Visual side -->
-            <div class="hero-visual">
-                <div class="device-wrap">
-                    <div class="pulse-ring"></div>
-                    <div class="pulse-ring"></div>
-                    <div class="pulse-ring"></div>
-                    <img class="device-img"
-                         src="https://i.postimg.cc/90GzRBCY/Chat-GPT-Image-6-fbrayr-2026-12-15-44-m-(1).png"
-                         alt="LifeBand Device">
-                    <div class="pill pill-1">❤️ <span data-i18n="pill_1">نبضات طبيعية</span></div>
-                    <div class="pill pill-2">🔒 <span data-i18n="pill_2">بيانات مشفرة</span></div>
-                    <div class="pill pill-3">⚡ <span data-i18n="pill_3">استجابة فورية</span></div>
-                </div>
-            </div>
-
-        </div>
-    </section>
-
-    <!-- ══ FEATURES ══ -->
-    <section class="section" id="features">
-        <div class="section-header reveal">
-            <div class="section-label">⚡ <span data-i18n="feat_label">المميزات الرئيسية</span></div>
-            <h2 class="section-title" data-i18n="feat_title">كل ما تحتاجه في لحظة الأزمة</h2>
-            <p class="section-desc" data-i18n="feat_desc">صممنا LifeBand ليكون رفيقك الصحي الأذكى — بسيط، سريع، وموثوق.</p>
-        </div>
-        <div class="features-grid">
-            <div class="feature-card reveal">
-                <div class="feature-icon">🛡️</div>
-                <h3 style="font-size:18px;font-weight:800;color:var(--text-h);margin-bottom:10px;" data-i18n="feat_1_title">حماية فورية</h3>
-                <p style="color:var(--text-muted);font-size:14px;line-height:1.75;" data-i18n="feat_1_desc">الوصول لبياناتك الطبية في ثوانٍ معدودة لمساعدة المسعفين على اتخاذ القرار الصحيح.</p>
-            </div>
-            <div class="feature-card reveal" style="transition-delay:0.1s;">
-                <div class="feature-icon">📡</div>
-                <h3 style="font-size:18px;font-weight:800;color:var(--text-h);margin-bottom:10px;" data-i18n="feat_2_title">تقنية NFC</h3>
-                <p style="color:var(--text-muted);font-size:14px;line-height:1.75;" data-i18n="feat_2_desc">لا يحتاج السوار لشحن — يعمل بمجرد تقريب أي هاتف منه عبر تقنية NFC المتطورة.</p>
-            </div>
-            <div class="feature-card reveal" style="transition-delay:0.2s;">
-                <div class="feature-icon">🔒</div>
-                <h3 style="font-size:18px;font-weight:800;color:var(--text-h);margin-bottom:10px;" data-i18n="feat_3_title">خصوصية تامة</h3>
-                <p style="color:var(--text-muted);font-size:14px;line-height:1.75;" data-i18n="feat_3_desc">تشفير عسكري لجميع بياناتك الحساسة — بياناتك ملكك فقط ولا يصل إليها أحد بدون إذنك.</p>
-            </div>
-            <div class="feature-card reveal" style="transition-delay:0.3s;">
-                <div class="feature-icon">🤖</div>
-                <h3 style="font-size:18px;font-weight:800;color:var(--text-h);margin-bottom:10px;" data-i18n="feat_4_title">ذكاء اصطناعي</h3>
-                <p style="color:var(--text-muted);font-size:14px;line-height:1.75;" data-i18n="feat_4_desc">تحليل طبي فوري يساعد المسعف على تشخيص حالتك واتخاذ الإجراء المناسب بدقة عالية.</p>
-            </div>
-            <div class="feature-card reveal" style="transition-delay:0.4s;">
-                <div class="feature-icon">🏆</div>
-                <h3 style="font-size:18px;font-weight:800;color:var(--text-h);margin-bottom:10px;" data-i18n="feat_5_title">نظام المكافآت</h3>
-                <p style="color:var(--text-muted);font-size:14px;line-height:1.75;" data-i18n="feat_5_desc">كل مسعف يباشر حالة يكسب نقاطاً تتراكم في رصيده — نكافئ المتطوعين على جهودهم.</p>
-            </div>
-            <div class="feature-card reveal" style="transition-delay:0.5s;">
-                <div class="feature-icon">🌐</div>
-                <h3 style="font-size:18px;font-weight:800;color:var(--text-h);margin-bottom:10px;" data-i18n="feat_6_title">ثنائي اللغة</h3>
-                <p style="color:var(--text-muted);font-size:14px;line-height:1.75;" data-i18n="feat_6_desc">يدعم النظام اللغتين العربية والإنجليزية بشكل كامل مع تصميم متجاوب يناسب جميع الأجهزة.</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- ══ HOW IT WORKS ══ -->
-    <section class="section">
-        <div class="section-header reveal">
-            <div class="section-label">📋 <span data-i18n="how_label">كيف يعمل</span></div>
-            <h2 class="section-title" data-i18n="how_title">ثلاث خطوات فقط</h2>
-        </div>
-        <div class="steps-wrap">
-            <div class="step-card reveal">
-                <div class="step-num">1</div>
-                <h3 data-i18n="step1_t">سجّل حسابك</h3>
-                <p data-i18n="step1_d">أنشئ ملفك الطبي الكامل في دقائق — اسمك، فصيلة دمك، وأمراضك المزمنة.</p>
-            </div>
-            <div class="step-card reveal" style="transition-delay:0.15s;">
-                <div class="step-num">2</div>
-                <h3 data-i18n="step2_t">ارتدِ السوار</h3>
-                <p data-i18n="step2_d">السوار مربوط برمز NFC يحمل معرّفك الطبي — ارتده دائماً لضمان سلامتك.</p>
-            </div>
-            <div class="step-card reveal" style="transition-delay:0.3s;">
-                <div class="step-num">3</div>
-                <h3 data-i18n="step3_t">طوارئ؟ ثوانٍ تكفي</h3>
-                <p data-i18n="step3_d">المسعف يقرّب هاتفه من السوار ويحصل فوراً على ملفك الطبي الكامل.</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- ══ CTA ══ -->
-    <div class="cta-banner reveal">
-        <h2 data-i18n="cta_title">انضم لمجتمع LifeBand اليوم</h2>
-        <p data-i18n="cta_desc">سجّل الآن مجاناً وابنِ ملفك الطبي الذكي — قرار واحد قد ينقذ حياتك.</p>
-        <a href="register.html" class="main-btn" data-i18n="btn_start">ابدأ الآن مجاناً →</a>
+    <!-- Top Bar -->
+    <div class="topbar">
+        <span>📍 المملكة العربية السعودية</span>
+        <span>📞 <a href="tel:911">الطوارئ: 911</a></span>
+        <span>⏰ متاح 24/7</span>
     </div>
 
-</div><!-- /container -->
+    <!-- Navbar (injected by layout.js) -->
+    <div id="main-layout" class="container" style="display:none;"></div>
 
-<script type="module">
-import { injectLayout } from './js/layout.js';
-import { auth } from './js/firebase-config.js';
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    <!-- ─── HERO ─── -->
+    <section class="hero">
+        <div class="hero-left">
+            <div class="hero-tag">ذكاء طبي متقدم · NFC</div>
+            <h1>رعاية طبية <em>ذكية</em> لحياة أكثر أماناً</h1>
+            <p class="hero-desc">
+                سوار LifeBand يربط ملفك الصحي الكامل بتقنية NFC — يُقرأ في ثانية واحدة بأي هاتف ذكي لضمان رعاية طارئة فورية ودقيقة.
+            </p>
+            <div class="hero-btns">
+                <a href="register.html" class="btn-primary">ابدأ الآن ←</a>
+                <a href="tips.html" class="btn-secondary">تصفح النصائح الطبية</a>
+            </div>
+            <div class="hero-stats">
+                <div>
+                    <div class="hero-stat-val">+١٢٠٠</div>
+                    <div class="hero-stat-lbl">مستخدم مسجّل</div>
+                </div>
+                <div>
+                    <div class="hero-stat-val">٩٨٪</div>
+                    <div class="hero-stat-lbl">رضا المرضى</div>
+                </div>
+                <div>
+                    <div class="hero-stat-val">&lt;٣٠ث</div>
+                    <div class="hero-stat-lbl">وقت قراءة الملف</div>
+                </div>
+            </div>
+        </div>
+        <div class="hero-right">
+            <div class="hero-img-main"></div>
+            <div class="hero-badge">
+                <div class="hero-badge-icon">🏆</div>
+                <div>
+                    <div class="hero-badge-num">+٣٤٠</div>
+                    <div class="hero-badge-txt">حالة طارئة تمت معالجتها</div>
+                </div>
+            </div>
+            <div class="hero-badge-2">
+                <div class="icon">📡</div>
+                <div>
+                    <div class="txt">NFC جاهز للقراءة</div>
+                    <div class="sub">بدون تطبيق مخصص</div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-injectLayout();
+    <!-- ─── TICKER ─── -->
+    <div class="ticker-bar">
+        <div class="ticker-track" id="tickerTrack"></div>
+    </div>
 
-// Scroll reveal
-const observer = new IntersectionObserver(entries => {
-    entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
-}, { threshold: 0.12 });
-document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+    <!-- ─── STATS STRIP ─── -->
+    <section class="stats-strip">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-icon">🏥</div>
+                    <div class="stat-num"><span class="counter" data-target="1200">0</span><span>+</span></div>
+                    <div class="stat-label">مريض مسجّل</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon">🚨</div>
+                    <div class="stat-num"><span class="counter" data-target="340">0</span><span>+</span></div>
+                    <div class="stat-label">حالة طارئة تمت</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon">⚡</div>
+                    <div class="stat-num"><span class="counter" data-target="30">0</span><span>ث</span></div>
+                    <div class="stat-label">وقت قراءة الملف</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon">🤝</div>
+                    <div class="stat-num"><span class="counter" data-target="98">0</span><span>٪</span></div>
+                    <div class="stat-label">رضا المستخدمين</div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-// i18n
-const T = {
-    ar: {
-        hero_badge:"نظام طبي ذكي — الجيل القادم",
-        hero_t1:"أمانك الصحي", hero_t2:"في معصمك.",
-        hero_desc:"نظام LifeBand يربط ملفك الطبي الكامل بتقنية NFC ليضمن وصول المسعفين لبياناتك في ثوانٍ معدودة.",
-        btn_start:"ابدأ الآن", btn_about:"اكتشف المزيد",
-        stat_users:"مستخدم نشط", stat_speed:"متوسط وقت الوصول", stat_secure:"مشفّر وآمن",
-        pill_1:"نبضات طبيعية", pill_2:"بيانات مشفرة", pill_3:"استجابة فورية",
-        feat_label:"المميزات الرئيسية", feat_title:"كل ما تحتاجه في لحظة الأزمة",
-        feat_desc:"صممنا LifeBand ليكون رفيقك الصحي الأذكى — بسيط، سريع، وموثوق.",
-        feat_1_title:"حماية فورية", feat_1_desc:"الوصول لبياناتك الطبية في ثوانٍ معدودة لمساعدة المسعفين على اتخاذ القرار الصحيح.",
-        feat_2_title:"تقنية NFC",   feat_2_desc:"لا يحتاج السوار لشحن — يعمل بمجرد تقريب أي هاتف منه.",
-        feat_3_title:"خصوصية تامة",feat_3_desc:"تشفير عسكري لجميع بياناتك الحساسة.",
-        feat_4_title:"ذكاء اصطناعي",feat_4_desc:"تحليل طبي فوري يساعد المسعف على تشخيص حالتك بدقة.",
-        feat_5_title:"نظام المكافآت",feat_5_desc:"كل مسعف يباشر حالة يكسب نقاطاً تتراكم في رصيده.",
-        feat_6_title:"ثنائي اللغة",feat_6_desc:"يدعم العربية والإنجليزية مع تصميم متجاوب.",
-        how_label:"كيف يعمل", how_title:"ثلاث خطوات فقط",
-        step1_t:"سجّل حسابك", step1_d:"أنشئ ملفك الطبي في دقائق.",
-        step2_t:"ارتدِ السوار", step2_d:"السوار مربوط برمز NFC يحمل معرّفك الطبي.",
-        step3_t:"طوارئ؟ ثوانٍ تكفي", step3_d:"المسعف يقرّب هاتفه ويحصل فوراً على ملفك.",
-        cta_title:"انضم لمجتمع LifeBand اليوم",
-        cta_desc:"سجّل الآن مجاناً وابنِ ملفك الطبي الذكي.",
-    },
-    en: {
-        hero_badge:"Smart Medical System — Next Generation",
-        hero_t1:"Your Health Safety", hero_t2:"On Your Wrist.",
-        hero_desc:"LifeBand links your complete medical file via NFC so paramedics access your data in seconds.",
-        btn_start:"Get Started", btn_about:"Learn More",
-        stat_users:"Active Users", stat_speed:"Avg. Access Time", stat_secure:"Encrypted & Safe",
-        pill_1:"Normal Heartbeat", pill_2:"Encrypted Data", pill_3:"Instant Response",
-        feat_label:"Key Features", feat_title:"Everything You Need in a Crisis",
-        feat_desc:"LifeBand is designed to be your smartest health companion — simple, fast, and reliable.",
-        feat_1_title:"Instant Protection",feat_1_desc:"Paramedics access your medical data in seconds to make the right call.",
-        feat_2_title:"NFC Technology",feat_2_desc:"No charging needed — works by simply scanning with any smartphone.",
-        feat_3_title:"Full Privacy",feat_3_desc:"Military-grade encryption for all your sensitive health information.",
-        feat_4_title:"AI Analysis",feat_4_desc:"Instant AI-powered triage helps rescuers diagnose accurately.",
-        feat_5_title:"Reward System",feat_5_desc:"Rescuers earn points for every case they handle.",
-        feat_6_title:"Bilingual",feat_6_desc:"Full Arabic & English support with responsive design.",
-        how_label:"How It Works", how_title:"Just Three Steps",
-        step1_t:"Register", step1_d:"Build your complete medical profile in minutes.",
-        step2_t:"Wear the Band", step2_d:"The band holds an NFC tag linked to your medical ID.",
-        step3_t:"Emergency? Seconds Save Lives", step3_d:"Rescuer scans the band and instantly gets your full file.",
-        cta_title:"Join LifeBand Today",
-        cta_desc:"Register free and build your smart medical file.",
-    }
-};
+    <!-- ─── ABOUT ─── -->
+    <section class="about-section">
+        <div class="container">
+            <div class="about-grid">
+                <div class="about-imgs">
+                    <div class="about-img-main">
+                        <img src="https://images.pexels.com/photos/4386467/pexels-photo-4386467.jpeg?auto=compress&cs=tinysrgb&w=700" alt="طبيب">
+                    </div>
+                    <div class="about-img-sm">
+                        <img src="https://images.pexels.com/photos/7578803/pexels-photo-7578803.jpeg?auto=compress&cs=tinysrgb&w=400" alt="مريض">
+                    </div>
+                    <div class="about-exp-badge">
+                        <div class="about-exp-num">٢٠٢٦</div>
+                        <div class="about-exp-txt">تأسست<br>المنصة</div>
+                    </div>
+                </div>
+                <div class="about-content">
+                    <div class="sec-label">من نحن</div>
+                    <h2 class="sec-title">رعاية طبية موثوقة تركّز على سلامة المريض وراحته</h2>
+                    <p class="about-desc">
+                        LifeBand منصة طبية ذكية تربط ملفك الصحي الكامل بسوار NFC يُقرأ فورياً في حالات الطوارئ — بدون أي تطبيق أو اتصال إنترنت. نحن نؤمن بأن السرعة في الطوارئ تنقذ الأرواح.
+                    </p>
+                    <ul class="about-list">
+                        <li><span class="check">✓</span> ملف طبي رقمي كامل — أمراض، أدوية، فصيلة دم</li>
+                        <li><span class="check">✓</span> تنبيهات واتساب فورية لجهة الطوارئ</li>
+                        <li><span class="check">✓</span> تحليل أعراض بالذكاء الاصطناعي للمسعفين</li>
+                        <li><span class="check">✓</span> أمان من الدرجة الطبية — Firebase مع قواعد صارمة</li>
+                    </ul>
+                    <a href="innovation.html" class="btn-primary" style="width:auto;display:inline-flex;">اكتشف التقنية ←</a>
+                </div>
+            </div>
+        </div>
+    </section>
 
-const lang = localStorage.getItem('preferred_lang') || 'ar';
-document.querySelectorAll('[data-i18n]').forEach(el => {
-    const k = el.getAttribute('data-i18n');
-    if(T[lang][k]) el.innerText = T[lang][k];
-});
-</script>
+    <!-- ─── SERVICES ─── -->
+    <section class="services-section">
+        <div class="container">
+            <div class="services-head">
+                <div>
+                    <div class="sec-label">خدماتنا</div>
+                    <h2 class="sec-title">خدمات طبية شاملة<br>تخدمك في كل لحظة</h2>
+                </div>
+                <a href="tips.html" class="btn-secondary">عرض الكل →</a>
+            </div>
+            <div class="services-grid">
+                <div class="service-card">
+                    <div class="service-card-img-wrap">
+                        <img src="https://images.pexels.com/photos/40568/medical-appointment-doctor-healthcare-40568.jpeg?auto=compress&cs=tinysrgb&w=600" class="service-card-img" alt="طوارئ">
+                        <span class="service-tag-badge">طوارئ</span>
+                    </div>
+                    <div class="service-card-body">
+                        <h3 class="service-card-title">استجابة طوارئ فورية</h3>
+                        <p class="service-card-desc">نظام بلاغات مباشر يربط المريض بأقرب مسعف متطوع خلال ثوانٍ.</p>
+                        <ul class="service-card-list">
+                            <li>قراءة NFC فورية</li>
+                            <li>تنبيه واتساب تلقائي</li>
+                            <li>تحديد موقع فوري</li>
+                        </ul>
+                        <a href="active-reports.html" class="service-link">اكتشف المزيد ←</a>
+                    </div>
+                </div>
+                <div class="service-card">
+                    <div class="service-card-img-wrap">
+                        <img src="https://images.pexels.com/photos/7088483/pexels-photo-7088483.jpeg?auto=compress&cs=tinysrgb&w=600" class="service-card-img" alt="ملف طبي">
+                        <span class="service-tag-badge">ملف رقمي</span>
+                    </div>
+                    <div class="service-card-body">
+                        <h3 class="service-card-title">الملف الطبي الذكي</h3>
+                        <p class="service-card-desc">ملفك الصحي الكامل في سوار NFC — أمراض، أدوية، حساسية، وجهة طوارئ.</p>
+                        <ul class="service-card-list">
+                            <li>فصيلة الدم والأمراض</li>
+                            <li>قائمة الأدوية</li>
+                            <li>جهة اتصال الطوارئ</li>
+                        </ul>
+                        <a href="profile.html" class="service-link">اكتشف المزيد ←</a>
+                    </div>
+                </div>
+                <div class="service-card">
+                    <div class="service-card-img-wrap">
+                        <img src="https://images.pexels.com/photos/3913025/pexels-photo-3913025.jpeg?auto=compress&cs=tinysrgb&w=600" class="service-card-img" alt="تطوع">
+                        <span class="service-tag-badge">تطوع</span>
+                    </div>
+                    <div class="service-card-body">
+                        <h3 class="service-card-title">برنامج المتطوعين الصحيين</h3>
+                        <p class="service-card-desc">انضم كمسعف متطوع، اكسب نقاطاً واحصل على شهادات معتمدة لكل حالة.</p>
+                        <ul class="service-card-list">
+                            <li>شهادات معتمدة</li>
+                            <li>نظام نقاط ومكافآت</li>
+                            <li>تدريب مستمر</li>
+                        </ul>
+                        <a href="volunteering.html" class="service-link">اكتشف المزيد ←</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ─── NFC FEATURE STRIP ─── -->
+    <section class="nfc-strip">
+        <div class="container">
+            <div class="nfc-grid">
+                <div class="nfc-content">
+                    <div class="sec-label">التقنية</div>
+                    <h2 class="sec-title">قللنا وقت الاستجابة<br>في الطوارئ بـ ٧٠٪</h2>
+                    <p class="nfc-desc">
+                        بفضل تقنية NFC والذكاء الاصطناعي، يحصل المسعف على كامل التاريخ الطبي للمريض خلال ثانية واحدة — حتى لو كان المريض فاقداً للوعي.
+                    </p>
+                    <div class="nfc-features">
+                        <div class="nfc-feat">
+                            <div class="nfc-feat-icon">📡</div>
+                            <div>
+                                <div class="nfc-feat-title">NFC بدون تطبيق</div>
+                                <div class="nfc-feat-desc">يُقرأ الملف الطبي بأي هاتف اندرويد أو آيفون مباشرة</div>
+                            </div>
+                        </div>
+                        <div class="nfc-feat">
+                            <div class="nfc-feat-icon">🤖</div>
+                            <div>
+                                <div class="nfc-feat-title">AI تحليل الأعراض</div>
+                                <div class="nfc-feat-desc">نموذج Llama 3.3 يحلل الأعراض ويقدم توصيات طبية فورية</div>
+                            </div>
+                        </div>
+                        <div class="nfc-feat">
+                            <div class="nfc-feat-icon">💬</div>
+                            <div>
+                                <div class="nfc-feat-title">تنبيه واتساب فوري</div>
+                                <div class="nfc-feat-desc">تُرسل رسالة تلقائية لجهة الطوارئ تتضمن الموقع والحالة</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="nfc-visual">
+                    <div class="nfc-ring"></div>
+                    <div class="nfc-ring"></div>
+                    <div class="nfc-ring"></div>
+                    <div class="nfc-band-mockup">
+                        <div class="nfc-band-inner">⚕️</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ─── TIPS PREVIEW ─── -->
+    <section class="tips-section">
+        <div class="container">
+            <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:20px;">
+                <div>
+                    <div class="sec-label">النصائح الطبية</div>
+                    <h2 class="sec-title">نصائح موثوقة لصحة<br>أفضل كل يوم</h2>
+                </div>
+                <a href="tips.html" class="btn-secondary">عرض الكل →</a>
+            </div>
+            <div class="tips-grid">
+                <div class="tip-card tip-card-big">
+                    <img src="https://images.pexels.com/photos/1452115/pexels-photo-1452115.jpeg?auto=compress&cs=tinysrgb&w=600" class="tip-card-img" alt="ماء">
+                    <div class="tip-card-body">
+                        <span class="tip-card-tag">ترطيب</span>
+                        <div class="tip-card-icon">💧</div>
+                        <h3 class="tip-card-title">٨ أكواب ماء يومياً</h3>
+                        <p class="tip-card-desc">الترطيب الكافي يحسن وظائف الكلى، ينشط الدورة الدموية، ويقلل الصداع والتعب المزمن.</p>
+                    </div>
+                </div>
+                <div class="tip-card">
+                    <img src="https://images.pexels.com/photos/3771069/pexels-photo-3771069.jpeg?auto=compress&cs=tinysrgb&w=400" class="tip-card-img" alt="نوم">
+                    <div class="tip-card-body">
+                        <span class="tip-card-tag">نوم</span>
+                        <div class="tip-card-icon">🌙</div>
+                        <h3 class="tip-card-title">نوم عميق ٧-٨ ساعات</h3>
+                        <p class="tip-card-desc">يعزز المناعة ويحسن التركيز والمزاج.</p>
+                    </div>
+                </div>
+                <div class="tip-card">
+                    <img src="https://images.pexels.com/photos/601177/pexels-photo-601177.jpeg?auto=compress&cs=tinysrgb&w=400" class="tip-card-img" alt="مشي">
+                    <div class="tip-card-body">
+                        <span class="tip-card-tag">نشاط</span>
+                        <div class="tip-card-icon">🏃</div>
+                        <h3 class="tip-card-title">٣٠ دقيقة مشي يومياً</h3>
+                        <p class="tip-card-desc">يقلل خطر أمراض القلب بنسبة ٣٥٪.</p>
+                    </div>
+                </div>
+                <div class="tip-card">
+                    <img src="https://images.pexels.com/photos/1143754/pexels-photo-1143754.jpeg?auto=compress&cs=tinysrgb&w=400" class="tip-card-img" alt="خضروات">
+                    <div class="tip-card-body">
+                        <span class="tip-card-tag">تغذية</span>
+                        <div class="tip-card-icon">🥗</div>
+                        <h3 class="tip-card-title">خمس حصص خضروات</h3>
+                        <p class="tip-card-desc">الألياف الطبيعية تدعم الجهاز الهضمي وتقلل الكوليسترول.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ─── TESTIMONIALS ─── -->
+    <section class="testimonials-section">
+        <div class="container">
+            <div class="sec-label">آراء المستخدمين</div>
+            <h2 class="sec-title">ماذا يقول مستخدمو LifeBand؟</h2>
+        </div>
+        <div style="overflow:hidden;margin-top:0;">
+            <div class="testimonials-track" id="testimonialsTrack"></div>
+        </div>
+    </section>
+
+    <!-- ─── CTA ─── -->
+    <section class="cta-section">
+        <div class="container">
+            <div class="cta-inner">
+                <div>
+                    <h2 class="cta-title">ابدأ حمايتك الطبية اليوم</h2>
+                    <p class="cta-desc">سجّل مجاناً واحصل على سوار LifeBand الذكي — رفيقك في كل لحظة طارئة.</p>
+                </div>
+                <div class="cta-btns">
+                    <a href="register.html" class="btn-gold">إنشاء حساب مجاني ←</a>
+                    <a href="volunteering.html" class="btn-ghost">انضم كمتطوع</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script type="module">
+        import { injectLayout } from './js/layout.js';
+        injectLayout();
+
+        /* ── Ticker ── */
+        const lang = localStorage.getItem('preferred_lang') || 'ar';
+        const tickerItems = lang === 'ar'
+            ? ['🚨 حدّث بياناتك الطبية دورياً', '💡 المشي يحسّن صحتك فوراً', '📡 اقرأ الملف الطبي بـ NFC', '🏆 انضم كمتطوع واكسب نقاطاً', '🔒 بياناتك مشفرة بالكامل', '⚕️ LifeBand — رعاية طبية ذكية']
+            : ['🚨 Update your medical data', '💡 Walking improves your health', '📡 Read files via NFC', '🏆 Join as a volunteer', '🔒 Data fully encrypted', '⚕️ LifeBand — Smart Healthcare'];
+
+        const tickerEl = document.getElementById('tickerTrack');
+        const tickerHTML = [...tickerItems, ...tickerItems].map(t =>
+            `<span class="ticker-item"><span class="ticker-dot"></span>${t}</span>`
+        ).join('');
+        tickerEl.innerHTML = tickerHTML;
+
+        /* ── Testimonials ── */
+        const testimonials = [
+            { name: 'سارة الأحمدي', role: 'مريضة', text: 'سوار LifeBand أنقذ حياتي — المسعف قرأ ملفي الطبي في ثانية واحدة وعرف أنني أعاني من حساسية شديدة.', avatar: '👩' },
+            { name: 'خالد المطيري', role: 'مسعف متطوع', text: 'كمسعف، النظام رائع جداً. أصل للملف الطبي فوراً دون أن أحتاج لسؤال المريض الذي قد يكون فاقداً للوعي.', avatar: '👨‍⚕️' },
+            { name: 'نورة السبيعي', role: 'مريضة مزمنة', text: 'أعاني من السكري وضغط الدم. الآن أشعر بأمان تام لأن بياناتي الطبية الكاملة في سواري دائماً.', avatar: '👩‍🦳' },
+            { name: 'محمد العتيبي', role: 'متطوع صحي', text: 'حصلت على ٢٠٠ نقطة ظرف شهر واحد من المباشرة بالحالات. النظام يقدّر تطوعنا بشكل ممتاز.', avatar: '🧑' },
+            { name: 'فاطمة الشمري', role: 'مريضة', text: 'التنبيه التلقائي على واتساب لعائلتي كان مطمئناً جداً — وصلتهم الرسالة فور فتح ملفي الطبي في الطوارئ.', avatar: '👩‍💼' },
+        ];
+        const trackEl = document.getElementById('testimonialsTrack');
+        const tesHTML = [...testimonials, ...testimonials].map(t => `
+            <div class="testimonial-card">
+                <div class="testimonial-stars">★★★★★</div>
+                <p class="testimonial-text">${t.text}</p>
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar">${t.avatar}</div>
+                    <div>
+                        <div class="testimonial-name">${t.name}</div>
+                        <div class="testimonial-role">${t.role}</div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+        trackEl.innerHTML = tesHTML;
+
+        /* ── Counter animation ── */
+        function animateCounters() {
+            document.querySelectorAll('.counter').forEach(el => {
+                const target = +el.dataset.target;
+                const duration = 1800;
+                const start = performance.now();
+                function update(now) {
+                    const elapsed = now - start;
+                    const progress = Math.min(elapsed / duration, 1);
+                    const ease = 1 - Math.pow(1 - progress, 3);
+                    el.textContent = Math.round(ease * target).toLocaleString('ar-SA');
+                    if (progress < 1) requestAnimationFrame(update);
+                }
+                requestAnimationFrame(update);
+            });
+        }
+        const statsObserver = new IntersectionObserver(entries => {
+            entries.forEach(e => { if (e.isIntersecting) { animateCounters(); statsObserver.disconnect(); } });
+        }, { threshold: 0.4 });
+        const statsEl = document.querySelector('.stats-strip');
+        if (statsEl) statsObserver.observe(statsEl);
+    </script>
 </body>
 </html>
