@@ -363,7 +363,7 @@ async function sendTelegramAlert(l) {
 
         // ✅ نرسل عبر Firebase Function بدل تيليغرام مباشرة — يحل مشكلة CORS
         const resp = await fetch(
-            'https://us-central1-lifeband-affa0.cloudfunctions.net/sendTelegramAlert',
+            'https://lifeband-telegram.fyyghgggg.workers.dev',
             {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
