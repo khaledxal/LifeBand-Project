@@ -6,19 +6,19 @@
     <title>LifeBand - إدارة الملف الطبي</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        .wa-preview {
+        .tg-preview {
             display: none;
             margin-top: 10px;
-            background: rgba(37,211,102,0.08);
-            border: 1px solid rgba(37,211,102,0.3);
+            background: rgba(34,158,217,0.08);
+            border: 1px solid rgba(34,158,217,0.3);
             border-radius: 12px;
             padding: 12px 16px;
             font-size: 13px;
             color: var(--text-main);
             line-height: 1.6;
         }
-        .wa-preview.visible { display: block; }
-        .wa-num { color: #25D366; font-weight: bold; }
+        .tg-preview.visible { display: block; }
+        .wa-num { color: #229ED9; font-weight: bold; }
     </style>
 </head>
 <body class="page-fade">
@@ -68,24 +68,24 @@
                 <!-- ✅ قسم واتساب الطوارئ -->
                 <div class="input-group" style="margin-top: 25px; border-top: 1px solid var(--glass-border); padding-top: 20px;">
                     <label style="display:flex; align-items:center; gap:8px;">
-                        <span style="font-size:20px;">📱</span>
-                        <span data-i18n="label_wa_contact">رقم واتساب جهة الطوارئ:</span>
+                        <span style="font-size:20px;">✈️</span>
+                        <span data-i18n="label_tg_contact">رقم معرّف تيليغرام جهة الطوارئ:</span>
                     </label>
-                    <input type="tel" id="userWaContact" class="input-style" style="margin-top:8px;"
-                           placeholder="966501234567"
+                    <input type="tel" id="userTgChatId" class="input-style" style="margin-top:8px;"
+                           placeholder="Chat ID من @userinfobot"
                            pattern="[0-9]{9,15}">
-                    <small style="color:var(--text-muted); font-size:12px; margin-top:6px; display:block;" data-i18n="hint_wa">
-                        أدخل الرقم الدولي بدون + مثال: 966501234567 — سيصلهم تنبيه فوري عند فتح ملفك في الطوارئ
+                    <small style="color:var(--text-muted); font-size:12px; margin-top:6px; display:block;" data-i18n="hint_tg">
+                        أدخل الرقم الدولي بدون + مثال: Chat ID من @userinfobot — سيصلهم تنبيه تيليغرام فوري عند فتح ملفك في الطوارئ
                     </small>
                     <!-- معاينة رسالة الواتساب -->
-                    <div id="waPreview" class="wa-preview">
-                        <strong>📋 معاينة رسالة الطوارئ:</strong><br>
-                        <span id="waPreviewText"></span>
+                    <div id="tgPreview" class="wa-preview">
+                        <strong>📋 معاينة رسالة تيليغرام:</strong><br>
+                        <span id="tgPreviewText"></span>
                     </div>
-                    <button type="button" id="testWaBtn" class="main-btn" 
-                            style="margin-top:10px; background:#25D366; width:auto; padding:10px 24px; font-size:14px;"
-                            data-i18n="btn_test_wa">
-                        🟢 معاينة رسالة الطوارئ
+                    <button type="button" id="testTgBtn" class="main-btn" 
+                            style="margin-top:10px; background:#229ED9; width:auto; padding:10px 24px; font-size:14px;"
+                            data-i18n="btn_test_tg">
+                        ✈️ معاينة رسالة تيليغرام
                     </button>
                 </div>
 
@@ -137,9 +137,9 @@
                 label_blood: "فصيلة الدم:", label_chronic: "الأمراض المزمنة:",
                 dis_diabetes:"السكري", dis_pressure:"الضغط", dis_asthma:"الربو",
                 dis_heart:"أمراض القلب", dis_allergy:"حساسية دواء", dis_epilepsy:"الصرع",
-                label_wa_contact: "رقم واتساب جهة الطوارئ:",
-                hint_wa: "مثال: 966501234567 — سيصلهم تنبيه فوري عند فتح ملفك في الطوارئ",
-                btn_test_wa: "🟢 معاينة رسالة الطوارئ",
+                label_tg_contact: "رقم معرّف تيليغرام جهة الطوارئ:",
+                hint_tg: "مثال: Chat ID من @userinfobot — سيصلهم تنبيه تيليغرام فوري عند فتح ملفك في الطوارئ",
+                btn_test_tg: "✈️ معاينة رسالة تيليغرام",
                 btn_save: "💾 حفظ التعديلات", btn_ai_tips: "✨ نصائح AI مخصصة لحالتي",
                 btn_share: "🔗 نسخ رابط الطوارئ", btn_export: "📄 تصدير البيانات",
                 btn_send: "إرسال",
@@ -148,8 +148,8 @@
                 save_ok: "تم التحديث بنجاح! ✅",
                 save_fail: "خطأ في الحفظ: ",
                 copy_ok: "✅ تم نسخ الرابط!",
-                no_wa: "⚠️ أدخل رقم واتساب أولاً في الحقل أعلاه",
-                wa_preview_title: "📋 معاينة رسالة الطوارئ:"
+                no_tg: "⚠️ أدخل Chat ID أولاً في الحقل أعلاه",
+                tg_preview_title: "📋 معاينة رسالة تيليغرام:"
             },
             en: {
                 profile_title: "Medical Profile Management",
@@ -157,9 +157,9 @@
                 label_blood: "Blood Type:", label_chronic: "Chronic Diseases:",
                 dis_diabetes:"Diabetes", dis_pressure:"Hypertension", dis_asthma:"Asthma",
                 dis_heart:"Heart Disease", dis_allergy:"Drug Allergy", dis_epilepsy:"Epilepsy",
-                label_wa_contact: "Emergency WhatsApp Number:",
-                hint_wa: "Example: 966501234567 — They'll get an instant alert when your emergency file is opened",
-                btn_test_wa: "🟢 Preview Emergency Message",
+                label_tg_contact: "Emergency Telegram Chat ID:",
+                hint_tg: "Example: Chat ID من @userinfobot — They'll get an instant alert when your emergency file is opened",
+                btn_test_tg: "🟢 Preview Emergency Message",
                 btn_save: "💾 Save Changes", btn_ai_tips: "✨ My Personalized AI Tips",
                 btn_share: "🔗 Copy Emergency Link", btn_export: "📄 Export Data",
                 btn_send: "Send",
@@ -168,8 +168,8 @@
                 save_ok: "Updated successfully! ✅",
                 save_fail: "Save error: ",
                 copy_ok: "✅ Link copied!",
-                no_wa: "⚠️ Enter a WhatsApp number first",
-                wa_preview_title: "📋 Emergency message preview:"
+                no_tg: "⚠️ Enter Telegram Chat ID first",
+                tg_preview_title: "📋 Emergency message preview:"
             }
         };
 
@@ -200,7 +200,7 @@
                 document.getElementById('userName').value      = data.name      || "";
                 document.getElementById('userIdNo').value      = data.idNo      || "";
                 document.getElementById('userBlood').value     = data.bloodType || "A+";
-                document.getElementById('userWaContact').value = data.waContact || "";
+                document.getElementById('userTgChatId').value = data.tgChatId || "";
 
                 const savedDiseases = data.diseases || [];
                 document.querySelectorAll('#diseasesList input').forEach(input => {
@@ -210,11 +210,11 @@
         });
 
         // ✅ زر معاينة رسالة الواتساب
-        document.getElementById('testWaBtn').addEventListener('click', () => {
+        document.getElementById('testTgBtn').addEventListener('click', () => {
             const l = lang();
-            const waNum = document.getElementById('userWaContact').value.trim();
+            const waNum = document.getElementById('userTgChatId').value.trim(); // chat_id
             if (!waNum) {
-                alert(T[l].no_wa);
+                alert(T[l].no_tg);
                 return;
             }
             const name      = document.getElementById('userName').value || '—';
@@ -227,8 +227,8 @@
                 ? `🚨 *تنبيه طوارئ - LifeBand*\n\nتم فتح الملف الطبي للمريض:\n👤 *${name}*\n🩸 فصيلة الدم: ${blood}\n💊 أمراض مزمنة: ${diseaseTxt}\n\n📍 موقع الطوارئ: جاري التحديد\n🔗 الملف الطبي: ${emergencyUrl}\n\n⏱ يرجى التواصل فوراً`
                 : `🚨 *Emergency Alert - LifeBand*\n\nMedical file opened for:\n👤 *${name}*\n🩸 Blood Type: ${blood}\n💊 Chronic Conditions: ${diseaseTxt}\n\n📍 Location: Being determined\n🔗 Medical File: ${emergencyUrl}\n\nPlease respond immediately`;
 
-            document.getElementById('waPreviewText').innerText = msg;
-            document.getElementById('waPreview').classList.add('visible');
+            document.getElementById('tgPreviewText').innerText = msg;
+            document.getElementById('tgPreview').classList.add('visible');
         });
 
         // ✅ حفظ مع رقم الواتساب
@@ -247,7 +247,7 @@
                 idNo:      document.getElementById('userIdNo').value.trim(),
                 bloodType: document.getElementById('userBlood').value,
                 diseases:  selectedDiseases,
-                waContact: document.getElementById('userWaContact').value.trim() || null,
+                tgChatId: document.getElementById('userTgChatId').value.trim() || null,
                 role:      "patient",
                 updatedAt: new Date().toISOString()
             };
@@ -277,7 +277,7 @@
         document.getElementById('exportBtn').onclick = () => {
             const name     = document.getElementById('userName').value;
             const diseases = Array.from(document.querySelectorAll('#diseasesList input:checked')).map(i => i.value).join(', ');
-            const content  = `LifeBand Medical Profile\nName: ${name}\nID: ${document.getElementById('userIdNo').value}\nBlood Type: ${document.getElementById('userBlood').value}\nChronic Conditions: ${diseases || 'None'}\nEmergency WhatsApp: ${document.getElementById('userWaContact').value || 'Not set'}`;
+            const content  = `LifeBand Medical Profile\nName: ${name}\nID: ${document.getElementById('userIdNo').value}\nBlood Type: ${document.getElementById('userBlood').value}\nChronic Conditions: ${diseases || 'None'}\nTelegram Chat ID: ${document.getElementById('userTgChatId').value || 'Not set'}`;
             const blob = new Blob([content], { type: 'text/plain' });
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);

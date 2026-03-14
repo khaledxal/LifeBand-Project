@@ -47,15 +47,15 @@
                         </select>
                     </div>
 
-                    <!-- ✅ حقل واتساب جهة الطوارئ -->
+                    <!-- ✅ حقل معرّف تيليغرام جهة الطوارئ -->
                     <div class="input-group" style="margin-top: 15px;">
-                        <label data-i18n="label_wa_contact">📱 رقم واتساب جهة الطوارئ:</label>
-                        <input type="tel" id="regWaContact" class="input-style" 
-                               placeholder="966XXXXXXXXX (بدون + أو 00)" 
-                               pattern="[0-9]{9,15}"
-                               title="أدخل الرقم الدولي بدون + مثال: 966501234567">
-                        <small style="color:var(--text-muted); font-size:12px; margin-top:4px; display:block;" data-i18n="hint_wa">
-                            مثال: 966501234567 — سيصلهم تنبيه واتساب فوري عند فتح ملفك في الطوارئ
+                        <label data-i18n="label_tg_chat_id">📱 رقم معرّف تيليغرام جهة الطوارئ:</label>
+                        <input type="tel" id="regTgChatId" class="input-style" 
+                               placeholder="أرسل لـ @userinfobot في تيليغرام لمعرفة الـ Chat ID" 
+                               pattern="[0-9]{5,12}"
+                               title="أدخل الرقم الدولي بدون + مثال: مثال: 123456789">
+                        <small style="color:var(--text-muted); font-size:12px; margin-top:4px; display:block;" data-i18n="hint_tg">
+                            مثال: مثال: 123456789 — سيصلهم تنبيه تيليغرام فوري عند فتح ملفك في الطوارئ
                         </small>
                     </div>
 
@@ -107,7 +107,7 @@
             const idNo      = document.getElementById('regIdNo').value.trim();
             const bloodType = document.getElementById('regBloodType').value;
             const userType  = document.getElementById('regUserType').value;
-            const waContact = document.getElementById('regWaContact').value.trim();
+            const tgChatId = document.getElementById('regTgChatId').value.trim();
 
             try {
                 const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
@@ -119,7 +119,7 @@
                     idNo:       idNo,
                     bloodType:  bloodType,
                     role:       userType,
-                    waContact:  waContact || null,   // ✅ رقم واتساب جهة الطوارئ
+                    tgChatId:  tgChatId || null,   // ✅ رقم معرّف تيليغرام جهة الطوارئ
                     diseases:   [],
                     createdAt:  new Date().toISOString()
                 });

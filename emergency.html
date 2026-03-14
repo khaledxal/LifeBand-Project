@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LifeBand - Emergency</title>
     <style>
-        :root { --primary: #ef4444; --glass: rgba(255,255,255,0.92); --text-main: #333; --accent: #6366f1; }
-        [data-theme="dark"] { --glass: rgba(30,32,40,0.95); --text-main: #e2e8f0; }
+        :root { --primary: #ef4444; --glass: rgba(255,255,255,0.92); --text-main: #333; --accent: #6366f1; --tg: #229ED9; }
+        html[data-theme="dark"] { --glass: rgba(30,32,40,0.95); --text-main: #e2e8f0; }
         * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: linear-gradient(135deg,#fee2e2,#f0f2f5); margin: 0; min-height: 100vh; }
-        [data-theme="dark"] body { background: linear-gradient(135deg,#1a0a0a,#0f1020); }
+        html[data-theme="dark"] body { background: linear-gradient(135deg,#1a0a0a,#0f1020); }
         .emergency-container { display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 20px; }
         .lang-toggle { position: fixed; top: 20px; right: 20px; background: var(--glass); border: 1px solid #ddd; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; font-weight: bold; z-index: 100; color: var(--text-main); }
         [dir="ltr"] .lang-toggle { right: auto; left: 20px; }
@@ -27,9 +27,11 @@
         .diag-form { text-align: right; }
         .diag-q { margin-bottom: 18px; }
         .diag-q label { font-weight: bold; font-size: 14px; color: #444; display: block; margin-bottom: 6px; }
+        html[data-theme="dark"] .diag-q label { color: #ccc; }
         .diag-q label .q-num { background: var(--primary); color: white; border-radius: 50%; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; margin-left: 6px; }
         .diag-options { display: flex; flex-wrap: wrap; gap: 8px; }
         .diag-options button { padding: 8px 16px; border-radius: 20px; border: 2px solid #e5e7eb; background: white; cursor: pointer; font-size: 13px; transition: 0.2s; font-family: inherit; }
+        html[data-theme="dark"] .diag-options button { background: #1e2030; border-color: #333; color: #ccc; }
         .diag-options button.selected { background: var(--primary); color: white; border-color: var(--primary); }
         .diag-options button:hover:not(.selected) { border-color: var(--primary); color: var(--primary); }
         .result-box { background: rgba(16,185,129,0.08); padding: 18px; border-radius: 15px; border-right: 5px solid #10b981; text-align: right; margin-bottom: 12px; }
@@ -50,17 +52,19 @@
         .step-dot { width: 10px; height: 10px; border-radius: 50%; background: #e5e7eb; transition: 0.3s; }
         .step-dot.active { background: var(--primary); transform: scale(1.3); }
         .step-dot.done { background: #10b981; }
-        .sms-card { border-radius: 16px; padding: 16px 18px; margin-bottom: 14px; display: flex; align-items: flex-start; gap: 14px; border: 1.5px solid rgba(99,102,241,0.2); background: rgba(99,102,241,0.05); transition: all 0.5s ease; }
-        .sms-card.sent   { background: rgba(16,185,129,0.08); border-color: rgba(16,185,129,0.35); }
-        .sms-card.failed { background: rgba(239,68,68,0.07);  border-color: rgba(239,68,68,0.3); }
-        .sms-card.no-num { background: rgba(245,158,11,0.07); border-color: rgba(245,158,11,0.3); }
-        .sms-emoji { font-size: 28px; flex-shrink: 0; }
-        .sms-body { flex: 1; min-width: 0; }
-        .sms-title { font-weight: bold; font-size: 14px; margin-bottom: 4px; color: #6366f1; }
-        .sms-card.sent   .sms-title { color: #10b981; }
-        .sms-card.failed .sms-title { color: #ef4444; }
-        .sms-card.no-num .sms-title { color: #f59e0b; }
-        .sms-detail { font-size: 12px; opacity: 0.75; line-height: 1.6; color: var(--text-main); }
+
+        /* بطاقة تيليغرام */
+        .tg-card { border-radius: 16px; padding: 16px 18px; margin-bottom: 14px; display: flex; align-items: flex-start; gap: 14px; border: 1.5px solid rgba(34,158,217,0.25); background: rgba(34,158,217,0.06); transition: all 0.5s ease; }
+        .tg-card.sent   { background: rgba(16,185,129,0.08); border-color: rgba(16,185,129,0.35); }
+        .tg-card.failed { background: rgba(239,68,68,0.07);  border-color: rgba(239,68,68,0.3); }
+        .tg-card.no-num { background: rgba(245,158,11,0.07); border-color: rgba(245,158,11,0.3); }
+        .tg-emoji { font-size: 28px; flex-shrink: 0; }
+        .tg-body { flex: 1; min-width: 0; }
+        .tg-title { font-weight: bold; font-size: 14px; margin-bottom: 4px; color: var(--tg); }
+        .tg-card.sent   .tg-title { color: #10b981; }
+        .tg-card.failed .tg-title { color: #ef4444; }
+        .tg-card.no-num .tg-title { color: #f59e0b; }
+        .tg-detail { font-size: 12px; opacity: 0.75; line-height: 1.6; color: var(--text-main); }
         .pulsing { animation: pulse 1.1s ease-in-out infinite; }
     </style>
 </head>
@@ -91,11 +95,12 @@
     <div id="resultSection" class="glass-card" style="display:none;">
         <h3 id="resultPatientName" style="color:var(--primary);text-align:center;margin-bottom:15px;"></h3>
 
-        <div class="sms-card" id="smsCard">
-            <div class="sms-emoji pulsing" id="smsEmoji">📤</div>
-            <div class="sms-body">
-                <div class="sms-title" id="smsTitle">جاري إرسال SMS لجهة الطوارئ...</div>
-                <div class="sms-detail" id="smsDetail"></div>
+        <!-- بطاقة تيليغرام -->
+        <div class="tg-card" id="tgCard">
+            <div class="tg-emoji pulsing" id="tgEmoji">📤</div>
+            <div class="tg-body">
+                <div class="tg-title" id="tgTitle" data-i18n="tg_sending">جاري إرسال تنبيه تيليغرام...</div>
+                <div class="tg-detail" id="tgDetail"></div>
             </div>
         </div>
 
@@ -106,7 +111,7 @@
 
         <div class="ai-box">
             <h4><span>🤖</span> <span data-i18n="ai_analysis_title">تحليل الذكاء الاصطناعي</span></h4>
-            <div id="aiAnalysisText"><span style="opacity:0.5;">جاري التحليل...</span></div>
+            <div id="aiAnalysisText"><span style="opacity:0.5;" data-i18n="loading">جاري التحليل...</span></div>
             <div class="media-box" id="mediaBox" style="display:none;">
                 <h4 style="font-size:14px;margin-bottom:10px;" data-i18n="media_title">📚 وسائط مساعدة:</h4>
                 <div class="media-grid" id="mediaGrid"></div>
@@ -133,16 +138,15 @@
 
 <script src="config.js"></script>
 <script type="module">
- import { injectLayout } from './js/layout.js';
 import { db } from './js/firebase-config.js';
 import { ref, get, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 import { askGroq } from './js/gemini-ai.js';
 
-// ✅ رابط الـ Function — يتحدث تلقائياً بعد firebase deploy
-// ✅ Twilio — مباشرة من المتصفح بدون Functions
-const TWILIO_SID   = "AC7eb7a38c86e7360bf04b65e9dce2cbe1";
-const TWILIO_TOKEN = "5ab3aa10299558cd4dd57a4debdcdecb";
-const TWILIO_FROM  = "+15637946621";
+// ── إعدادات Telegram Bot ──
+// عشان تشتغل: ابعث لـ @BotFather وسوّي بوت، خذ الـ token وحطه هنا
+// المستخدم يحصل على chat_id من بوت @userinfobot
+const TG_BOT_TOKEN = window.TG_BOT_TOKEN || "YOUR_BOT_TOKEN_HERE";
+// (حطه في config.js: window.TG_BOT_TOKEN = "123456:ABC-DEF...")
 
 const T = {
     ar: {
@@ -155,13 +159,13 @@ const T = {
         btn_save_exit:"✅ حفظ التقرير وإنهاء", btn_cancel:"❌ إلغاء والعودة",
         alert_success:"✅ تم حفظ البلاغ بنجاح", lang_label:"EN",
         file_prefix:"ملف: ", loading:"جاري التحليل...",
-        sms_sending:"📤 جاري إرسال SMS لجهة الطوارئ...",
-        sms_sent:"✅ SMS أُرسل تلقائياً",
-        sms_failed:"⚠️ تعذّر إرسال SMS",
-        sms_no_num:"ℹ️ لا توجد جهة طوارئ مسجلة",
-        sms_no_num_detail:"يمكن للمريض إضافة رقم طوارئ من ملفه الشخصي",
-        sms_sent_detail:"وصلت رسالة SMS تلقائية تتضمن الحالة الصحية",
-        sms_fail_detail:"تحقق من اتصال الإنترنت أو أعد المحاولة"
+        tg_sending:"📤 جاري إرسال تنبيه تيليغرام...",
+        tg_sent:"✅ تم إرسال التنبيه عبر تيليغرام",
+        tg_failed:"⚠️ تعذّر إرسال تنبيه تيليغرام",
+        tg_no_id:"ℹ️ لا توجد جهة طوارئ مسجلة",
+        tg_no_id_detail:"يمكن للمريض إضافة معرّف تيليغرام من ملفه الشخصي",
+        tg_sent_detail:"وصل تنبيه تيليغرام تلقائي يتضمن الحالة الصحية الكاملة",
+        tg_fail_detail:"تحقق من توكن البوت أو معرّف المستلم"
     },
     en: {
         em_title:"LifeBand Emergency System", em_hold:"Hold to<br>open file",
@@ -173,13 +177,13 @@ const T = {
         btn_save_exit:"✅ Save & Exit", btn_cancel:"❌ Cancel",
         alert_success:"✅ Report saved", lang_label:"AR",
         file_prefix:"File: ", loading:"Analyzing...",
-        sms_sending:"📤 Sending SMS to emergency contact...",
-        sms_sent:"✅ SMS sent automatically",
-        sms_failed:"⚠️ SMS delivery failed",
-        sms_no_num:"ℹ️ No emergency contact registered",
-        sms_no_num_detail:"Patient can add an emergency number from their profile",
-        sms_sent_detail:"Automatic SMS with health details was delivered",
-        sms_fail_detail:"Check internet connection or try again"
+        tg_sending:"📤 Sending Telegram alert...",
+        tg_sent:"✅ Telegram alert sent successfully",
+        tg_failed:"⚠️ Telegram alert failed",
+        tg_no_id:"ℹ️ No emergency contact registered",
+        tg_no_id_detail:"Patient can add their Telegram chat ID from their profile",
+        tg_sent_detail:"Automatic Telegram alert with full health details was sent",
+        tg_fail_detail:"Check bot token or recipient chat ID"
     }
 };
 
@@ -226,6 +230,7 @@ function applyLang(l) {
 document.getElementById('langBtn').onclick = () => applyLang(lang()==='ar'?'en':'ar');
 applyLang(lang());
 
+// ── hold-to-open ──
 let progress=0, holdTimer;
 const circle  = document.getElementById("progressCircle");
 const holdBtn = document.getElementById("holdBtn");
@@ -307,22 +312,12 @@ async function runAnalysis(isExtra) {
     document.getElementById("mediaBox").style.display="none";
     document.getElementById("extraQBox").style.display="none";
 
-    // ✅ إرسال SMS فوري — لا ينتظر AI
-    sendEmergencySMS(l);
+    // إرسال تيليغرام فوري — لا ينتظر AI
+    sendTelegramAlert(l);
 
     const allAnswers    = isExtra?{...answers,...extraAnswers}:answers;
     const answerSummary = Object.entries(allAnswers).map(([k,v])=>`${k}: ${v}`).join('\n');
-    const prompt = `أنت طبيب طوارئ خبير. المريض:
-- الاسم: ${patientName||'غير محدد'}
-- فصيلة الدم: ${patientData.bloodType||'غير محدد'}
-- أمراض مزمنة: ${(patientData.diseases||[]).join('، ')||'لا يوجد'}
-إجابات المسعف:
-${answerSummary}
-المطلوب:
-التشخيص: (جملة واحدة)
-الإجراء: (3-4 خطوات)
-التصنيف: (قلب/تنفس/نزيف/تشنج/إغماء/أخرى)
-معلومات_إضافية: نعم/لا`;
+    const prompt = `أنت طبيب طوارئ خبير. المريض:\n- الاسم: ${patientName||'غير محدد'}\n- فصيلة الدم: ${patientData.bloodType||'غير محدد'}\n- أمراض مزمنة: ${(patientData.diseases||[]).join('، ')||'لا يوجد'}\nإجابات المسعف:\n${answerSummary}\nالمطلوب:\nالتشخيص: (جملة واحدة)\nالإجراء: (3-4 خطوات)\nالتصنيف: (قلب/تنفس/نزيف/تشنج/إغماء/أخرى)\nمعلومات_إضافية: نعم/لا`;
 
     try {
         const result = await askGroq(prompt);
@@ -336,82 +331,75 @@ ${answerSummary}
     }
 }
 
-// ✅ إرسال SMS تلقائي عبر Firebase Function
-async function sendEmergencySMS(l) {
-    const card   = document.getElementById('smsCard');
-    const title  = document.getElementById('smsTitle');
-    const detail = document.getElementById('smsDetail');
-    const emoji  = document.getElementById('smsEmoji');
+// ── إرسال تنبيه تيليغرام ──
+async function sendTelegramAlert(l) {
+    const card   = document.getElementById('tgCard');
+    const title  = document.getElementById('tgTitle');
+    const detail = document.getElementById('tgDetail');
+    const emoji  = document.getElementById('tgEmoji');
 
-    if (!patientData.waContact) {
-        card.className  = 'sms-card no-num';
-        emoji.className = 'sms-emoji';
+    // tgChatId = معرّف المحادثة المحفوظ في ملف المريض
+    if (!patientData.tgChatId) {
+        card.className  = 'tg-card no-num';
+        emoji.className = 'tg-emoji';
         emoji.innerText = 'ℹ️';
-        title.innerText  = T[l].sms_no_num;
-        detail.innerText = T[l].sms_no_num_detail;
+        title.innerText  = T[l].tg_no_id;
+        detail.innerText = T[l].tg_no_id_detail;
         return;
     }
 
-    title.innerText  = T[l].sms_sending;
-    detail.innerText = patientData.waContact.replace(/\d(?=\d{4})/g, '*');
+    title.innerText  = T[l].tg_sending;
+    detail.innerText = '...';
 
     try {
-        // بناء رسالة SMS
         const diseaseArr = patientData.diseases || [];
-        const diseaseTxt = diseaseArr.length ? diseaseArr.join(', ') : 'None';
+        const diseaseTxt = diseaseArr.length ? diseaseArr.join(', ') : (l==='ar'?'لا يوجد':'None');
         const timestamp  = new Date().toLocaleString('ar-SA', { timeZone: 'Asia/Riyadh' });
-        const toNumber   = patientData.waContact.startsWith('+')
-            ? patientData.waContact : '+' + patientData.waContact;
+        const emergencyUrl = `${location.origin}/emergency.html?id=${patientId}`;
 
-        const smsBody =
-`🚨 LIFEBAND EMERGENCY
-Patient: ${patientName || '—'}
-Blood: ${patientData.bloodType || '—'}
-Conditions: ${diseaseTxt}
-Time: ${timestamp}
--- LifeBand Auto Alert --`;
+        const msg = l==='ar'
+            ? `🚨 *تنبيه طوارئ — LifeBand*\n\n👤 المريض: *${patientName||'—'}*\n🩸 فصيلة الدم: ${patientData.bloodType||'—'}\n💊 أمراض مزمنة: ${diseaseTxt}\n⏱ الوقت: ${timestamp}\n🔗 الملف الطبي: ${emergencyUrl}\n\n_يرجى التواصل فوراً_`
+            : `🚨 *Emergency Alert — LifeBand*\n\n👤 Patient: *${patientName||'—'}*\n🩸 Blood Type: ${patientData.bloodType||'—'}\n💊 Conditions: ${diseaseTxt}\n⏱ Time: ${timestamp}\n🔗 Medical File: ${emergencyUrl}\n\n_Please respond immediately_`;
 
-        // إرسال عبر Twilio API مباشرة
-        const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_SID}/Messages.json`;
-        const params = new URLSearchParams();
-        params.append('To',   toNumber);
-        params.append('From', TWILIO_FROM);
-        params.append('Body', smsBody);
-
-        const resp = await fetch(twilioUrl, {
-            method:  'POST',
-            headers: {
-                'Content-Type':  'application/x-www-form-urlencoded',
-                'Authorization': 'Basic ' + btoa(`${TWILIO_SID}:${TWILIO_TOKEN}`)
-            },
-            body: params
-        });
+        const resp = await fetch(
+            `https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`,
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id:    patientData.tgChatId,
+                    text:       msg,
+                    parse_mode: 'Markdown'
+                })
+            }
+        );
         const data = await resp.json();
 
-        if (data.sid) {
-            card.className  = 'sms-card sent';
-            emoji.className = 'sms-emoji';
+        if (data.ok) {
+            card.className  = 'tg-card sent';
+            emoji.className = 'tg-emoji';
             emoji.innerText = '✅';
-            title.innerText  = T[l].sms_sent;
-            detail.innerText = `${T[l].sms_sent_detail} → ${toNumber.replace(/\d(?=\d{4})/g, '*')}`;
+            title.innerText  = T[l].tg_sent;
+            detail.innerText = T[l].tg_sent_detail;
 
             // تسجيل في Firebase
             try {
-                await push(ref(db, `sms_logs/${patientId}`), {
-                    to: toNumber, twilioSid: data.sid,
-                    sentAt: new Date().toISOString(), status: 'sent'
+                await push(ref(db, `tg_logs/${patientId}`), {
+                    chatId: patientData.tgChatId,
+                    sentAt: new Date().toISOString(),
+                    status: 'sent'
                 });
             } catch(_) {}
         } else {
-            throw new Error(data.message || 'Twilio error');
+            throw new Error(data.description || 'Telegram error');
         }
     } catch(err) {
-        card.className  = 'sms-card failed';
-        emoji.className = 'sms-emoji';
+        card.className  = 'tg-card failed';
+        emoji.className = 'tg-emoji';
         emoji.innerText = '⚠️';
-        title.innerText  = T[l].sms_failed;
-        detail.innerText = T[l].sms_fail_detail;
-        console.error('SMS error:', err);
+        title.innerText  = T[l].tg_failed;
+        detail.innerText = T[l].tg_fail_detail;
+        console.error('Telegram error:', err);
     }
 }
 
@@ -460,7 +448,7 @@ document.getElementById('saveExitBtn').addEventListener('click', async () => {
             diagnosis:   lastAnalysis||document.getElementById("aiAnalysisText").innerText,
             bloodType:   patientData.bloodType||'',
             diseases:    patientData.diseases||[],
-            smsAlertSent:!!patientData.waContact,
+            tgAlertSent: !!patientData.tgChatId,
             timestamp:   new Date().toISOString(),
             status:      "قيد الانتظار"
         });

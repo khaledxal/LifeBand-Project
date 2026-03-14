@@ -2,23 +2,31 @@ name: Deploy LifeBand to Firebase
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Install Firebase CLI
-        run: npm install -g firebase-tools
-
-      - name: Deploy Hosting only
+      # ─── حقن كل الـ secrets في config.js ───
+      # هذا الملف يُنشأ مؤقتاً وقت الـ deploy فقط
+      # ولا يُرفع أبداً للـ repository (موجود في .gitignore)
+      - name: Build config.js from secrets
         run: |
-          firebase deploy \
-            --token "${{ secrets.FIREBASE_TOKEN }}" \
-            --project lifeband-affa0 \
-            --only hosting \
-            --non-interactive
+          cat > config.js << 'ENDOFFILE'
+          window.GROQ_KEY     = "${{ secrets.GROQ_KEY }}";
+          window.GEMINI_KEY   = "${{ secrets.GEMINI_KEY }}";
+          window.TG_BOT_TOKEN = "${{ secrets.TG_BOT_TOKEN }}";
+          ENDOFFILE
+
+      - name: Deploy to Firebase Hosting
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_TOKEN }}
+          channelId: live
