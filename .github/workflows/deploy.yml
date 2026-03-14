@@ -13,9 +13,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # ─── حقن كل الـ secrets في config.js ───
-      # هذا الملف يُنشأ مؤقتاً وقت الـ deploy فقط
-      # ولا يُرفع أبداً للـ repository (موجود في .gitignore)
       - name: Build config.js from secrets
         run: |
           cat > config.js << 'ENDOFFILE'
@@ -29,4 +26,5 @@ jobs:
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_TOKEN }}
+          projectId: ${{ secrets.FIREBASE_PROJECT_ID }}
           channelId: live
