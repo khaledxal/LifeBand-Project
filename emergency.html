@@ -332,18 +332,17 @@ async function runAnalysis(isExtra) {
     }
 }
 
-// ── إرسال تنبيه تيليغرام ──
+// ── إرسال تنبيه تيليغرام عبر Firebase Function (يحل مشكلة CORS) ──
 async function sendTelegramAlert(l) {
     const card   = document.getElementById('tgCard');
     const title  = document.getElementById('tgTitle');
     const detail = document.getElementById('tgDetail');
     const emoji  = document.getElementById('tgEmoji');
 
-    // tgChatId = معرّف المحادثة المحفوظ في ملف المريض
     if (!patientData.tgChatId) {
-        card.className  = 'tg-card no-num';
-        emoji.className = 'tg-emoji';
-        emoji.innerText = 'ℹ️';
+        card.className   = 'tg-card no-num';
+        emoji.className  = 'tg-emoji';
+        emoji.innerText  = 'ℹ️';
         title.innerText  = T[l].tg_no_id;
         detail.innerText = T[l].tg_no_id_detail;
         return;
@@ -353,51 +352,39 @@ async function sendTelegramAlert(l) {
     detail.innerText = '...';
 
     try {
-        const diseaseArr = patientData.diseases || [];
-        const diseaseTxt = diseaseArr.length ? diseaseArr.join(', ') : (l==='ar'?'لا يوجد':'None');
-        const timestamp  = new Date().toLocaleString('ar-SA', { timeZone: 'Asia/Riyadh' });
+        const diseaseArr   = patientData.diseases || [];
+        const diseaseTxt   = diseaseArr.length ? diseaseArr.join(', ') : (l==='ar'?'لا يوجد':'None');
+        const timestamp    = new Date().toLocaleString('ar-SA', { timeZone: 'Asia/Riyadh' });
         const emergencyUrl = `${location.origin}/LifeBand-Project/emergency.html?id=${patientId}`;
 
         const msg = l==='ar'
             ? `🚨 *تنبيه طوارئ — LifeBand*\n\n👤 المريض: *${patientName||'—'}*\n🩸 فصيلة الدم: ${patientData.bloodType||'—'}\n💊 أمراض مزمنة: ${diseaseTxt}\n⏱ الوقت: ${timestamp}\n🔗 الملف الطبي: ${emergencyUrl}\n\n_يرجى التواصل فوراً_`
             : `🚨 *Emergency Alert — LifeBand*\n\n👤 Patient: *${patientName||'—'}*\n🩸 Blood Type: ${patientData.bloodType||'—'}\n💊 Conditions: ${diseaseTxt}\n⏱ Time: ${timestamp}\n🔗 Medical File: ${emergencyUrl}\n\n_Please respond immediately_`;
 
+        // ✅ نرسل عبر Firebase Function بدل تيليغرام مباشرة — يحل مشكلة CORS
         const resp = await fetch(
-            `https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`,
+            'https://us-central1-lifeband-affa0.cloudfunctions.net/sendTelegramAlert',
             {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    chat_id:    patientData.tgChatId,
-                    text:       msg,
-                    parse_mode: 'Markdown'
-                })
+                body: JSON.stringify({ chatId: patientData.tgChatId, message: msg })
             }
         );
         const data = await resp.json();
 
-        if (data.ok) {
-            card.className  = 'tg-card sent';
-            emoji.className = 'tg-emoji';
-            emoji.innerText = '✅';
+        if (data.sent) {
+            card.className   = 'tg-card sent';
+            emoji.className  = 'tg-emoji';
+            emoji.innerText  = '✅';
             title.innerText  = T[l].tg_sent;
             detail.innerText = T[l].tg_sent_detail;
-
-            // تسجيل في Firebase
-            try {
-                await push(ref(db, `tg_logs/${patientId}`), {
-                    chatId: patientData.tgChatId,
-                    sentAt: new Date().toISOString(),
-                    status: 'sent'
-                });
-            } catch(_) {}
         } else {
-            throw new Error(data.description || 'Telegram error');
+            throw new Error(data.error || 'Firebase Function error');
         }
     } catch(err) {
-        card.className  = 'tg-card failed';
-        emoji.className = 'tg-emoji';
-        emoji.innerText = '⚠️';
+        card.className   = 'tg-card failed';
+        emoji.className  = 'tg-emoji';
+        emoji.innerText  = '⚠️';
         title.innerText  = T[l].tg_failed;
         detail.innerText = T[l].tg_fail_detail;
         console.error('Telegram error:', err);

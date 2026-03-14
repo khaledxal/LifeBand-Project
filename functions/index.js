@@ -92,6 +92,48 @@ function twilioSendSMS(toNumber, message) {
   });
 }
 
+// ══════════════════════════════════════════════
+// Function 2: sendTelegramAlert
+// ══════════════════════════════════════════════
+const tgToken = defineSecret("TG_BOT_TOKEN");
+
+exports.sendTelegramAlert = onRequest(
+  { secrets: [tgToken], cors: true },
+  async (req, res) => {
+    if (req.method === "OPTIONS") return res.status(204).send("");
+    if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
+
+    const { chatId, message } = req.body;
+    if (!chatId || !message) return res.status(400).json({ error: "chatId and message required" });
+
+    try {
+      const response = await fetch(
+        `https://api.telegram.org/bot${tgToken.value()}/sendMessage`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ chat_id: chatId, text: message, parse_mode: "Markdown" })
+        }
+      );
+      const data = await response.json();
+      if (!data.ok) throw new Error(data.description || "Telegram error");
+
+      // تسجيل في Firebase
+      await admin.database().ref(`tg_logs/${chatId}`).push({
+        sentAt: new Date().toISOString(), status: "sent"
+      });
+
+      return res.status(200).json({ sent: true });
+    } catch (err) {
+      console.error("Telegram error:", err.message);
+      return res.status(500).json({ error: err.message });
+    }
+  }
+);
+
+// ══════════════════════════════════════════════
+// Function 3: sendEmergencySMS
+// ══════════════════════════════════════════════
 exports.sendEmergencySMS = onRequest(
   { cors: true },
   async (req, res) => {
