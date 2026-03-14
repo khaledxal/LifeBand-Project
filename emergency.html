@@ -356,7 +356,7 @@ async function sendTelegramAlert(l) {
         const diseaseArr = patientData.diseases || [];
         const diseaseTxt = diseaseArr.length ? diseaseArr.join(', ') : (l==='ar'?'لا يوجد':'None');
         const timestamp  = new Date().toLocaleString('ar-SA', { timeZone: 'Asia/Riyadh' });
-        const emergencyUrl = `${location.origin}/emergency.html?id=${patientId}`;
+        const emergencyUrl = `${location.origin}/LifeBand-Project/emergency.html?id=${patientId}`;
 
         const msg = l==='ar'
             ? `🚨 *تنبيه طوارئ — LifeBand*\n\n👤 المريض: *${patientName||'—'}*\n🩸 فصيلة الدم: ${patientData.bloodType||'—'}\n💊 أمراض مزمنة: ${diseaseTxt}\n⏱ الوقت: ${timestamp}\n🔗 الملف الطبي: ${emergencyUrl}\n\n_يرجى التواصل فوراً_`

@@ -221,7 +221,7 @@
             const blood     = document.getElementById('userBlood').value || '—';
             const diseases  = Array.from(document.querySelectorAll('#diseasesList input:checked')).map(i => i.value);
             const diseaseTxt = diseases.length ? diseases.join('، ') : (l === 'ar' ? 'لا يوجد' : 'None');
-            const emergencyUrl = `${window.location.origin}/emergency.html?id=USER_ID`;
+            const emergencyUrl = `${window.location.origin}/LifeBand-Project/emergency.html?id=USER_ID`;
 
             const msg = l === 'ar'
                 ? `🚨 *تنبيه طوارئ - LifeBand*\n\nتم فتح الملف الطبي للمريض:\n👤 *${name}*\n🩸 فصيلة الدم: ${blood}\n💊 أمراض مزمنة: ${diseaseTxt}\n\n📍 موقع الطوارئ: جاري التحديد\n🔗 الملف الطبي: ${emergencyUrl}\n\n⏱ يرجى التواصل فوراً`
@@ -269,7 +269,7 @@
             const user = auth.currentUser;
             const l = lang();
             if (user) {
-                const emergencyUrl = `${window.location.origin}/emergency.html?id=${user.uid}`;
+                const emergencyUrl = `${window.location.origin}/LifeBand-Project/emergency.html?id=${user.uid}`;
                 navigator.clipboard.writeText(emergencyUrl).then(() => alert(T[l].copy_ok));
             }
         });
