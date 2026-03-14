@@ -361,7 +361,7 @@ async function sendTelegramAlert(l) {
             ? `🚨 *تنبيه طوارئ — LifeBand*\n\n👤 المريض: *${patientName||'—'}*\n🩸 فصيلة الدم: ${patientData.bloodType||'—'}\n💊 أمراض مزمنة: ${diseaseTxt}\n⏱ الوقت: ${timestamp}\n🔗 الملف الطبي: ${emergencyUrl}\n\n_يرجى التواصل فوراً_`
             : `🚨 *Emergency Alert — LifeBand*\n\n👤 Patient: *${patientName||'—'}*\n🩸 Blood Type: ${patientData.bloodType||'—'}\n💊 Conditions: ${diseaseTxt}\n⏱ Time: ${timestamp}\n🔗 Medical File: ${emergencyUrl}\n\n_Please respond immediately_`;
 
-        // ✅ نرسل عبر Firebase Function بدل تيليغرام مباشرة — يحل مشكلة CORS
+        // ✅ نرسل عبر Firebase Function بدل تيلغرام مباشرة — يحل مشكلة CORS
         const resp = await fetch(
             'https://lifeband-telegram.fyyghgggg.workers.dev',
             {
