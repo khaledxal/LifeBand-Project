@@ -28,7 +28,7 @@ jobs:
         run: |
           grep -rl "__GROQ_KEY__" . | xargs sed -i "s|__GROQ_KEY__|${{ secrets.GROQ_KEY }}|g"
 
-      # نشر المشروع على Firebase
+      # نشر المشروع على 
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
