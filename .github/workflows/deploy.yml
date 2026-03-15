@@ -21,6 +21,10 @@ jobs:
           window.TG_BOT_TOKEN = "${{ secrets.TG_BOT_TOKEN }}";
           ENDOFFILE
 
+      - name: Inject GROQ_KEY into gemini-ai.js
+        run: |
+          sed -i 's/__GROQ_KEY__/${{ secrets.GROQ_KEY }}/g' js/gemini-ai.js
+
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:

@@ -10,9 +10,9 @@ async function sleep(ms) {
 }
 
 export async function askGroq(prompt, retries = 3) {
-    const GROQ_API_KEY = window.GROQ_KEY || "";
+    const GROQ_API_KEY = "__GROQ_KEY__";
 
-    if (!GROQ_API_KEY) {
+    if (!GROQ_API_KEY || GROQ_API_KEY === "__GROQ_KEY__") {
         throw new Error("⚠️ مفتاح Groq غير متوفر");
     }
 
