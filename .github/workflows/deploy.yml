@@ -22,8 +22,9 @@ jobs:
           ENDOFFILE
 
       - name: Inject GROQ_KEY into gemini-ai.js
+        # تم تغيير ' إلى " لضمان قراءة السر من GitHub بشكل صحيح
         run: |
-          sed -i 's/__GROQ_KEY__/${{ secrets.GROQ_KEY }}/g' js/gemini-ai.js
+          sed -i "s/__GROQ_KEY__/${{ secrets.GROQ_KEY }}/g" gemini-ai.js
 
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
