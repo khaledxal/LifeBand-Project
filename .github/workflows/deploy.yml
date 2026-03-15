@@ -10,25 +10,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # تحميل المشروع
       - name: Checkout
         uses: actions/checkout@v4
 
-      # الخطوة 1: إنشاء ملف الإعدادات
+      # إنشاء ملف config.js من الـ secrets
       - name: Build config.js from secrets
         run: |
-          cat > config.js << 'ENDOFFILE'
-          window.GROQ_KEY     = "${{ secrets.GROQ_KEY }}";
-          window.GEMINI_KEY   = "${{ secrets.GEMINI_KEY }}";
-          window.TG_BOT_TOKEN = "${{ secrets.TG_BOT_TOKEN }}";
-          ENDOFFILE
+          cat <<EOF > config.js
+          window.GROQ_KEY="${{ secrets.GROQ_KEY }}";
+          window.GEMINI_KEY="${{ secrets.GEMINI_KEY }}";
+          window.TG_BOT_TOKEN="${{ secrets.TG_BOT_TOKEN }}";
+          EOF
 
-      # الخطوة 2: وضع المفتاح في المكان الصحيح (داخل مجلد js)
-      - name: Inject GROQ_KEY into gemini-ai.js
+      # استبدال __GROQ_KEY__ في أي ملف بالمشروع
+      - name: Inject GROQ_KEY into project
         run: |
-          # هذا الأمر سيبحث عن الملف في المجلد الرئيسي وفي مجلد js لضمان التعديل
-          sed -i "s/__GROQ_KEY__/${{ secrets.GROQ_KEY }}/g" js/gemini-ai.js || sed -i "s/__GROQ_KEY__/${{ secrets.GROQ_KEY }}/g" gemini-ai.js
+          grep -rl "__GROQ_KEY__" . | xargs sed -i "s|__GROQ_KEY__|${{ secrets.GROQ_KEY }}|g"
 
-      # الخطوة 3: الرفع إلى فايربيز
+      # نشر المشروع على Firebase
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
