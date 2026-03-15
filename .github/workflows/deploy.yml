@@ -13,6 +13,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # الخطوة 1: إنشاء ملف الإعدادات
       - name: Build config.js from secrets
         run: |
           cat > config.js << 'ENDOFFILE'
@@ -21,11 +22,13 @@ jobs:
           window.TG_BOT_TOKEN = "${{ secrets.TG_BOT_TOKEN }}";
           ENDOFFILE
 
+      # الخطوة 2: وضع المفتاح في المكان الصحيح (داخل مجلد js)
       - name: Inject GROQ_KEY into gemini-ai.js
-        # تم تعديل المسار ليكون داخل مجلد js واستخدام " " لقراءة السر
         run: |
-          sed -i "s/__GROQ_KEY__/${{ secrets.GROQ_KEY }}/g" js/gemini-ai.js
+          # هذا الأمر سيبحث عن الملف في المجلد الرئيسي وفي مجلد js لضمان التعديل
+          sed -i "s/__GROQ_KEY__/${{ secrets.GROQ_KEY }}/g" js/gemini-ai.js || sed -i "s/__GROQ_KEY__/${{ secrets.GROQ_KEY }}/g" gemini-ai.js
 
+      # الخطوة 3: الرفع إلى فايربيز
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
