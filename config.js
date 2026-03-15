@@ -1,0 +1,1 @@
+window.GROQ_KEY="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";
