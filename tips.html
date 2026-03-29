@@ -3,201 +3,633 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LifeBand - نصائح طبية</title>
+    <title>LifeBand – نصائح طبية يومية</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <style>
-        /* تنسيق السلايدر (Slider) */
-        .hero-slider {
+        /* ─── Unified background ─── */
+        :root {
+            --bg:       #f7fafc;
+            --card:     #ffffff;
+            --border:   #e2e8f0;
+            --text:     #2d3748;
+            --muted:    #718096;
+            --primary:  #e53e3e;
+            --accent:   #6366f1;
+            --success:  #38a169;
+        }
+        html[data-theme="dark"] {
+            --bg:     #0f1117;
+            --card:   #1a202c;
+            --border: #2d3748;
+            --text:   #e2e8f0;
+            --muted:  #a0aec0;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        .bg-mesh {
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
+            background:
+                radial-gradient(ellipse at 10% 20%, rgba(99,102,241,0.07) 0%, transparent 55%),
+                radial-gradient(ellipse at 90% 80%, rgba(229,62,62,0.05) 0%, transparent 50%),
+                var(--bg);
+        }
+        html[data-theme="dark"] .bg-mesh {
+            background:
+                radial-gradient(ellipse at 10% 20%, rgba(99,102,241,0.10) 0%, transparent 55%),
+                radial-gradient(ellipse at 90% 80%, rgba(229,62,62,0.07) 0%, transparent 50%),
+                var(--bg);
+        }
+
+        .tips-page {
             position: relative;
-            width: 100%;
-            height: 400px;
-            border-radius: 25px;
+            z-index: 1;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px 80px;
+        }
+
+        /* ─── Page header ─── */
+        .page-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        .page-title {
+            font-size: 28px;
+            font-weight: 900;
+            color: var(--text);
+            line-height: 1.2;
+        }
+        .page-title span { color: var(--accent); }
+        .page-meta {
+            font-size: 13px;
+            color: var(--muted);
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .freshness-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            flex-shrink: 0;
+        }
+        .freshness-dot.stale { background: var(--muted); }
+
+        .header-actions { display: flex; gap: 10px; align-items: center; }
+        .refresh-btn {
+            padding: 10px 20px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            font-family: 'Cairo', sans-serif;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            color: var(--text);
+            display: flex; align-items: center; gap: 6px;
+            transition: 0.2s;
+        }
+        .refresh-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+        .refresh-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .refresh-btn.loading .refresh-icon { animation: spin 0.8s linear infinite; display: inline-block; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ─── Category tabs ─── */
+        .cat-tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 28px;
+        }
+        .cat-tab {
+            padding: 8px 18px;
+            border-radius: 20px;
+            border: 1.5px solid var(--border);
+            background: var(--card);
+            font-family: 'Cairo', sans-serif;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            color: var(--muted);
+            transition: 0.2s;
+        }
+        .cat-tab:hover { border-color: var(--accent); color: var(--accent); }
+        .cat-tab.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+        /* ─── Loading skeleton ─── */
+        .skeleton-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 16px;
+        }
+        .skeleton-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 22px;
+            animation: shimmer 1.4s ease infinite;
+        }
+        @keyframes shimmer {
+            0%,100%{opacity:1} 50%{opacity:0.5}
+        }
+        .skel-line {
+            height: 12px;
+            background: var(--border);
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+        .skel-line.short { width: 60%; }
+        .skel-line.long  { width: 100%; }
+
+        /* ─── Tips grid ─── */
+        .tips-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+            gap: 16px;
+        }
+
+        .tip-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 22px;
+            position: relative;
             overflow: hidden;
-            margin-top: 25px;
-            margin-bottom: 30px;
-            box-shadow: var(--card-shadow);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: default;
         }
-        .slides {
-            display: flex;
-            width: 300%;
-            height: 100%;
-            transition: transform 0.8s ease-in-out;
+        .tip-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.08);
         }
-        .slide {
-            width: 33.33%;
-            height: 100%;
-            position: relative;
-            background-size: cover;
-            background-position: center;
-        }
-        .slide-overlay {
+        .tip-card::before {
+            content: '';
             position: absolute;
-            inset: 0;
-            background: linear-gradient(to right, rgba(0,0,0,0.7), transparent);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            padding: 50px;
+            top: 0; right: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--tip-color, var(--accent));
+            border-radius: 0 18px 18px 0;
+        }
+
+        .tip-cat-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            background: var(--tip-bg, rgba(99,102,241,0.1));
+            color: var(--tip-color, var(--accent));
+        }
+        .tip-title {
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--text);
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+        .tip-body {
+            font-size: 13px;
+            color: var(--muted);
+            line-height: 1.8;
+        }
+        .tip-number {
+            position: absolute;
+            bottom: 14px;
+            left: 16px;
+            font-size: 40px;
+            font-weight: 900;
+            opacity: 0.04;
+            color: var(--tip-color, var(--accent));
+            user-select: none;
+        }
+
+        /* ─── Featured tip (first card) ─── */
+        .tip-card.featured {
+            grid-column: 1 / -1;
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 20px;
+            align-items: center;
+            border-width: 1.5px;
+        }
+        @media (max-width: 560px) {
+            .tip-card.featured { grid-template-columns: 1fr; }
+        }
+        .featured-icon {
+            font-size: 56px;
+            text-align: center;
+        }
+
+        /* ─── Personalized banner ─── */
+        .personal-banner {
+            display: none;
+            background: linear-gradient(135deg, rgba(99,102,241,0.08), rgba(229,62,62,0.06));
+            border: 1px solid rgba(99,102,241,0.2);
+            border-radius: 16px;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            align-items: center;
+            gap: 14px;
+        }
+        .personal-banner.show { display: flex; }
+        .personal-banner-icon { font-size: 28px; }
+        .personal-banner-text { flex: 1; }
+        .personal-banner-text h4 { font-size: 14px; font-weight: 800; color: var(--accent); margin-bottom: 3px; }
+        .personal-banner-text p  { font-size: 12px; color: var(--muted); }
+
+        /* ─── Next refresh countdown ─── */
+        .next-refresh {
+            text-align: center;
+            margin-top: 36px;
+            padding: 16px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            font-size: 13px;
+            color: var(--muted);
+        }
+        .next-refresh strong { color: var(--text); font-weight: 700; }
+
+        /* ─── Error state ─── */
+        .error-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--muted);
+        }
+        .error-state h3 { font-size: 18px; font-weight: 800; color: var(--text); margin-bottom: 8px; }
+        .error-state p  { font-size: 14px; line-height: 1.7; margin-bottom: 20px; }
+        .retry-btn {
+            padding: 12px 28px;
+            background: var(--accent);
             color: white;
+            border: none;
+            border-radius: 12px;
+            font-family: 'Cairo', sans-serif;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.2s;
         }
-        [dir="ltr"] .slide-overlay {
-            background: linear-gradient(to left, rgba(0,0,0,0.7), transparent);
-        }
-        .slide-overlay h2 { font-size: 2rem; margin-bottom: 15px; color: var(--accent); }
-        .slide-overlay p { font-size: 1.1rem; max-width: 450px; margin-bottom: 20px; line-height: 1.6; }
-
-        /* تنسيق الشريط المتحرك (Ticker) */
-        .ticker-wrap {
-            width: 100%;
-            overflow: hidden;
-            background: var(--glass);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--glass-border);
-            padding: 10px 0;
-            margin-bottom: 30px;
-            border-radius: 15px;
-        }
-        @keyframes tickerAr { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
-        @keyframes tickerEn { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
-        
-        .ticker { display: flex; white-space: nowrap; animation: tickerAr 30s linear infinite; }
-        [dir="ltr"] .ticker { animation: tickerEn 30s linear infinite; }
-        .ticker-item { padding: 0 40px; font-weight: bold; color: var(--primary); }
-
-        .slider-dots {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 10px;
-        }
-        .dot { width: 12px; height: 12px; background: rgba(255,255,255,0.5); border-radius: 50%; cursor: pointer; }
-        .dot.active { background: var(--accent); width: 30px; border-radius: 10px; }
+        .retry-btn:hover { opacity: 0.9; }
     </style>
 </head>
-<body class="page-fade">
+<body>
+<div class="bg-animation"></div>
+<div class="bg-mesh"></div>
+<div class="container" id="main-layout">
 
-    <div class="container" id="main-layout">
-        
-        <div class="hero-slider">
-            <div class="slides" id="mainSlides">
-                <div class="slide" style="background-image: url('https://images.pexels.com/photos/40568/medical-appointment-doctor-healthcare-40568.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1');">
-                    <div class="slide-overlay">
-                        <h2 data-i18n="slide1_h">مستقبلك يبدأ من وعيك</h2>
-                        <p data-i18n="slide1_p">اكتشف كيف يمكن لتغييرات بسيطة في نمط حياتك أن تحميك من الأمراض المزمنة.</p>
-                        <a href="#tipsGrid" class="main-btn" style="width: fit-content; padding: 10px 30px; text-decoration: none;" data-i18n="slide_btn_browse">تصفح النصائح</a>
-                    </div>
-                </div>
-                <div class="slide" style="background-image: url('https://images.pexels.com/photos/7088483/pexels-photo-7088483.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1');">
-                    <div class="slide-overlay">
-                        <h2 data-i18n="slide2_h">تقنية تصنع الفرق</h2>
-                        <p data-i18n="slide2_p">سوار LifeBand رفيقك الذكي لإنقاذك في اللحظات الحرجة.</p>
-                        <a href="register.html" class="main-btn" style="width: fit-content; padding: 10px 30px; background: var(--secondary); text-decoration: none;" data-i18n="slide_btn_reg">سجل الآن</a>
-                    </div>
-                </div>
-                <div class="slide" style="background-image: url('https://images.pexels.com/photos/3913025/pexels-photo-3913025.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1');">
-                    <div class="slide-overlay">
-                        <h2 data-i18n="slide3_h">مجتمع صحي متكامل</h2>
-                        <p data-i18n="slide3_p">انضم لبرامجنا التطوعية وساهم في نشر الوعي الصحي.</p>
-                        <a href="volunteering.html" class="main-btn" style="width: fit-content; padding: 10px 30px; text-decoration: none;" data-i18n="slide_btn_vol">برامج التطوع</a>
-                    </div>
+    <div class="tips-page">
+
+        <!-- ─── Header ─── -->
+        <div class="page-top">
+            <div>
+                <h1 class="page-title">نصائح <span>طبية</span> يومية</h1>
+                <div class="page-meta">
+                    <div class="freshness-dot" id="freshnessDot"></div>
+                    <span id="freshnessMeta">جاري التحميل...</span>
                 </div>
             </div>
-            <div class="slider-dots" id="sliderDots"><div class="dot active"></div><div class="dot"></div><div class="dot"></div></div>
+            <div class="header-actions">
+                <button class="refresh-btn" id="refreshBtn" onclick="manualRefresh()" disabled>
+                    <span class="refresh-icon" id="refreshIcon">🔄</span>
+                    <span id="refreshBtnText">تحديث</span>
+                </button>
+            </div>
         </div>
 
-        <div class="ticker-wrap">
-            <div class="ticker" id="tickerContent"></div>
+        <!-- ─── Personalized banner ─── -->
+        <div class="personal-banner" id="personalBanner">
+            <span class="personal-banner-icon">👤</span>
+            <div class="personal-banner-text">
+                <h4 id="personalTitle">نصائح مخصصة لك</h4>
+                <p id="personalDesc">تم تخصيص هذه النصائح بناءً على بياناتك الصحية</p>
+            </div>
         </div>
 
-        <main>
-            <div id="tipsGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; padding-bottom: 50px;"></div>
-        </main>
+        <!-- ─── Category tabs ─── -->
+        <div class="cat-tabs" id="catTabs">
+            <button class="cat-tab active" onclick="filterCat('all', this)">🏥 الكل</button>
+            <button class="cat-tab" onclick="filterCat('قلب', this)">❤️ القلب</button>
+            <button class="cat-tab" onclick="filterCat('تغذية', this)">🥗 التغذية</button>
+            <button class="cat-tab" onclick="filterCat('رياضة', this)">🏃 الرياضة</button>
+            <button class="cat-tab" onclick="filterCat('نوم', this)">😴 النوم</button>
+            <button class="cat-tab" onclick="filterCat('ضغط', this)">🩺 الضغط</button>
+        </div>
+
+        <!-- ─── Loading skeleton ─── -->
+        <div class="skeleton-grid" id="skeletonGrid">
+            ${Array.from({length:6}, () => `
+                <div class="skeleton-card">
+                    <div class="skel-line short" style="width:40%;height:16px;margin-bottom:16px;"></div>
+                    <div class="skel-line long"></div>
+                    <div class="skel-line long"></div>
+                    <div class="skel-line short"></div>
+                </div>
+            `).join('')}
+        </div>
+
+        <!-- ─── Tips grid ─── -->
+        <div class="tips-grid" id="tipsGrid" style="display:none;"></div>
+
+        <!-- ─── Error state ─── -->
+        <div class="error-state" id="errorState" style="display:none;">
+            <div style="font-size:48px;margin-bottom:12px;">😕</div>
+            <h3>تعذّر تحميل النصائح</h3>
+            <p id="errorMsg">تحقق من الاتصال بالإنترنت وأعد المحاولة.</p>
+            <button class="retry-btn" onclick="loadTips(true)">🔄 إعادة المحاولة</button>
+        </div>
+
+        <!-- ─── Next refresh ─── -->
+        <div class="next-refresh" id="nextRefreshBox" style="display:none;">
+            <strong>⏰</strong> تتجدد النصائح تلقائياً كل 24 ساعة.
+            التحديث التالي: <strong id="nextRefreshTime"></strong>
+        </div>
     </div>
 
-    <script type="module">
-        import { injectLayout } from './js/layout.js';
-        import { auth } from './js/firebase-config.js';
-        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+</div>
 
-        // 1. تشغيل الهيكل الموحد
-        injectLayout();
+<script src="config.js"></script>
+<script type="module">
+import { auth, db } from './js/firebase-config.js';
+import { ref, get, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { askGroq } from './js/gemini-ai.js';
+import { injectLayout } from './js/layout.js';
 
-        // 2. مصفوفة النصائح الطبية الموسعة
-        const tips = [
-            { ar: {t:"شرب الماء", c:"8 أكواب يومياً تحسن وظائف الكلى."}, en: {t:"Drink Water", c:"8 glasses a day improves kidney function."}, icon: "💧", img: "https://images.pexels.com/photos/1452115/pexels-photo-1452115.jpeg?auto=compress&cs=tinysrgb&w=400" },
-            { ar: {t:"النوم العميق", c:"7-8 ساعات تعزز المناعة."}, en: {t:"Deep Sleep", c:"7-8 hours boosts immunity."}, icon: "🌙", img: "https://images.pexels.com/photos/3771069/pexels-photo-3771069.jpeg?auto=compress&cs=tinysrgb&w=400" },
-            { ar: {t:"المشي السريع", c:"30 دقيقة تقلل مخاطر القلب."}, en: {t:"Brisk Walk", c:"30 mins daily reduces heart risk."}, icon: "🏃‍♂️", img: "https://images.pexels.com/photos/601177/pexels-photo-601177.jpeg?auto=compress&cs=tinysrgb&w=400" },
-            { ar: {t:"الخضروات", c:"الألياف تدعم الجهاز الهضمي."}, en: {t:"Vegetables", c:"Fiber supports the digestive system."}, icon: "🥗", img: "https://images.pexels.com/photos/1143754/pexels-photo-1143754.jpeg?auto=compress&cs=tinysrgb&w=400" },
-            { ar: {t:"تقليل السكر", c:"يحميك من السكري والسمنة."}, en: {t:"Reduce Sugar", c:"Protects from diabetes and obesity."}, icon: "🚫", img: "https://images.pexels.com/photos/4113661/pexels-photo-4113661.jpeg?auto=compress&cs=tinysrgb&w=400" },
-            { ar: {t:"غسل اليدين", c:"يمنع انتقال 80% من الأمراض المعدية."}, en: {t:"Hand Washing", c:"Prevents 80% of infectious diseases."}, icon: "🧼", img: "https://images.pexels.com/photos/4210561/pexels-photo-4210561.jpeg?auto=compress&cs=tinysrgb&w=400" },
-            { ar: {t:"صحة العين", c:"قاعدة 20-20-20 تقلل إجهاد الشاشة."}, en: {t:"Eye Health", c:"The 20-20-20 rule reduces digital strain."}, icon: "👁️", img: "https://images.pexels.com/photos/3758105/pexels-photo-3758105.jpeg?auto=compress&cs=tinysrgb&w=400" },
-            { ar: {t:"الإسعاف الأولي", c:"تعلم كيفية التعامل مع الحروق البسيطة."}, en: {t:"First Aid", c:"Learn how to treat minor burns correctly."}, icon: "🩹", img: "https://images.pexels.com/photos/6520192/pexels-photo-6520192.jpeg?auto=compress&cs=tinysrgb&w=400" }
-        ];
+injectLayout();
 
-        const tickerItems = {
-            ar: ["🚨 حدث بياناتك الطبية دورياً.", "💡 المشي يحسن مزاجك فوراً.", "📞 رقم الطوارئ: 911.", "🔒 بياناتك مشفرة بالكامل."],
-            en: ["🚨 Update your medical data.", "💡 Walking boosts your mood.", "📞 Emergency: 911.", "🔒 Data is fully encrypted."]
-        };
+const CACHE_KEY      = 'tips_cache';
+const REFRESH_HOURS  = 24;
+const COOLDOWN_MINS  = 60;
+const TIPS_FIREBASE  = 'daily_tips';
 
-        // 3. وظيفة تحديث اللغة داخل الصفحة
-        function updatePageContent(lang) {
-            const isAr = lang === 'ar';
-            
-            // تحديث التيكر
-            const tickerHtml = tickerItems[lang].map(item => `<div class="ticker-item">${item}</div>`).join('');
-            document.getElementById('tickerContent').innerHTML = tickerHtml + tickerHtml; // مضاعفة المحتوى لحركة مستمرة
+// Category config
+const CAT_CONFIG = {
+    'قلب':    { color: '#e53e3e', bg: 'rgba(229,62,62,0.1)',    icon: '❤️' },
+    'تغذية':  { color: '#38a169', bg: 'rgba(56,161,105,0.1)',   icon: '🥗' },
+    'رياضة':  { color: '#3182ce', bg: 'rgba(49,130,206,0.1)',   icon: '🏃' },
+    'نوم':    { color: '#805ad5', bg: 'rgba(128,90,213,0.1)',   icon: '😴' },
+    'ضغط':    { color: '#d69e2e', bg: 'rgba(214,158,46,0.1)',   icon: '🩺' },
+    'عام':    { color: '#6366f1', bg: 'rgba(99,102,241,0.1)',   icon: '💡' },
+    'سكر':    { color: '#e53e3e', bg: 'rgba(229,62,62,0.08)',   icon: '🩸' },
+    'ذهني':   { color: '#6366f1', bg: 'rgba(99,102,241,0.08)', icon: '🧠' },
+};
 
-            // تحديث كروت النصائح
-            document.getElementById('tipsGrid').innerHTML = tips.map(tip => `
-                <div class="glass-card" style="padding: 0; overflow: hidden; transition: 0.4s;">
-                    <img src="${tip.img}" style="width: 100%; height: 160px; object-fit: cover; opacity: 0.8;" alt="tip">
-                    <div style="padding: 20px;">
-                        <div style="font-size: 24px; margin-bottom: 5px;">${tip.icon}</div>
-                        <h3 style="color: var(--primary); margin-bottom: 5px;">${tip[lang].t}</h3>
-                        <p style="color: var(--text-main); font-size: 13px; opacity: 0.8; line-height: 1.5;">${tip[lang].c}</p>
-                    </div>
-                </div>
-            `).join('');
-        }
+let allTips  = [];
+let userData = null;
+let lastManualRefresh = parseInt(localStorage.getItem('tips_last_manual') || '0');
 
-        // 4. منطق السلايدر التلقائي
-        let currentSlide = 0;
-        const slides = document.getElementById('mainSlides');
-        const dots = document.querySelectorAll('.dot');
-        function moveSlide() {
-            currentSlide = (currentSlide + 1) % 3;
-            const factor = document.documentElement.dir === 'rtl' ? 33.33 : -33.33;
-            slides.style.transform = `translateX(${currentSlide * factor}%)`;
-            dots.forEach((dot, index) => dot.classList.toggle('active', index === currentSlide));
-        }
-        setInterval(moveSlide, 5000);
+// ─── Auth ───
+onAuthStateChanged(auth, async user => {
+    if (user) {
+        try {
+            const snap = await get(ref(db, `users/${user.uid}`));
+            if (snap.exists()) userData = snap.val();
+        } catch(e) {}
+    }
+    loadTips();
+});
 
-        // 5. تهيئة الصفحة عند التحميل وتغيير اللغة
-        const currentLang = localStorage.getItem('preferred_lang') || 'ar';
-        updatePageContent(currentLang);
+// ─── Main load ───
+async function loadTips(forceRefresh = false) {
+    showSkeleton();
 
-        // مراقبة تغيير اللغة من الهيدر (عن طريق زر langBtn في الـ Layout)
-        document.addEventListener('click', (e) => {
-            if (e.target.id === 'langBtn') {
-                setTimeout(() => {
-                    const newLang = localStorage.getItem('preferred_lang');
-                    updatePageContent(newLang);
-                }, 50);
+    // Check Firebase cache first
+    try {
+        const snap = await get(ref(db, TIPS_FIREBASE));
+        if (snap.exists()) {
+            const cached = snap.val();
+            const ageMs  = Date.now() - (cached.generatedAt || 0);
+            const isOld  = ageMs > REFRESH_HOURS * 60 * 60 * 1000;
+
+            if (!forceRefresh && !isOld && cached.tips && cached.tips.length > 0) {
+                allTips = cached.tips;
+                renderTips(cached);
+                return;
             }
-        });
+        }
+    } catch(e) {}
 
-        // إدارة حالة الدخول
-        onAuthStateChanged(auth, (user) => {
-            const authZone = document.getElementById('auth-zone');
-            const lang = localStorage.getItem('preferred_lang') || 'ar';
-            if (user && authZone) {
-                authZone.innerHTML = `<a href="profile.html?id=${user.uid}" class="nav-item">${lang==='ar'?'ملفي':'Profile'}</a>
-                <button id="logoutBtn" class="nav-item" style="background:none; border:none; cursor:pointer; color: #ef4444;">${lang==='ar'?'خروج':'Logout'}</button>`;
-                document.getElementById('logoutBtn').onclick = () => signOut(auth).then(() => window.location.reload());
+    // Generate new tips
+    try {
+        const tips = await generateTips();
+        if (tips && tips.length > 0) {
+            allTips = tips;
+            const payload = { tips, generatedAt: Date.now() };
+            // Save to Firebase
+            try { await set(ref(db, TIPS_FIREBASE), payload); } catch(e) {}
+            renderTips(payload);
+        } else {
+            showError('لم يتم الحصول على نصائح. حاول مرة أخرى.');
+        }
+    } catch(err) {
+        showError(err.message || 'حدث خطأ أثناء التوليد.');
+    }
+}
+
+// ─── Generate via Groq ───
+async function generateTips() {
+    const personalContext = userData
+        ? `المستخدم: فصيلة دم ${userData.bloodType || 'غير محدد'}، أمراض مزمنة: ${(userData.diseases || []).join('، ') || 'لا يوجد'}.`
+        : 'المستخدم: لا توجد بيانات شخصية.';
+
+    const today = new Date().toLocaleDateString('ar-SA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+    const prompt = `أنت طبيب متخصص في الصحة العامة. اليوم ${today}.
+${personalContext}
+
+أنشئ 8 نصائح طبية متنوعة ومفيدة. يجب أن تشمل الفئات: قلب، تغذية، رياضة، نوم، ضغط، عام.
+${userData ? 'راعي الحالة الصحية للمستخدم في بعض النصائح.' : ''}
+
+أجب بـ JSON فقط (بدون markdown أو backticks) بهذا الشكل EXACTLY:
+[
+  {"cat":"قلب","title":"عنوان قصير","body":"شرح مفيد من سطرين إلى ثلاثة أسطر."},
+  {"cat":"تغذية","title":"...","body":"..."}
+]
+
+القواعد:
+- العنوان: 3-5 كلمات
+- الشرح: 20-40 كلمة
+- الفئات المسموحة: قلب / تغذية / رياضة / نوم / ضغط / عام / سكر / ذهني
+- أجب بالعربية فقط
+- لا تضف أي نص خارج الـ JSON`;
+
+    const raw = await askGroq(prompt);
+
+    // Parse JSON safely
+    let parsed = [];
+    try {
+        const clean = raw.replace(/```json|```/g, '').trim();
+        parsed = JSON.parse(clean);
+        if (!Array.isArray(parsed)) throw new Error('Not array');
+    } catch(e) {
+        // Try extracting array from text
+        const match = raw.match(/\[[\s\S]*\]/);
+        if (match) {
+            try { parsed = JSON.parse(match[0]); } catch(e2) {
+                throw new Error('تعذّر تحليل استجابة AI');
             }
-        });
-    </script>
+        } else {
+            throw new Error('استجابة AI غير صالحة');
+        }
+    }
+
+    return parsed.filter(t => t.cat && t.title && t.body);
+}
+
+// ─── Render ───
+function renderTips(payload) {
+    hideSkeleton();
+    const tips = payload.tips || [];
+    allTips    = tips;
+
+    if (tips.length === 0) { showError('لا توجد نصائح متاحة.'); return; }
+
+    // Update meta
+    const genDate  = new Date(payload.generatedAt);
+    const ageMs    = Date.now() - payload.generatedAt;
+    const isOld    = ageMs > REFRESH_HOURS * 60 * 60 * 1000;
+    const dot      = document.getElementById('freshnessDot');
+    dot.className  = `freshness-dot${isOld ? ' stale' : ''}`;
+    document.getElementById('freshnessMeta').textContent =
+        `آخر تحديث: ${genDate.toLocaleString('ar-SA')} ${isOld ? '(قديم)' : ''}`;
+
+    // Personalized banner
+    if (userData) {
+        document.getElementById('personalBanner').classList.add('show');
+        document.getElementById('personalTitle').textContent =
+            `نصائح مخصصة لـ ${userData.name || 'حسابك'}`;
+        const parts = [];
+        if (userData.bloodType) parts.push(`فصيلة دم ${userData.bloodType}`);
+        if (userData.diseases && userData.diseases.length) parts.push(`${userData.diseases.length} حالة مزمنة`);
+        document.getElementById('personalDesc').textContent =
+            parts.length ? `بناءً على: ${parts.join('، ')}` : 'بيانات حسابك الصحي';
+    }
+
+    // Enable refresh button
+    const canRefresh = (Date.now() - lastManualRefresh) > COOLDOWN_MINS * 60 * 1000;
+    const btn = document.getElementById('refreshBtn');
+    btn.disabled = !canRefresh;
+    if (!canRefresh) {
+        const remainMin = Math.ceil((COOLDOWN_MINS * 60 * 1000 - (Date.now() - lastManualRefresh)) / 60000);
+        document.getElementById('refreshBtnText').textContent = `تحديث (${remainMin} د)`;
+    } else {
+        btn.disabled = false;
+        document.getElementById('refreshBtnText').textContent = 'تحديث';
+    }
+
+    // Next refresh time
+    const nextRefresh = new Date(payload.generatedAt + REFRESH_HOURS * 60 * 60 * 1000);
+    document.getElementById('nextRefreshTime').textContent = nextRefresh.toLocaleString('ar-SA');
+    document.getElementById('nextRefreshBox').style.display = 'block';
+
+    renderFilteredTips(tips);
+}
+
+function renderFilteredTips(tips) {
+    const grid = document.getElementById('tipsGrid');
+    grid.style.display = 'grid';
+    grid.innerHTML = '';
+
+    if (tips.length === 0) {
+        grid.innerHTML = '<p style="color:var(--muted);text-align:center;grid-column:1/-1;padding:40px 0;">لا توجد نصائح في هذه الفئة.</p>';
+        return;
+    }
+
+    tips.forEach((tip, idx) => {
+        const cfg   = CAT_CONFIG[tip.cat] || CAT_CONFIG['عام'];
+        const isFeatured = idx === 0;
+
+        const card  = document.createElement('div');
+        card.className  = `tip-card${isFeatured ? ' featured' : ''}`;
+        card.style.cssText = `--tip-color:${cfg.color};--tip-bg:${cfg.bg};`;
+        card.innerHTML = isFeatured ? `
+            <div class="featured-icon">${cfg.icon}</div>
+            <div>
+                <div class="tip-cat-badge">${cfg.icon} ${tip.cat}</div>
+                <div class="tip-title">${tip.title}</div>
+                <div class="tip-body">${tip.body}</div>
+            </div>
+            <span class="tip-number">${idx + 1}</span>
+        ` : `
+            <div class="tip-cat-badge">${cfg.icon} ${tip.cat}</div>
+            <div class="tip-title">${tip.title}</div>
+            <div class="tip-body">${tip.body}</div>
+            <span class="tip-number">${idx + 1}</span>
+        `;
+        grid.appendChild(card);
+    });
+}
+
+// ─── Filter ───
+window.filterCat = (cat, btn) => {
+    document.querySelectorAll('.cat-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const filtered = cat === 'all' ? allTips : allTips.filter(t => t.cat === cat);
+    renderFilteredTips(filtered);
+};
+
+// ─── Manual refresh ───
+window.manualRefresh = async () => {
+    const btn  = document.getElementById('refreshBtn');
+    const icon = document.getElementById('refreshIcon');
+    btn.disabled = true;
+    btn.classList.add('loading');
+    icon.textContent = '↻';
+    document.getElementById('refreshBtnText').textContent = 'جاري التحديث...';
+    document.getElementById('tipsGrid').style.display  = 'none';
+    document.getElementById('nextRefreshBox').style.display = 'none';
+
+    lastManualRefresh = Date.now();
+    localStorage.setItem('tips_last_manual', lastManualRefresh);
+
+    await loadTips(true);
+    btn.classList.remove('loading');
+    icon.textContent = '🔄';
+};
+
+// ─── UI helpers ───
+function showSkeleton() {
+    document.getElementById('skeletonGrid').style.display = 'grid';
+    document.getElementById('tipsGrid').style.display     = 'none';
+    document.getElementById('errorState').style.display   = 'none';
+    document.getElementById('nextRefreshBox').style.display = 'none';
+}
+function hideSkeleton() {
+    document.getElementById('skeletonGrid').style.display = 'none';
+    document.getElementById('errorState').style.display   = 'none';
+}
+function showError(msg) {
+    hideSkeleton();
+    document.getElementById('tipsGrid').style.display   = 'none';
+    document.getElementById('errorState').style.display = 'block';
+    document.getElementById('errorMsg').textContent     = msg;
+    document.getElementById('refreshBtn').disabled      = false;
+    document.getElementById('refreshBtnText').textContent = 'تحديث';
+}
+
+window.loadTips = loadTips;
+
+// ─── Theme ───
+const theme = localStorage.getItem('theme') || 'light';
+document.documentElement.setAttribute('data-theme', theme);
+</script>
 </body>
 </html>

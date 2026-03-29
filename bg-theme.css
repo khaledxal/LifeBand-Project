@@ -1,0 +1,51 @@
+/* ================================================================
+   LifeBand — Background Theme Patch
+   أضف هذا الملف بعد style.css في كل صفحة:
+   <link rel="stylesheet" href="bg-theme.css">
+================================================================ */
+
+/* ── Light mode ── */
+body::before {
+    background:
+        conic-gradient(
+            from 200deg at 50% 50%,
+            rgba(26,86,219,0.055)   0deg,
+            rgba(26,122,94,0.040) 120deg,
+            rgba(200,168,75,0.045) 240deg,
+            rgba(26,86,219,0.055) 360deg
+        ),
+        radial-gradient(ellipse 85% 85% at 50% 50%,
+            rgba(26,86,219,0.07) 0%, transparent 72%),
+        radial-gradient(ellipse 45% 40% at 14% 12%,
+            rgba(26,86,219,0.06) 0%, transparent 55%),
+        radial-gradient(ellipse 40% 35% at 88% 88%,
+            rgba(200,168,75,0.05) 0%, transparent 55%);
+    animation: bgDrift 22s ease-in-out infinite alternate;
+}
+
+/* ── Dark mode ── */
+html[data-theme="dark"] body::before {
+    background:
+        conic-gradient(
+            from 200deg at 50% 50%,
+            rgba(26,86,219,0.13)   0deg,
+            rgba(26,122,94,0.09)  120deg,
+            rgba(200,168,75,0.08) 240deg,
+            rgba(26,86,219,0.13)  360deg
+        ),
+        radial-gradient(ellipse 85% 85% at 50% 50%,
+            rgba(26,86,219,0.14) 0%, transparent 72%),
+        radial-gradient(ellipse 45% 40% at 14% 12%,
+            rgba(26,86,219,0.11) 0%, transparent 55%),
+        radial-gradient(ellipse 40% 35% at 88% 88%,
+            rgba(200,168,75,0.08) 0%, transparent 55%);
+    animation: bgDrift 22s ease-in-out infinite alternate;
+}
+
+/* ── Drift animation ── */
+@keyframes bgDrift {
+    0%   { transform: scale(1)    rotate(0deg);   opacity: 1;    }
+    33%  { transform: scale(1.04) rotate(1.5deg); opacity: 0.92; }
+    66%  { transform: scale(0.97) rotate(-1deg);  opacity: 0.96; }
+    100% { transform: scale(1.03) rotate(2deg);   opacity: 0.90; }
+}
