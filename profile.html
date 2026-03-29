@@ -93,6 +93,7 @@
                     <button id="saveBtn" class="main-btn" data-i18n="btn_save">💾 حفظ التعديلات</button>
                     <button id="aiTipsBtn" class="main-btn" style="background: linear-gradient(135deg, #6366f1, #a855f7);" data-i18n="btn_ai_tips">✨ نصائح AI مخصصة لحالتي</button>
                     <button id="shareEmergencyBtn" class="main-btn" style="background: var(--secondary);" data-i18n="btn_share">🔗 نسخ رابط الطوارئ الخاص بي</button>
+                    <button id="qrCardBtn" class="main-btn" style="background: #0f766e;" data-i18n="btn_qr">📱 بطاقة QR الطوارئ</button>
                     <button id="exportBtn" class="main-btn" style="background: var(--glass); color: var(--text-main); border: 1px solid var(--glass-border);" data-i18n="btn_export">📄 تصدير البيانات كملف نصي</button>
                 </div>
 
@@ -141,7 +142,7 @@
                 hint_tg: "مثال: Chat ID من @userinfobot — سيصلهم تنبيه تيليغرام فوري عند فتح ملفك في الطوارئ",
                 btn_test_tg: "✈️ معاينة رسالة تيليغرام",
                 btn_save: "💾 حفظ التعديلات", btn_ai_tips: "✨ نصائح AI مخصصة لحالتي",
-                btn_share: "🔗 نسخ رابط الطوارئ", btn_export: "📄 تصدير البيانات",
+                btn_share: "🔗 نسخ رابط الطوارئ", btn_qr: "📱 بطاقة QR الطوارئ", btn_export: "📄 تصدير البيانات",
                 btn_send: "إرسال",
                 ai_tips_title: "نصائحك الصحية المخصصة",
                 chatbot_title: "المساعد الطبي الذكي",
@@ -161,7 +162,7 @@
                 hint_tg: "Example: Chat ID من @userinfobot — They'll get an instant alert when your emergency file is opened",
                 btn_test_tg: "🟢 Preview Emergency Message",
                 btn_save: "💾 Save Changes", btn_ai_tips: "✨ My Personalized AI Tips",
-                btn_share: "🔗 Copy Emergency Link", btn_export: "📄 Export Data",
+                btn_share: "🔗 Copy Emergency Link", btn_qr: "📱 Emergency QR Card", btn_export: "📄 Export Data",
                 btn_send: "Send",
                 ai_tips_title: "Your Personalized Health Tips",
                 chatbot_title: "AI Medical Assistant",
@@ -271,6 +272,13 @@
             if (user) {
                 const emergencyUrl = `${window.location.origin}/LifeBand-Project/emergency.html?id=${user.uid}`;
                 navigator.clipboard.writeText(emergencyUrl).then(() => alert(T[l].copy_ok));
+            }
+        });
+
+        document.getElementById('qrCardBtn').addEventListener('click', () => {
+            const user = auth.currentUser;
+            if (user) {
+                window.location.href = `qr-card.html?id=${user.uid}`;
             }
         });
 
