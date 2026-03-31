@@ -24,11 +24,13 @@ jobs:
           EOF
 
       # استبدال __GROQ_KEY__ في أي ملف بالمشروع
-      - name: Inject GROQ_KEY into project
+      - name: Inject secrets into project files
         run: |
-          grep -rl "__GROQ_KEY__" . | xargs sed -i "s|__GROQ_KEY__|${{ secrets.GROQ_KEY }}|g"
+          grep -rl "__GROQ_KEY__" . | xargs -r sed -i "s|__GROQ_KEY__|${{ secrets.GROQ_KEY }}|g" || true
+          grep -rl "__GEMINI_KEY__" . | xargs -r sed -i "s|__GEMINI_KEY__|${{ secrets.GEMINI_KEY }}|g" || true
+          grep -rl "__TG_BOT_TOKEN__" . | xargs -r sed -i "s|__TG_BOT_TOKEN__|${{ secrets.TG_BOT_TOKEN }}|g" || true
 
-      # نشر المشروع على 
+      # نشر المشروع على Firebase Hosting
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
