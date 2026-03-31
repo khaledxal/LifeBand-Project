@@ -1,1 +1,1 @@
-window.GROQ_KEY="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";
+window.GROQ_KEY="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";
