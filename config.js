@@ -1,1 +1,1 @@
-window.GROQ_KEY = "{{GROQ_KEY}}";
+window.GROQ_KEY = "{{GROQ_KEY}}" ;
