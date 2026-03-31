@@ -1,1 +1,1 @@
-window.GROQ_KEY="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";
+window.GROQ_KEY = "{{GROQ_KEY}}";
