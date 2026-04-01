@@ -53,20 +53,7 @@
 </head>
 <body class="page-fade">
 <div class="bg-animation"></div>
-<div class="container">
-    <header class="navbar">
-        <a href="index.html" class="nav-brand">LifeBand</a>
-        <div id="auth-zone" style="display:flex; gap:8px; align-items:center;">
-            <a href="active-reports.html" class="nav-item" data-i18n="nav_active">البلاغات</a>
-            <a href="history.html" class="nav-item" data-i18n="nav_history">السجل</a>
-            <a href="rewards.html" class="nav-item" data-i18n="nav_rewards">المكافآت</a>
-        </div>
-        <div class="nav-links" style="display:flex; gap:10px; align-items:center;">
-            <button class="lang-toggle" id="langBtn">EN</button>
-            <button class="theme-toggle" id="themeBtn">🌙</button>
-        </div>
-    </header>
-
+<div class="container" id="main-layout">
     <main class="reports-container">
         <h2 data-i18n="reports_title">⚠️ البلاغات الحالية</h2>
         <div id="reportsList" style="margin-top:25px;"></div>
@@ -80,25 +67,26 @@
 </div>
 
 <script type="module">
+import { injectLayout } from './js/layout.js';
 import { auth, db } from './js/firebase-config.js';
 import { ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 import { askGroq } from './js/gemini-ai.js';
 
+injectLayout();
+
 const T = {
-    ar: { nav_active:"البلاغات", nav_history:"السجل", nav_rewards:"المكافآت",
-          reports_title:"⚠️ البلاغات الحالية", btn_respond:"مباشرة الحالة",
+    ar: { reports_title:"⚠️ البلاغات الحالية", btn_respond:"مباشرة الحالة",
           btn_diagnose:"🤖 تشخيص AI", btn_analyze:"🔍 تحليل الأسئلة",
-          empty:"لا توجد بلاغات حالياً", lang_label:"EN",
+          empty:"لا توجد بلاغات حالياً",
           diag_title:"أسئلة تشخيصية للمسعف", media_label:"📚 وسائط مساعدة:",
           analyzing:"جاري التحليل...", extra_needed:"⚠️ يحتاج معلومات إضافية",
-          btn_extra:"🔄 أسئلة إضافية", btn_reanalyze:"🔄 إعادة التحليل" },
-    en: { nav_active:"Reports", nav_history:"History", nav_rewards:"Rewards",
-          reports_title:"⚠️ Active Reports", btn_respond:"Respond",
+          btn_reanalyze:"🔄 إعادة التحليل" },
+    en: { reports_title:"⚠️ Active Reports", btn_respond:"Respond",
           btn_diagnose:"🤖 AI Diagnosis", btn_analyze:"🔍 Analyze",
-          empty:"No active reports", lang_label:"AR",
+          empty:"No active reports",
           diag_title:"Diagnostic Questions", media_label:"📚 Support Media:",
           analyzing:"Analyzing...", extra_needed:"⚠️ Needs more info",
-          btn_extra:"🔄 Extra Questions", btn_reanalyze:"🔄 Re-analyze" }
+          btn_reanalyze:"🔄 Re-analyze" }
 };
 
 const QUESTIONS = {
@@ -132,21 +120,6 @@ const t = () => T[lang()];
 
 // حالة كل بلاغ منفصلة
 const reportStates = {};
-
-function setLanguage(l) {
-    document.documentElement.lang = l;
-    document.documentElement.dir = l==='ar'?'rtl':'ltr';
-    document.querySelectorAll('[data-i18n]').forEach(el => { if(T[l][el.getAttribute('data-i18n')]) el.innerText = T[l][el.getAttribute('data-i18n')]; });
-    document.getElementById('langBtn').innerText = T[l].lang_label;
-    localStorage.setItem('preferred_lang', l);
-}
-document.getElementById('langBtn').onclick = () => { setLanguage(lang()==='ar'?'en':'ar'); location.reload(); };
-
-const themeBtn = document.getElementById('themeBtn');
-const applyTheme = th => { document.body.setAttribute('data-theme',th==='dark'?'dark':''); themeBtn.innerText=th==='dark'?'☀️':'🌙'; };
-applyTheme(localStorage.getItem('theme')||'light');
-themeBtn.onclick = () => { const nt=document.body.getAttribute('data-theme')==='dark'?'light':'dark'; localStorage.setItem('theme',nt); applyTheme(nt); };
-setLanguage(lang());
 
 // ===== عرض البلاغات =====
 const reportsList = document.getElementById('reportsList');
