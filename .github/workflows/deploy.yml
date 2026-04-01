@@ -11,24 +11,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build config.js from secrets
-        run: |
-          printf 'window.GROQ_KEY="%s";\nwindow.GEMINI_KEY="%s";\nwindow.TG_BOT_TOKEN="%s";\n' \
-            "${{ secrets.GROQ_KEY }}" \
-            "${{ secrets.GEMINI_KEY }}" \
-            "${{ secrets.TG_BOT_TOKEN }}" > config.js
-
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: .
           publish_branch: gh-pages
-
-      - name: Deploy to Firebase Hosting
-        uses: FirebaseExtended/action-hosting-deploy@v0
-        with:
-          repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_TOKEN }}
-          projectId: lifeband-affa0
-          channelId: live
