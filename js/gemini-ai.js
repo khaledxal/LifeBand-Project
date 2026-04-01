@@ -10,12 +10,9 @@ async function sleep(ms) {
 }
 
 export async function askGroq(prompt, retries = 3) {
-const GROQ_API_KEY = window.GROQ_KEY || "__GROQ_KEY__";
 
 
-if (!GROQ_API_KEY || GROQ_API_KEY === "__GROQ_KEY__") {
-            throw new Error("⚠️ مفتاح Groq غير متوفر");
-    }
+
 
     if (_cache.has(prompt)) return _cache.get(prompt);
 
@@ -27,20 +24,19 @@ if (!GROQ_API_KEY || GROQ_API_KEY === "__GROQ_KEY__") {
 const GROQ_URL = "https://green-meadow-35a6.fyyghgggg.workers.dev";
 
     for (let attempt = 1; attempt <= retries; attempt++) {
-        const response = await fetch(GROQ_URL, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${GROQ_API_KEY}`
-            },
-            body: JSON.stringify({
-                model: "llama-3.3-70b-versatile",
-                messages: [{ role: "user", content: prompt }],
-                max_tokens: 500,
-                temperature: 0.4
-            })
-        });
-
+      // ✅ بدون Authorization - الكي في Cloudflare
+const response = await fetch(GROQ_URL, {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+        model: "llama-3.3-70b-versatile",
+        messages: [{ role: "user", content: prompt }],
+        max_tokens: 500,
+        temperature: 0.4
+    })
+});
         if (response.status === 429) {
             const waitMs = attempt * 3000;
             console.warn(`Groq rate limit hit. Retrying in ${waitMs/1000}s... (attempt ${attempt}/${retries})`);
