@@ -24,7 +24,7 @@ if (!GROQ_API_KEY || GROQ_API_KEY === "__GROQ_KEY__") {
     if (gap < MIN_INTERVAL_MS) await sleep(MIN_INTERVAL_MS - gap);
     _lastCallTime = Date.now();
 
-    const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
+const GROQ_URL = "https://green-meadow-35a6.fyyghgggg.workers.dev";
 
     for (let attempt = 1; attempt <= retries; attempt++) {
         const response = await fetch(GROQ_URL, {
