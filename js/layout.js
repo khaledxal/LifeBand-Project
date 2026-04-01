@@ -86,6 +86,15 @@ export function injectLayout() {
                         : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>`
                     }
                 </button>
+                <button id="lb-bell-btn" class="lb-icon-btn" title="${isAr ? 'الإشعارات' : 'Notifications'}" style="position:relative;display:none;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+                    <span id="lb-bell-badge" style="display:none;position:absolute;top:4px;right:4px;width:8px;height:8px;background:#ef4444;border-radius:50%;"></span>
+                </button>
+                <!-- Notifications dropdown -->
+                <div id="lb-notif-dropdown" style="display:none;position:absolute;top:56px;${isAr?'left:16px':'right:16px'};width:300px;background:var(--lb-surface,#fff);border:1px solid var(--lb-border,#e5e7eb);border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,0.12);z-index:999;overflow:hidden;">
+                    <div style="padding:14px 16px;border-bottom:1px solid var(--lb-border,#e5e7eb);font-weight:700;font-size:14px;">${isAr?'الإشعارات':'Notifications'}</div>
+                    <div id="lb-notif-list" style="max-height:300px;overflow-y:auto;padding:8px;"></div>
+                </div>
                 <button id="lb-hamburger" class="lb-hamburger" aria-label="Menu">
                     <span></span><span></span><span></span>
                 </button>
@@ -191,6 +200,31 @@ export function injectLayout() {
 // ─────────────────────────────────────────────
 function _initEvents() {
     const navbar = document.getElementById('mainNavbar');
+
+    // ── Dropdown click toggle (fix disappearing on scroll) ──
+    document.querySelectorAll('.lb-dropdown-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const menu = btn.nextElementSibling;
+            const isOpen = menu.style.display === 'block';
+            // Close all dropdowns first
+            document.querySelectorAll('.lb-dropdown-menu').forEach(m => m.style.display = 'none');
+            menu.style.display = isOpen ? 'none' : 'block';
+        });
+    });
+    document.addEventListener('click', () => {
+        document.querySelectorAll('.lb-dropdown-menu').forEach(m => m.style.display = 'none');
+        const nd = document.getElementById('lb-notif-dropdown');
+        if (nd) nd.style.display = 'none';
+    });
+
+    // ── Bell notification toggle ──
+    document.getElementById('lb-bell-btn')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const nd = document.getElementById('lb-notif-dropdown');
+        if (nd) nd.style.display = nd.style.display === 'none' ? 'block' : 'none';
+        document.getElementById('lb-bell-badge').style.display = 'none';
+    });
 
     // Scroll shadow
     window.addEventListener('scroll', () => {
@@ -298,6 +332,36 @@ function _initAuth() {
                 const logout = () => confirm(isAr ? 'هل تريد الخروج؟' : 'Logout?') && signOut(auth).then(() => location.href = 'index.html');
                 document.getElementById('lb-logout')?.addEventListener('click', logout);
                 document.getElementById('lb-drawer-logout')?.addEventListener('click', logout);
+
+                // ── Notifications listener ──
+                const { onValue: _onValue, ref: _ref } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js");
+                const bellBtn = document.getElementById('lb-bell-btn');
+                const bellBadge = document.getElementById('lb-bell-badge');
+                const notifList = document.getElementById('lb-notif-list');
+                if (bellBtn) bellBtn.style.display = 'flex';
+
+                _onValue(_ref(db, 'notifications'), (snap) => {
+                    const items = [];
+                    snap.forEach(child => {
+                        const d = child.val();
+                        // Show to all or to specific user
+                        if (!d.targetUid || d.targetUid === user.uid) {
+                            items.push(d);
+                        }
+                    });
+                    if (notifList) {
+                        if (items.length === 0) {
+                            notifList.innerHTML = `<p style="text-align:center;opacity:0.5;padding:16px;font-size:13px;">${isAr?'لا توجد إشعارات':'No notifications'}</p>`;
+                        } else {
+                            notifList.innerHTML = items.reverse().map(d => `
+                                <div style="padding:10px 12px;border-radius:10px;margin-bottom:6px;background:var(--lb-bg,#f9fafb);border:1px solid var(--lb-border,#e5e7eb);">
+                                    <div style="font-weight:700;font-size:13px;margin-bottom:3px;">${d.title||'إشعار'}</div>
+                                    <div style="font-size:12px;opacity:0.7;">${d.message||''}</div>
+                                </div>`).join('');
+                            if (bellBadge) bellBadge.style.display = 'block';
+                        }
+                    }
+                });
 
             } catch (e) { console.error(e); }
         } else {
