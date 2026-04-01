@@ -357,11 +357,14 @@ function _initAuth() {
                         if (items.length === 0) {
                             notifList.innerHTML = `<p style="text-align:center;opacity:0.5;padding:16px;font-size:13px;">${isAr?'لا توجد إشعارات':'No notifications'}</p>`;
                         } else {
-                            notifList.innerHTML = items.reverse().map(d => `
-                                <div style="padding:10px 12px;border-radius:10px;margin-bottom:6px;background:var(--lb-bg,#f9fafb);border:1px solid var(--lb-border,#e5e7eb);">
-                                    <div style="font-weight:700;font-size:13px;margin-bottom:3px;">${d.title||'إشعار'}</div>
-                                    <div style="font-size:12px;opacity:0.7;">${d.message||''}</div>
-                                </div>`).join('');
+                            notifList.innerHTML = items.reverse().map(d => {
+                                const date = d.sentAt ? new Date(d.sentAt).toLocaleString(isAr?'ar-SA':'en-US') : '';
+                                return `<div style="padding:12px 14px;border-radius:10px;margin-bottom:8px;background:var(--lb-bg,#f9fafb);border:1px solid var(--lb-border,#e5e7eb);">
+                                    <div style="font-weight:700;font-size:13px;margin-bottom:5px;">${d.title||'إشعار'}</div>
+                                    <div style="font-size:13px;line-height:1.6;margin-bottom:6px;">${d.body||''}</div>
+                                    <div style="font-size:11px;opacity:0.5;">${date}</div>
+                                </div>`;
+                            }).join('');
                             if (bellBadge) bellBadge.style.display = 'block';
                         }
                     }
