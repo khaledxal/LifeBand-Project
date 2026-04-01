@@ -212,10 +212,14 @@ function _initEvents() {
             menu.style.display = isOpen ? 'none' : 'block';
         });
     });
-    document.addEventListener('click', () => {
-        document.querySelectorAll('.lb-dropdown-menu').forEach(m => m.style.display = 'none');
-        const nd = document.getElementById('lb-notif-dropdown');
-        if (nd) nd.style.display = 'none';
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.lb-dropdown')) {
+            document.querySelectorAll('.lb-dropdown-menu').forEach(m => m.style.display = 'none');
+        }
+        if (!e.target.closest('#lb-notif-dropdown') && !e.target.closest('#lb-bell-btn')) {
+            const nd = document.getElementById('lb-notif-dropdown');
+            if (nd) nd.style.display = 'none';
+        }
     });
 
     // ── Bell notification toggle ──
