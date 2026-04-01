@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LifeBand - إدارة الملف الطبي</title>
+    <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="bg-theme.css">      <style>
+        .tg-preview {
+            display: none;
+            margin-top: 10px;
+            background: rgba(34,158,217,0.08);
+            border: 1px solid rgba(34,158,217,0.3);
+            border-radius: 12px;
+            padding: 12px 16px;
+            font-size: 13px;
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+        .tg-preview.visible { display: block; }
+        .wa-num { color: #229ED9; font-weight: bold; }
+    </style>
+</head>
+<body class="page-fade">
+    <div class="bg-animation"></div>
+
+    <div class="container" id="main-layout">
+        <main style="display: flex; justify-content: center; padding-top: 20px; padding-bottom: 60px;">
+            <div class="glass-card" style="width: 100%; max-width: 550px; z-index: 10;">
+                <h2 style="color: var(--primary); margin-bottom: 25px; text-align: center;" data-i18n="profile_title">إدارة الملف الطبي</h2>
+                
+                <div class="input-group">
+                    <label data-i18n="label_full_name">الاسم الكامل:</label>
+                    <input type="text" id="userName" class="input-style" placeholder="...">
+                </div>
+
+                <div class="input-group" style="margin-top: 15px;">
+                    <label data-i18n="label_id">رقم الهوية / الإقامة:</label>
+                    <input type="text" id="userIdNo" class="input-style" placeholder="10XXXXXXXX">
+                </div>
+
+                <div class="input-group" style="margin-top: 15px;">
+                    <label data-i18n="label_blood">فصيلة الدم:</label>
+                    <select id="userBlood" class="input-style">
+                        <option value="A+">A+</option>
+                        <option value="A-">A-</option>
+                        <option value="B+">B+</option>
+                        <option value="B-">B-</option>
+                        <option value="O+">O+</option>
+                        <option value="O-">O-</option>
+                        <option value="AB+">AB+</option>
+                        <option value="AB-">AB-</option>
+                    </select>
+                </div>
+
+                <div class="input-group" style="margin-top: 20px;">
+                    <label data-i18n="label_chronic">الأمراض المزمنة (اختر ما ينطبق):</label>
+                    <div id="diseasesList" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                        <label class="check-container"><span data-i18n="dis_diabetes">السكري</span> <input type="checkbox" value="السكري"><span class="checkmark"></span></label>
+                        <label class="check-container"><span data-i18n="dis_pressure">الضغط</span> <input type="checkbox" value="الضغط"><span class="checkmark"></span></label>
+                        <label class="check-container"><span data-i18n="dis_asthma">الربو</span> <input type="checkbox" value="الربو"><span class="checkmark"></span></label>
+                        <label class="check-container"><span data-i18n="dis_heart">أمراض القلب</span> <input type="checkbox" value="أمراض القلب"><span class="checkmark"></span></label>
+                        <label class="check-container"><span data-i18n="dis_allergy">حساسية دواء</span> <input type="checkbox" value="حساسية دواء"><span class="checkmark"></span></label>
+                        <label class="check-container"><span data-i18n="dis_epilepsy">الصرع</span> <input type="checkbox" value="الصرع"><span class="checkmark"></span></label>
+                    </div>
+                </div>
+
+                <!-- ✅ قسم واتساب الطوارئ -->
+                <div class="input-group" style="margin-top: 25px; border-top: 1px solid var(--glass-border); padding-top: 20px;">
+                    <label style="display:flex; align-items:center; gap:8px;">
+                        <span style="font-size:20px;">✈️</span>
+                        <span data-i18n="label_tg_contact">رقم معرّف تيليغرام جهة الطوارئ:</span>
+                    </label>
+                    <input type="tel" id="userTgChatId" class="input-style" style="margin-top:8px;"
+                           placeholder="Chat ID من @userinfobot"
+                           pattern="[0-9]{9,15}">
+                    <small style="color:var(--text-muted); font-size:12px; margin-top:6px; display:block;" data-i18n="hint_tg">
+                        أدخل الرقم الدولي بدون + مثال: Chat ID من @userinfobot — سيصلهم تنبيه تيليغرام فوري عند فتح ملفك في الطوارئ
+                    </small>
+                    <!-- معاينة رسالة الواتساب -->
+                    <div id="tgPreview" class="wa-preview">
+                        <strong>📋 معاينة رسالة تيليغرام:</strong><br>
+                        <span id="tgPreviewText"></span>
+                    </div>
+                    <button type="button" id="testTgBtn" class="main-btn" 
+                            style="margin-top:10px; background:#229ED9; width:auto; padding:10px 24px; font-size:14px;"
+                            data-i18n="btn_test_tg">
+                        ✈️ معاينة رسالة تيليغرام
+                    </button>
+                </div>
+
+                <div style="margin-top: 30px; display: flex; flex-direction: column; gap: 12px;">
+                    <button id="saveBtn" class="main-btn" data-i18n="btn_save">💾 حفظ التعديلات</button>
+                    <button id="aiTipsBtn" class="main-btn" style="background: linear-gradient(135deg, #6366f1, #a855f7);" data-i18n="btn_ai_tips">✨ نصائح AI مخصصة لحالتي</button>
+                    <button id="shareEmergencyBtn" class="main-btn" style="background: var(--secondary);" data-i18n="btn_share">🔗 نسخ رابط الطوارئ الخاص بي</button>
+                    <button id="qrCardBtn" class="main-btn" style="background: #0f766e;" data-i18n="btn_qr">📱 بطاقة QR الطوارئ</button>
+                    <button id="exportBtn" class="main-btn" style="background: var(--glass); color: var(--text-main); border: 1px solid var(--glass-border);" data-i18n="btn_export">📄 تصدير البيانات كملف نصي</button>
+                </div>
+
+                <!-- صندوق نصائح AI -->
+                <div id="aiTipsBox" style="display:none; margin-top:20px; background:rgba(99,102,241,0.07); border:1px solid rgba(99,102,241,0.25); border-radius:16px; padding:20px;">
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+                        <span style="font-size:22px;">🤖</span>
+                        <h4 style="color:#6366f1; margin:0;" data-i18n="ai_tips_title">نصائحك الصحية المخصصة</h4>
+                    </div>
+                    <div id="aiTipsText" style="font-size:14px; line-height:1.9; white-space:pre-wrap;"></div>
+                </div>
+
+                <!-- Chatbot AI -->
+                <div style="margin-top:25px; background:rgba(99,102,241,0.05); border:1px solid rgba(99,102,241,0.2); border-radius:16px; padding:20px;">
+                    <h4 style="color:#6366f1; margin-bottom:15px;">🤖 <span data-i18n="chatbot_title">المساعد الطبي الذكي</span></h4>
+                    <div id="chatMessages" style="max-height:250px; overflow-y:auto; margin-bottom:12px; display:flex; flex-direction:column; gap:10px;"></div>
+                    <div style="display:flex; gap:8px;">
+                        <input id="chatInput" type="text" class="input-style" style="flex:1; margin-top:0;" placeholder="اسأل عن صحتك..." data-i18n-placeholder="chatbot_placeholder">
+                        <button id="chatSendBtn" class="main-btn" style="width:auto; padding:10px 20px;" data-i18n="btn_send">إرسال</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="config.js"></script>
+    <script type="module">
+        // ✅ مسارات صحيحة
+        import { injectLayout } from './js/layout.js';
+        import { auth, db } from './js/firebase-config.js';
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { ref, get, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { medicalChatbot, getPersonalizedTips } from './js/gemini-ai.js';
+
+        injectLayout();
+
+        // --- ترجمات ---
+        const T = {
+            ar: {
+                profile_title: "إدارة الملف الطبي",
+                label_full_name: "الاسم الكامل:", label_id: "رقم الهوية / الإقامة:",
+                label_blood: "فصيلة الدم:", label_chronic: "الأمراض المزمنة:",
+                dis_diabetes:"السكري", dis_pressure:"الضغط", dis_asthma:"الربو",
+                dis_heart:"أمراض القلب", dis_allergy:"حساسية دواء", dis_epilepsy:"الصرع",
+                label_tg_contact: "رقم معرّف تيليغرام جهة الطوارئ:",
+                hint_tg: "مثال: Chat ID من @userinfobot — سيصلهم تنبيه تيليغرام فوري عند فتح ملفك في الطوارئ",
+                btn_test_tg: "✈️ معاينة رسالة تيليغرام",
+                btn_save: "💾 حفظ التعديلات", btn_ai_tips: "✨ نصائح AI مخصصة لحالتي",
+                btn_share: "🔗 نسخ رابط الطوارئ", btn_qr: "📱 بطاقة QR الطوارئ", btn_export: "📄 تصدير البيانات",
+                btn_send: "إرسال",
+                ai_tips_title: "نصائحك الصحية المخصصة",
+                chatbot_title: "المساعد الطبي الذكي",
+                save_ok: "تم التحديث بنجاح! ✅",
+                save_fail: "خطأ في الحفظ: ",
+                copy_ok: "✅ تم نسخ الرابط!",
+                no_tg: "⚠️ أدخل Chat ID أولاً في الحقل أعلاه",
+                tg_preview_title: "📋 معاينة رسالة تيليغرام:"
+            },
+            en: {
+                profile_title: "Medical Profile Management",
+                label_full_name: "Full Name:", label_id: "ID / Residency Number:",
+                label_blood: "Blood Type:", label_chronic: "Chronic Diseases:",
+                dis_diabetes:"Diabetes", dis_pressure:"Hypertension", dis_asthma:"Asthma",
+                dis_heart:"Heart Disease", dis_allergy:"Drug Allergy", dis_epilepsy:"Epilepsy",
+                label_tg_contact: "Emergency Telegram Chat ID:",
+                hint_tg: "Example: Chat ID من @userinfobot — They'll get an instant alert when your emergency file is opened",
+                btn_test_tg: "🟢 Preview Emergency Message",
+                btn_save: "💾 Save Changes", btn_ai_tips: "✨ My Personalized AI Tips",
+                btn_share: "🔗 Copy Emergency Link", btn_qr: "📱 Emergency QR Card", btn_export: "📄 Export Data",
+                btn_send: "Send",
+                ai_tips_title: "Your Personalized Health Tips",
+                chatbot_title: "AI Medical Assistant",
+                save_ok: "Updated successfully! ✅",
+                save_fail: "Save error: ",
+                copy_ok: "✅ Link copied!",
+                no_tg: "⚠️ Enter Telegram Chat ID first",
+                tg_preview_title: "📋 Emergency message preview:"
+            }
+        };
+
+        const lang = () => localStorage.getItem('preferred_lang') || 'ar';
+
+        function applyTranslations() {
+            const l = lang();
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const k = el.getAttribute('data-i18n');
+                if(T[l][k]) el.innerText = T[l][k];
+            });
+            const chatPlaceholder = document.getElementById('chatInput');
+            if(chatPlaceholder) chatPlaceholder.placeholder = l === 'ar' ? 'اسأل عن صحتك...' : 'Ask about your health...';
+        }
+
+        // ✅ Route guard — يمنع الوصول بدون تسجيل دخول
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.href = "login.html";
+                return;
+            }
+
+            applyTranslations();
+
+            const snapshot = await get(ref(db, 'users/' + user.uid));
+            if (snapshot.exists()) {
+                const data = snapshot.val();
+                document.getElementById('userName').value      = data.name      || "";
+                document.getElementById('userIdNo').value      = data.idNo      || "";
+                document.getElementById('userBlood').value     = data.bloodType || "A+";
+                document.getElementById('userTgChatId').value = data.tgChatId || "";
+
+                const savedDiseases = data.diseases || [];
+                document.querySelectorAll('#diseasesList input').forEach(input => {
+                    if (savedDiseases.includes(input.value)) input.checked = true;
+                });
+            }
+        });
+
+        // ✅ زر معاينة رسالة الواتساب
+        document.getElementById('testTgBtn').addEventListener('click', () => {
+            const l = lang();
+            const waNum = document.getElementById('userTgChatId').value.trim(); // chat_id
+            if (!waNum) {
+                alert(T[l].no_tg);
+                return;
+            }
+            const name      = document.getElementById('userName').value || '—';
+            const blood     = document.getElementById('userBlood').value || '—';
+            const diseases  = Array.from(document.querySelectorAll('#diseasesList input:checked')).map(i => i.value);
+            const diseaseTxt = diseases.length ? diseases.join('، ') : (l === 'ar' ? 'لا يوجد' : 'None');
+            const emergencyUrl = `${window.location.origin}/LifeBand-Project/emergency.html?id=USER_ID`;
+
+            const msg = l === 'ar'
+                ? `🚨 *تنبيه طوارئ - LifeBand*\n\nتم فتح الملف الطبي للمريض:\n👤 *${name}*\n🩸 فصيلة الدم: ${blood}\n💊 أمراض مزمنة: ${diseaseTxt}\n\n📍 موقع الطوارئ: جاري التحديد\n🔗 الملف الطبي: ${emergencyUrl}\n\n⏱ يرجى التواصل فوراً`
+                : `🚨 *Emergency Alert - LifeBand*\n\nMedical file opened for:\n👤 *${name}*\n🩸 Blood Type: ${blood}\n💊 Chronic Conditions: ${diseaseTxt}\n\n📍 Location: Being determined\n🔗 Medical File: ${emergencyUrl}\n\nPlease respond immediately`;
+
+            document.getElementById('tgPreviewText').innerText = msg;
+            document.getElementById('tgPreview').classList.add('visible');
+        });
+
+        // ✅ حفظ مع رقم الواتساب
+        document.getElementById('saveBtn').addEventListener('click', async () => {
+            const user = auth.currentUser;
+            const l = lang();
+            const btn = document.getElementById('saveBtn');
+            if (!user) return;
+
+            btn.disabled = true;
+            btn.innerText = l === 'ar' ? '⏳ جاري الحفظ...' : '⏳ Saving...';
+
+            const selectedDiseases = Array.from(document.querySelectorAll('#diseasesList input:checked')).map(i => i.value);
+            const newData = {
+                name:      document.getElementById('userName').value.trim(),
+                idNo:      document.getElementById('userIdNo').value.trim(),
+                bloodType: document.getElementById('userBlood').value,
+                diseases:  selectedDiseases,
+                tgChatId: document.getElementById('userTgChatId').value.trim() || null,
+                role:      "patient",
+                updatedAt: new Date().toISOString()
+            };
+            try {
+                // حفظ جزئي — لا يمسح role القديم
+                const snap = await get(ref(db, 'users/' + user.uid));
+                const existing = snap.exists() ? snap.val() : {};
+                await set(ref(db, 'users/' + user.uid), { ...existing, ...newData });
+                alert(T[l].save_ok);
+            } catch (err) {
+                alert(T[l].save_fail + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = T[l].btn_save;
+            }
+        });
+
+        document.getElementById('shareEmergencyBtn').addEventListener('click', () => {
+            const user = auth.currentUser;
+            const l = lang();
+            if (user) {
+                const emergencyUrl = `${window.location.origin}/LifeBand-Project/emergency.html?id=${user.uid}`;
+                navigator.clipboard.writeText(emergencyUrl).then(() => alert(T[l].copy_ok));
+            }
+        });
+
+        document.getElementById('qrCardBtn').addEventListener('click', () => {
+            const user = auth.currentUser;
+            if (user) {
+                window.location.href = `qr-card.html?id=${user.uid}`;
+            }
+        });
+
+        document.getElementById('exportBtn').onclick = () => {
+            const name     = document.getElementById('userName').value;
+            const diseases = Array.from(document.querySelectorAll('#diseasesList input:checked')).map(i => i.value).join(', ');
+            const content  = `LifeBand Medical Profile\nName: ${name}\nID: ${document.getElementById('userIdNo').value}\nBlood Type: ${document.getElementById('userBlood').value}\nChronic Conditions: ${diseases || 'None'}\nTelegram Chat ID: ${document.getElementById('userTgChatId').value || 'Not set'}`;
+            const blob = new Blob([content], { type: 'text/plain' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `LifeBand_${name}.txt`;
+            a.click();
+        };
+
+        // AI نصائح مخصصة
+        document.getElementById('aiTipsBtn').addEventListener('click', async () => {
+            const tipsBox  = document.getElementById('aiTipsBox');
+            const tipsText = document.getElementById('aiTipsText');
+            const l = lang();
+            tipsBox.style.display = 'block';
+            tipsText.innerText = l === 'ar' ? '⏳ جاري تحليل ملفك الطبي...' : '⏳ Analyzing your profile...';
+            try {
+                const patientCtx = {
+                    bloodType: document.getElementById('userBlood').value,
+                    diseases:  Array.from(document.querySelectorAll('#diseasesList input:checked')).map(i => i.value)
+                };
+                tipsText.innerText = await getPersonalizedTips(patientCtx);
+            } catch(e) {
+                tipsText.innerText = '⚠️ تعذّر الاتصال بـ AI. ' + e.message;
+            }
+        });
+
+        // Chatbot
+        function appendMessage(text, isUser) {
+            const chatMessages = document.getElementById('chatMessages');
+            const bubble = document.createElement('div');
+            bubble.style.cssText = `padding:10px 15px;border-radius:14px;max-width:85%;font-size:14px;line-height:1.7;
+                ${isUser?'background:#6366f1;color:white;align-self:flex-end;':'background:rgba(0,0,0,0.06);align-self:flex-start;'}`;
+            bubble.innerText = text;
+            chatMessages.appendChild(bubble);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        document.getElementById('chatSendBtn').addEventListener('click', async () => {
+            const input = document.getElementById('chatInput');
+            const msg   = input.value.trim();
+            if (!msg) return;
+            input.value = '';
+            appendMessage(msg, true);
+            const thinking = document.createElement('div');
+            thinking.id = 'thinking';
+            thinking.style.cssText = 'padding:10px 15px;border-radius:14px;background:rgba(0,0,0,0.06);align-self:flex-start;font-size:13px;opacity:0.6;';
+            thinking.innerText = '⏳ ...';
+            document.getElementById('chatMessages').appendChild(thinking);
+            try {
+                const patientCtx = {
+                    bloodType: document.getElementById('userBlood').value,
+                    diseases:  Array.from(document.querySelectorAll('#diseasesList input:checked')).map(i => i.value)
+                };
+                const reply = await medicalChatbot(msg, patientCtx);
+                document.getElementById('thinking')?.remove();
+                appendMessage(reply, false);
+            } catch(e) {
+                document.getElementById('thinking')?.remove();
+                appendMessage('⚠️ تعذّر الاتصال بـ AI.', false);
+            }
+        });
+
+        document.getElementById('chatInput').addEventListener('keydown', e => {
+            if (e.key === 'Enter') document.getElementById('chatSendBtn').click();
+        });
+    </script>
+</body>
+</html>

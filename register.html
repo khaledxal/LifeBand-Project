@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LifeBand - إنشاء حساب جديد</title>
+    <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="bg-theme.css">  </head>
+<body class="page-fade">
+    <div class="bg-animation"></div>
+    
+    <div class="container" id="main-layout">
+        
+        <main style="display: flex; justify-content: center; padding-top: 20px;">
+            <div class="glass-card" style="width: 100%; max-width: 500px; z-index: 10;">
+                <h2 id="regTitle" style="color: var(--primary); margin-bottom: 25px; text-align: center;" data-i18n="reg_title">إنشاء حساب جديد</h2>
+                
+                <form id="regForm">
+                    <div class="input-group">
+                        <label data-i18n="label_name">الاسم الكامل:</label>
+                        <input type="text" id="regName" class="input-style" placeholder="..." required>
+                    </div>
+
+                    <div class="input-group" style="margin-top: 15px;">
+                        <label data-i18n="label_email">البريد الإلكتروني:</label>
+                        <input type="email" id="regEmail" class="input-style" placeholder="example@mail.com" required>
+                    </div>
+
+                    <div class="input-group" style="margin-top: 15px;">
+                        <label data-i18n="label_id">رقم الهوية / الإقامة:</label>
+                        <input type="text" id="regIdNo" class="input-style" placeholder="10XXXXXXXX" required>
+                    </div>
+
+                    <div class="input-group" style="margin-top: 15px;">
+                        <label data-i18n="label_blood">فصيلة الدم:</label>
+                        <select id="regBloodType" class="input-style" required>
+                            <option value="" disabled selected data-i18n="opt_blood_def">اختر فصيلة دمك</option>
+                            <option value="A+">A+</option>
+                            <option value="A-">A-</option>
+                            <option value="B+">B+</option>
+                            <option value="B-">B-</option>
+                            <option value="O+">O+</option>
+                            <option value="O-">O-</option>
+                            <option value="AB+">AB+</option>
+                            <option value="AB-">AB-</option>
+                            <option value="Unknown" data-i18n="opt_unknown">لا أعلم</option>
+                        </select>
+                    </div>
+
+                    <!-- ✅ حقل معرّف تيليغرام جهة الطوارئ -->
+                    <div class="input-group" style="margin-top: 15px;">
+                        <label data-i18n="label_tg_chat_id">📱 رقم معرّف تيليغرام جهة الطوارئ:</label>
+                        <input type="tel" id="regTgChatId" class="input-style" 
+                               placeholder="أرسل لـ @userinfobot في تيليغرام لمعرفة الـ Chat ID" 
+                               pattern="[0-9]{5,12}"
+                               title="أدخل الرقم الدولي بدون + مثال: مثال: 123456789">
+                        <small style="color:var(--text-muted); font-size:12px; margin-top:4px; display:block;" data-i18n="hint_tg">
+                            مثال: مثال: 123456789 — سيصلهم تنبيه تيليغرام فوري عند فتح ملفك في الطوارئ
+                        </small>
+                    </div>
+
+                    <div class="input-group" style="margin-top: 15px;">
+                        <label data-i18n="label_type">نوع الحساب:</label>
+                        <select id="regUserType" class="input-style" required>
+                            <option value="patient" selected data-i18n="opt_user">مريض / مستخدم عادي</option>
+                            <option value="rescuer" data-i18n="opt_rescuer">متطوع / منقذ صحي</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group" style="margin-top: 15px;">
+                        <label data-i18n="label_pass">كلمة المرور:</label>
+                        <input type="password" id="regPass" class="input-style" placeholder="********" required minlength="6">
+                    </div>
+
+                    <button type="submit" id="regBtn" class="main-btn" style="margin-top: 30px;" data-i18n="btn_reg">إنشاء الحساب وبناء الملف</button>
+                </form>
+                
+                <p style="text-align: center; margin-top: 20px; font-size: 14px;">
+                    <span data-i18n="have_acc">لديك حساب بالفعل؟</span> 
+                    <a href="login.html" style="color: var(--primary); text-decoration: none;" data-i18n="nav_login">تسجيل دخول</a>
+                </p>
+            </div>
+        </main>
+
+    </div>
+
+    <script type="module">
+        import { injectLayout } from './js/layout.js';
+        import { auth, db } from './js/firebase-config.js';
+        import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { ref, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        injectLayout();
+
+        document.getElementById('regForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const lang = localStorage.getItem('preferred_lang') || 'ar';
+            const btn = document.getElementById('regBtn');
+
+            // ✅ تعطيل الزر أثناء المعالجة (يمنع الضغط المزدوج)
+            btn.disabled = true;
+            btn.innerText = lang === 'ar' ? '⏳ جاري الإنشاء...' : '⏳ Creating...';
+            
+            const email     = document.getElementById('regEmail').value.trim();
+            const pass      = document.getElementById('regPass').value;
+            const name      = document.getElementById('regName').value.trim();
+            const idNo      = document.getElementById('regIdNo').value.trim();
+            const bloodType = document.getElementById('regBloodType').value;
+            const userType  = document.getElementById('regUserType').value;
+            const tgChatId = document.getElementById('regTgChatId').value.trim();
+
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+                const user = userCredential.user;
+
+                await set(ref(db, 'users/' + user.uid), {
+                    name:       name,
+                    email:      email,
+                    idNo:       idNo,
+                    bloodType:  bloodType,
+                    role:       userType,
+                    tgChatId:  tgChatId || null,   // ✅ رقم معرّف تيليغرام جهة الطوارئ
+                    diseases:   [],
+                    createdAt:  new Date().toISOString()
+                });
+
+                alert(lang === 'ar' ? "تم إنشاء الحساب بنجاح! 🎉" : "Account created successfully! 🎉");
+
+                if (userType === 'rescuer') {
+                    window.location.href = "index.html";
+                } else {
+                    window.location.href = `profile.html?id=${user.uid}`;
+                }
+
+            } catch (error) {
+                // ✅ إعادة تفعيل الزر عند الخطأ
+                btn.disabled = false;
+                btn.innerText = lang === 'ar' ? 'إنشاء الحساب وبناء الملف' : 'Create Account';
+                alert(lang === 'ar' ? "خطأ في التسجيل: " + error.message : "Registration Error: " + error.message);
+            }
+        };
+    </script>
+</body>
+</html>

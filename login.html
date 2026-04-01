@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>LifeBand - دخول</title>
+    <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="bg-theme.css">  </head>
+<body class="page-fade">
+    <div class="bg-animation"></div>
+    
+    <div class="container" id="main-layout">
+        
+        <main style="display: flex; justify-content: center; align-items: center; min-height: 70vh;">
+            <div class="glass-card" style="width: 100%; max-width: 400px; z-index: 10;">
+                <h2 id="loginTitle" style="text-align: center; color: var(--primary); margin-bottom: 20px;" data-i18n="login_title">مرحباً بعودتك</h2>
+                
+                <form id="loginForm">
+                    <div class="input-group" style="margin-bottom: 15px;">
+                        <label data-i18n="label_email">الاسم أو البريد الإلكتروني</label>
+                        <input type="text" id="loginEmail" class="input-style" placeholder="example@mail.com" required>
+                    </div>
+                    <div class="input-group" style="margin-bottom: 25px;">
+                        <label data-i18n="label_pass">كلمة المرور</label>
+                        <input type="password" id="loginPassword" class="input-style" placeholder="••••••••" required>
+                    </div>
+                    <button type="submit" class="main-btn" data-i18n="nav_login">دخول</button>
+                </form>
+                
+                <p style="text-align: center; margin-top: 20px; font-size: 14px;">
+                    <span data-i18n="no_account">ليس لديك حساب؟</span> 
+                    <a href="register.html" style="color: var(--secondary); text-decoration: none;" data-i18n="register_now">سجل الآن</a>
+                </p>
+            </div>
+        </main>
+
+    </div>
+
+    <script type="module">
+        import { injectLayout } from './js/layout.js';
+        import { auth } from './js/firebase-config.js';
+        import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        // 1. تشغيل الهيكل الموحد (الهيدر والفوتر)
+        injectLayout();
+
+        // 2. منطق تسجيل الدخول
+        document.getElementById('loginForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const emailInput = document.getElementById('loginEmail').value;
+            const passInput = document.getElementById('loginPassword').value;
+            const lang = localStorage.getItem('preferred_lang') || 'ar';
+
+            // أولاً: التحقق من حساب الإدمن الثابت
+            if (emailInput === "admin@admin.com" && passInput === "admin") {
+                localStorage.setItem('adminLoggedIn', 'true');
+                window.location.href = "admin.html";
+                return;
+            }
+
+            // ثانياً: تسجيل الدخول عبر Firebase
+            try {
+                const { ref, get } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js");
+                const { db } = await import('./js/firebase-config.js');
+                
+                const userCredential = await signInWithEmailAndPassword(auth, emailInput, passInput);
+                const user = userCredential.user;
+
+                const snapshot = await get(ref(db, 'users/' + user.uid));
+                if (snapshot.exists()) {
+                    const userData = snapshot.val();
+                    // التوجيه بناءً على الرتبة
+                    if (userData.role === 'rescuer') {
+                        window.location.href = "index.html";
+                    } else {
+                        window.location.href = `profile.html?id=${user.uid}`;
+                    }
+                } else {
+                    window.location.href = `profile.html?id=${user.uid}`;
+                }
+            } catch (err) { 
+                const errorMsg = lang === 'ar' ? "خطأ: تأكد من البريد وكلمة المرور" : "Error: Invalid credentials";
+                alert(errorMsg);
+            }
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+
+
+# Firebase
+functions/node_modules/
+.firebase/
+
+# Node
+node_modules/
+

@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LifeBand — أمانك الصحي في معصمك</title>
+    <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="bg-theme.css">      <style>
+        /* ── Hero ── */
+        .hero {
+            min-height: 92vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 0 60px;
+            position: relative;
+        }
+        .hero-inner {
+            display: flex;
+            align-items: center;
+            gap: 60px;
+            width: 100%;
+        }
+        .hero-text { flex: 1; min-width: 280px; }
+        .hero-visual { flex: 1; min-width: 280px; display: flex; justify-content: center; align-items: center; }
+
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(59,91,219,0.09);
+            border: 1px solid rgba(59,91,219,0.2);
+            border-radius: var(--r-pill);
+            padding: 7px 18px;
+            font-size: 13px; font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 24px;
+            animation: badgePulse 3s ease-in-out infinite;
+        }
+        @keyframes badgePulse { 0%,100%{box-shadow:0 0 0 0 rgba(59,91,219,0.15);} 50%{box-shadow:0 0 0 8px rgba(59,91,219,0);} }
+
+        .hero-title {
+            font-size: clamp(2.4rem, 5vw, 4rem);
+            font-weight: 900;
+            line-height: 1.15;
+            color: var(--text-h);
+            margin-bottom: 20px;
+            letter-spacing: -0.5px;
+        }
+        .hero-title .gradient-text {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-desc {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            max-width: 480px;
+            margin-bottom: 36px;
+            line-height: 1.8;
+        }
+
+        .hero-btns { display: flex; gap: 14px; flex-wrap: wrap; }
+        .hero-btns .main-btn { width: auto; padding: 15px 40px; border-radius: var(--r-pill); font-size: 16px; }
+
+        /* Hero stats row */
+        .hero-stats {
+            display: flex; gap: 32px;
+            margin-top: 48px;
+            padding-top: 32px;
+            border-top: 1px solid var(--glass-border);
+        }
+        .hero-stat-num { font-size: 28px; font-weight: 900; color: var(--primary); line-height: 1; }
+        .hero-stat-label { font-size: 12px; color: var(--text-muted); font-weight: 600; margin-top: 4px; }
+
+        /* Floating device visual */
+        .device-wrap {
+            position: relative;
+            width: 100%;
+            max-width: 420px;
+        }
+        .device-img {
+            width: 100%;
+            filter: drop-shadow(0 20px 60px rgba(59,91,219,0.25));
+            animation: floatDevice 5s ease-in-out infinite;
+        }
+        @keyframes floatDevice {
+            0%,100%{ transform: translateY(0) rotate(-1deg); }
+            50%    { transform: translateY(-18px) rotate(1deg); }
+        }
+
+        /* Floating pills */
+        .pill {
+            position: absolute;
+            background: var(--glass);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--r-pill);
+            padding: 10px 18px;
+            font-size: 13px; font-weight: 700;
+            display: flex; align-items: center; gap: 8px;
+            box-shadow: var(--shadow-md);
+            white-space: nowrap;
+            animation: pillFloat 4s ease-in-out infinite;
+            color: var(--text-h);
+        }
+        .pill-1 { top: 12%; right: -10%; animation-delay: 0s; }
+        .pill-2 { bottom: 20%; left: -8%; animation-delay: -2s; }
+        .pill-3 { top: 55%; right: -12%; animation-delay: -3.5s; }
+        @keyframes pillFloat {
+            0%,100%{ transform:translateY(0); }
+            50%    { transform:translateY(-8px); }
+        }
+
+        /* Pulse ring */
+        .pulse-ring {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%,-50%);
+            width: 120%; height: 120%;
+            border-radius: 50%;
+            border: 1.5px solid rgba(59,91,219,0.15);
+            animation: pulseRing 3s ease-out infinite;
+        }
+        .pulse-ring:nth-child(2) { animation-delay: -1s; width:130%;height:130%; }
+        .pulse-ring:nth-child(3) { animation-delay: -2s; width:140%;height:140%; }
+        @keyframes pulseRing {
+            0%  { opacity:0.6; transform:translate(-50%,-50%) scale(0.9); }
+            100%{ opacity:0;   transform:translate(-50%,-50%) scale(1.1); }
+        }
+
+        /* ── Features ── */
+        .section { padding: 80px 0; }
+        .section-header { text-align: center; margin-bottom: 56px; }
+        .section-label {
+            display: inline-flex; align-items: center; gap: 8px;
+            font-size: 12px; font-weight: 800; letter-spacing: 1.5px;
+            text-transform: uppercase; color: var(--primary);
+            background: rgba(59,91,219,0.08); border: 1px solid rgba(59,91,219,0.18);
+            padding: 6px 16px; border-radius: var(--r-pill);
+            margin-bottom: 16px;
+        }
+        .section-title {
+            font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+            font-weight: 900; color: var(--text-h); line-height: 1.2;
+            letter-spacing: -0.3px;
+        }
+        .section-desc { font-size: 1rem; color: var(--text-muted); max-width: 560px; margin: 14px auto 0; line-height: 1.8; }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px,1fr));
+            gap: 24px;
+        }
+
+        /* ── How it works ── */
+        .steps-wrap {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
+            gap: 32px;
+            position: relative;
+        }
+        .step-card {
+            text-align: center;
+            padding: 36px 24px;
+            background: var(--bg-surface);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--r-xl);
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s;
+            position: relative;
+        }
+        .step-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); }
+        .step-num {
+            width: 52px; height: 52px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white; font-size: 20px; font-weight: 900;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 20px;
+            box-shadow: 0 6px 20px rgba(59,91,219,0.35);
+        }
+        .step-card h3 { font-size: 17px; font-weight: 800; color: var(--text-h); margin-bottom: 10px; }
+        .step-card p  { font-size: 13.5px; color: var(--text-muted); line-height: 1.7; }
+
+        /* ── CTA Banner ── */
+        .cta-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: var(--r-xl);
+            padding: 64px 48px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 80px;
+        }
+        .cta-banner::before {
+            content:'';
+            position:absolute; inset:0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        .cta-banner h2 { font-size: clamp(1.6rem, 3vw, 2.5rem); font-weight: 900; color: white; margin-bottom: 14px; position:relative; }
+        .cta-banner p  { font-size: 1rem; color: rgba(255,255,255,0.8); max-width:500px; margin:0 auto 32px; position:relative; }
+        .cta-banner .main-btn {
+            width: auto; padding: 15px 48px;
+            background: white; color: var(--primary);
+            font-size: 16px; border-radius: var(--r-pill);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            position: relative;
+        }
+        .cta-banner .main-btn:hover { background: white; opacity: 0.95; }
+
+        /* scroll reveal */
+        .reveal { opacity:0; transform:translateY(30px); transition:opacity 0.65s var(--ease), transform 0.65s var(--ease); }
+        .reveal.visible { opacity:1; transform:translateY(0); }
+
+        /* responsive */
+        @media (max-width:768px) {
+            .hero-inner { flex-direction: column-reverse; gap: 32px; }
+            .hero-text { text-align: center; }
+            .hero-desc { margin: 0 auto 32px; }
+            .hero-btns { justify-content: center; }
+            .hero-stats { justify-content: center; }
+            .pill-1,.pill-2,.pill-3 { display:none; }
+            .section { padding: 60px 0; }
+            .cta-banner { padding: 48px 24px; }
+        }
+    </style>
+</head>
+<body class="page-fade">
+
+<div class="container" id="main-layout">
+
+    <!-- ══ HERO ══ -->
+    <section class="hero">
+        <div class="hero-inner">
+
+            <!-- Text side -->
+            <div class="hero-text">
+                <div class="hero-badge">
+                    <span>✨</span>
+                    <span data-i18n="hero_badge">نظام طبي ذكي — الجيل القادم</span>
+                </div>
+                <h1 class="hero-title">
+                    <span data-i18n="hero_t1">أمانك الصحي</span><br>
+                    <span class="gradient-text" data-i18n="hero_t2">في معصمك.</span>
+                </h1>
+                <p class="hero-desc" data-i18n="hero_desc">
+                    نظام LifeBand يربط ملفك الطبي الكامل بتقنية NFC ليضمن وصول المسعفين لبياناتك في ثوانٍ معدودة.
+                </p>
+                <div class="hero-btns">
+                    <a href="register.html" class="main-btn" data-i18n="btn_start">ابدأ الآن</a>
+                    <a href="#features"     class="main-btn btn-outline btn-pill" style="width:auto;padding:15px 36px;" data-i18n="btn_about">اكتشف المزيد</a>
+                </div>
+                <div class="hero-stats">
+                    <div>
+                        <div class="hero-stat-num">+500</div>
+                        <div class="hero-stat-label" data-i18n="stat_users">مستخدم نشط</div>
+                    </div>
+                    <div>
+                        <div class="hero-stat-num">3s</div>
+                        <div class="hero-stat-label" data-i18n="stat_speed">متوسط وقت الوصول</div>
+                    </div>
+                    <div>
+                        <div class="hero-stat-num">100%</div>
+                        <div class="hero-stat-label" data-i18n="stat_secure">مشفّر وآمن</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Visual side -->
+            <div class="hero-visual">
+                <div class="device-wrap">
+                    <div class="pulse-ring"></div>
+                    <div class="pulse-ring"></div>
+                    <div class="pulse-ring"></div>
+                    <img class="device-img"
+                         src="https://i.postimg.cc/90GzRBCY/Chat-GPT-Image-6-fbrayr-2026-12-15-44-m-(1).png"
+                         alt="LifeBand Device">
+                    <div class="pill pill-1">❤️ <span data-i18n="pill_1">نبضات طبيعية</span></div>
+                    <div class="pill pill-2">🔒 <span data-i18n="pill_2">بيانات مشفرة</span></div>
+                    <div class="pill pill-3">⚡ <span data-i18n="pill_3">استجابة فورية</span></div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ══ FEATURES ══ -->
+    <section class="section" id="features">
+        <div class="section-header reveal">
+            <div class="section-label">⚡ <span data-i18n="feat_label">المميزات الرئيسية</span></div>
+            <h2 class="section-title" data-i18n="feat_title">كل ما تحتاجه في لحظة الأزمة</h2>
+            <p class="section-desc" data-i18n="feat_desc">صممنا LifeBand ليكون رفيقك الصحي الأذكى — بسيط، سريع، وموثوق.</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card reveal">
+                <div class="feature-icon">🛡️</div>
+                <h3 style="font-size:18px;font-weight:800;color:var(--text-h);margin-bottom:10px;" data-i18n="feat_1_title">حماية فورية</h3>
+                <p style="color:var(--text-muted);font-size:14px;line-height:1.75;" data-i18n="feat_1_desc">الوصول لبياناتك الطبية في ثوانٍ معدودة لمساعدة المسعفين على اتخاذ القرار الصحيح.</p>
+            </div>
+            <div class="feature-card reveal" style="transition-delay:0.1s;">
+                <div class="feature-icon">📡</div>
+                <h3 style="font-size:18px;font-weight:800;color:var(--text-h);margin-bottom:10px;" data-i18n="feat_2_title">تقنية NFC</h3>
+                <p style="color:var(--text-muted);font-size:14px;line-height:1.75;" data-i18n="feat_2_desc">لا يحتاج السوار لشحن — يعمل بمجرد تقريب أي هاتف منه عبر تقنية NFC المتطورة.</p>
+            </div>
+            <div class="feature-card reveal" style="transition-delay:0.2s;">
+                <div class="feature-icon">🔒</div>
+                <h3 style="font-size:18px;font-weight:800;color:var(--text-h);margin-bottom:10px;" data-i18n="feat_3_title">خصوصية تامة</h3>
+                <p style="color:var(--text-muted);font-size:14px;line-height:1.75;" data-i18n="feat_3_desc">تشفير عسكري لجميع بياناتك الحساسة — بياناتك ملكك فقط ولا يصل إليها أحد بدون إذنك.</p>
+            </div>
+            <div class="feature-card reveal" style="transition-delay:0.3s;">
+                <div class="feature-icon">🤖</div>
+                <h3 style="font-size:18px;font-weight:800;color:var(--text-h);margin-bottom:10px;" data-i18n="feat_4_title">ذكاء اصطناعي</h3>
+                <p style="color:var(--text-muted);font-size:14px;line-height:1.75;" data-i18n="feat_4_desc">تحليل طبي فوري يساعد المسعف على تشخيص حالتك واتخاذ الإجراء المناسب بدقة عالية.</p>
+            </div>
+            <div class="feature-card reveal" style="transition-delay:0.4s;">
+                <div class="feature-icon">🏆</div>
+                <h3 style="font-size:18px;font-weight:800;color:var(--text-h);margin-bottom:10px;" data-i18n="feat_5_title">نظام المكافآت</h3>
+                <p style="color:var(--text-muted);font-size:14px;line-height:1.75;" data-i18n="feat_5_desc">كل مسعف يباشر حالة يكسب نقاطاً تتراكم في رصيده — نكافئ المتطوعين على جهودهم.</p>
+            </div>
+            <div class="feature-card reveal" style="transition-delay:0.5s;">
+                <div class="feature-icon">🌐</div>
+                <h3 style="font-size:18px;font-weight:800;color:var(--text-h);margin-bottom:10px;" data-i18n="feat_6_title">ثنائي اللغة</h3>
+                <p style="color:var(--text-muted);font-size:14px;line-height:1.75;" data-i18n="feat_6_desc">يدعم النظام اللغتين العربية والإنجليزية بشكل كامل مع تصميم متجاوب يناسب جميع الأجهزة.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══ HOW IT WORKS ══ -->
+    <section class="section">
+        <div class="section-header reveal">
+            <div class="section-label">📋 <span data-i18n="how_label">كيف يعمل</span></div>
+            <h2 class="section-title" data-i18n="how_title">ثلاث خطوات فقط</h2>
+        </div>
+        <div class="steps-wrap">
+            <div class="step-card reveal">
+                <div class="step-num">1</div>
+                <h3 data-i18n="step1_t">سجّل حسابك</h3>
+                <p data-i18n="step1_d">أنشئ ملفك الطبي الكامل في دقائق — اسمك، فصيلة دمك، وأمراضك المزمنة.</p>
+            </div>
+            <div class="step-card reveal" style="transition-delay:0.15s;">
+                <div class="step-num">2</div>
+                <h3 data-i18n="step2_t">ارتدِ السوار</h3>
+                <p data-i18n="step2_d">السوار مربوط برمز NFC يحمل معرّفك الطبي — ارتده دائماً لضمان سلامتك.</p>
+            </div>
+            <div class="step-card reveal" style="transition-delay:0.3s;">
+                <div class="step-num">3</div>
+                <h3 data-i18n="step3_t">طوارئ؟ ثوانٍ تكفي</h3>
+                <p data-i18n="step3_d">المسعف يقرّب هاتفه من السوار ويحصل فوراً على ملفك الطبي الكامل.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══ CTA ══ -->
+    <div class="cta-banner reveal">
+        <h2 data-i18n="cta_title">انضم لمجتمع LifeBand اليوم</h2>
+        <p data-i18n="cta_desc">سجّل الآن مجاناً وابنِ ملفك الطبي الذكي — قرار واحد قد ينقذ حياتك.</p>
+        <a href="register.html" class="main-btn" data-i18n="btn_start">ابدأ الآن مجاناً →</a>
+    </div>
+
+</div><!-- /container -->
+
+<script type="module">
+import { injectLayout } from './js/layout.js';
+import { auth } from './js/firebase-config.js';
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+injectLayout();
+
+// Scroll reveal
+const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.12 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// i18n
+const T = {
+    ar: {
+        hero_badge:"نظام طبي ذكي — الجيل القادم",
+        hero_t1:"أمانك الصحي", hero_t2:"في معصمك.",
+        hero_desc:"نظام LifeBand يربط ملفك الطبي الكامل بتقنية NFC ليضمن وصول المسعفين لبياناتك في ثوانٍ معدودة.",
+        btn_start:"ابدأ الآن", btn_about:"اكتشف المزيد",
+        stat_users:"مستخدم نشط", stat_speed:"متوسط وقت الوصول", stat_secure:"مشفّر وآمن",
+        pill_1:"نبضات طبيعية", pill_2:"بيانات مشفرة", pill_3:"استجابة فورية",
+        feat_label:"المميزات الرئيسية", feat_title:"كل ما تحتاجه في لحظة الأزمة",
+        feat_desc:"صممنا LifeBand ليكون رفيقك الصحي الأذكى — بسيط، سريع، وموثوق.",
+        feat_1_title:"حماية فورية", feat_1_desc:"الوصول لبياناتك الطبية في ثوانٍ معدودة لمساعدة المسعفين على اتخاذ القرار الصحيح.",
+        feat_2_title:"تقنية NFC",   feat_2_desc:"لا يحتاج السوار لشحن — يعمل بمجرد تقريب أي هاتف منه.",
+        feat_3_title:"خصوصية تامة",feat_3_desc:"تشفير عسكري لجميع بياناتك الحساسة.",
+        feat_4_title:"ذكاء اصطناعي",feat_4_desc:"تحليل طبي فوري يساعد المسعف على تشخيص حالتك بدقة.",
+        feat_5_title:"نظام المكافآت",feat_5_desc:"كل مسعف يباشر حالة يكسب نقاطاً تتراكم في رصيده.",
+        feat_6_title:"ثنائي اللغة",feat_6_desc:"يدعم العربية والإنجليزية مع تصميم متجاوب.",
+        how_label:"كيف يعمل", how_title:"ثلاث خطوات فقط",
+        step1_t:"سجّل حسابك", step1_d:"أنشئ ملفك الطبي في دقائق.",
+        step2_t:"ارتدِ السوار", step2_d:"السوار مربوط برمز NFC يحمل معرّفك الطبي.",
+        step3_t:"طوارئ؟ ثوانٍ تكفي", step3_d:"المسعف يقرّب هاتفه ويحصل فوراً على ملفك.",
+        cta_title:"انضم لمجتمع LifeBand اليوم",
+        cta_desc:"سجّل الآن مجاناً وابنِ ملفك الطبي الذكي.",
+    },
+    en: {
+        hero_badge:"Smart Medical System — Next Generation",
+        hero_t1:"Your Health Safety", hero_t2:"On Your Wrist.",
+        hero_desc:"LifeBand links your complete medical file via NFC so paramedics access your data in seconds.",
+        btn_start:"Get Started", btn_about:"Learn More",
+        stat_users:"Active Users", stat_speed:"Avg. Access Time", stat_secure:"Encrypted & Safe",
+        pill_1:"Normal Heartbeat", pill_2:"Encrypted Data", pill_3:"Instant Response",
+        feat_label:"Key Features", feat_title:"Everything You Need in a Crisis",
+        feat_desc:"LifeBand is designed to be your smartest health companion — simple, fast, and reliable.",
+        feat_1_title:"Instant Protection",feat_1_desc:"Paramedics access your medical data in seconds to make the right call.",
+        feat_2_title:"NFC Technology",feat_2_desc:"No charging needed — works by simply scanning with any smartphone.",
+        feat_3_title:"Full Privacy",feat_3_desc:"Military-grade encryption for all your sensitive health information.",
+        feat_4_title:"AI Analysis",feat_4_desc:"Instant AI-powered triage helps rescuers diagnose accurately.",
+        feat_5_title:"Reward System",feat_5_desc:"Rescuers earn points for every case they handle.",
+        feat_6_title:"Bilingual",feat_6_desc:"Full Arabic & English support with responsive design.",
+        how_label:"How It Works", how_title:"Just Three Steps",
+        step1_t:"Register", step1_d:"Build your complete medical profile in minutes.",
+        step2_t:"Wear the Band", step2_d:"The band holds an NFC tag linked to your medical ID.",
+        step3_t:"Emergency? Seconds Save Lives", step3_d:"Rescuer scans the band and instantly gets your full file.",
+        cta_title:"Join LifeBand Today",
+        cta_desc:"Register free and build your smart medical file.",
+    }
+};
+
+const lang = localStorage.getItem('preferred_lang') || 'ar';
+document.querySelectorAll('[data-i18n]').forEach(el => {
+    const k = el.getAttribute('data-i18n');
+    if(T[lang][k]) el.innerText = T[lang][k];
+});
+</script>
+</body>
+</html>

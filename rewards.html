@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>المكافآت - LifeBand</title>
+    <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="bg-theme.css">      <style>
+        .reward-container { text-align: center; padding: 60px 20px; }
+        .points-circle { 
+            width: 200px; height: 200px; border-radius: 50%; 
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            margin: 0 auto 30px; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; color: white;
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+            border: 5px solid var(--glass-border);
+        }
+        .points-val { font-size: 48px; font-weight: 800; }
+    </style>
+</head>
+<body class="page-fade">
+    <div class="bg-animation"></div>
+
+    <div class="container" id="main-layout">
+        
+        <main class="reward-container">
+            <div class="points-circle">
+                <span style="font-size: 40px;">🏆</span>
+                <div id="userPoints" class="points-val">0</div>
+                <span data-i18n="points_label">نقطة</span>
+            </div>
+            <h2 data-i18n="congrats">أحسنت صنعاً!</h2>
+            <p data-i18n="reward_desc" style="max-width: 500px; margin: 15px auto; opacity: 0.8;">كل حالة تباشرها تمنحك 10 نقاط في رصيد إنقاذ الأرواح الخاص بك.</p>
+        </main>
+
+    </div>
+
+    <script type="module">
+        import { injectLayout } from './js/layout.js';
+        import { auth, db } from './js/firebase-config.js';
+        import { ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        // 1. تشغيل الهيكل الموحد (الهيدر والفوتر)
+        injectLayout();
+
+        // 2. حساب النقاط بناءً على الحالات التي باشرها المسعف
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                onValue(ref(db, 'reports'), (snapshot) => {
+                    let count = 0;
+                    snapshot.forEach(c => { 
+                        // حساب النقاط إذا كان معرف المنقذ يطابق المستخدم الحالي
+                        if(c.val().rescuerId === user.uid) count++; 
+                    });
+                    const pointsDisplay = document.getElementById('userPoints');
+                    if(pointsDisplay) pointsDisplay.innerText = (count * 10);
+                });
+            } else {
+                // إذا لم يسجل دخول، يتم توجيهه لصفحة الدخول
+                window.location.href = "login.html";
+            }
+        });
+    </script>
+</body>
+</html>
