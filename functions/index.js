@@ -14,8 +14,8 @@ const geminiKey = defineSecret("GEMINI_KEY");
 
 // ══════════════════════════════════════════════
 // Twilio credentials
-// يُستبدل __TWILIO_*__ تلقائياً من GitHub Actions
-// لا تضع القيم الحقيقية هنا أبداً
+// __TWILIO_*__ are replaced automatically by GitHub Actions
+// Never put real values here
 // ══════════════════════════════════════════════
 const TWILIO_SID   = "__TWILIO_SID__";
 const TWILIO_TOKEN = "__TWILIO_TOKEN__";
@@ -47,7 +47,7 @@ exports.askGemini = onRequest(
       if (!response.ok) {
         return res.status(response.status).json({ error: data?.error?.message || "Gemini error" });
       }
-      const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "لم يتم الحصول على رد";
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "No response received";
       return res.json({ result: text });
     } catch (err) {
       return res.status(500).json({ error: err.message });
@@ -118,7 +118,7 @@ exports.sendTelegramAlert = onRequest(
       const data = await response.json();
       if (!data.ok) throw new Error(data.description || "Telegram error");
 
-      // تسجيل في Firebase
+      // Log to Firebase
       await admin.database().ref(`tg_logs/${chatId}`).push({
         sentAt: new Date().toISOString(), status: "sent"
       });
