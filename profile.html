@@ -65,7 +65,7 @@
                     </div>
                 </div>
 
-                <!-- ✅ قسم واتساب الطوارئ -->
+                <!-- Emergency Telegram section -->
                 <div class="input-group" style="margin-top: 25px; border-top: 1px solid var(--glass-border); padding-top: 20px;">
                     <label style="display:flex; align-items:center; gap:8px;">
                         <span style="font-size:20px;">✈️</span>
@@ -77,7 +77,7 @@
                     <small style="color:var(--text-muted); font-size:12px; margin-top:6px; display:block;" data-i18n="hint_tg">
                         أدخل الرقم الدولي بدون + مثال: Chat ID من @userinfobot — سيصلهم تنبيه تيليغرام فوري عند فتح ملفك في الطوارئ
                     </small>
-                    <!-- معاينة رسالة الواتساب -->
+                    <!-- Telegram message preview -->
                     <div id="tgPreview" class="wa-preview">
                         <strong>📋 معاينة رسالة تيليغرام:</strong><br>
                         <span id="tgPreviewText"></span>
@@ -97,7 +97,7 @@
                     <button id="exportBtn" class="main-btn" style="background: var(--glass); color: var(--text-main); border: 1px solid var(--glass-border);" data-i18n="btn_export">📄 تصدير البيانات كملف نصي</button>
                 </div>
 
-                <!-- صندوق نصائح AI -->
+                <!-- AI tips box -->
                 <div id="aiTipsBox" style="display:none; margin-top:20px; background:rgba(99,102,241,0.07); border:1px solid rgba(99,102,241,0.25); border-radius:16px; padding:20px;">
                     <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
                         <span style="font-size:22px;">🤖</span>
@@ -120,7 +120,7 @@
     </div>
 
         <script type="module">
-        // ✅ مسارات صحيحة
+        // Correct import paths
         import { injectLayout } from './js/layout.js';
         import { auth, db } from './js/firebase-config.js';
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
@@ -129,7 +129,7 @@
 
         injectLayout();
 
-        // --- ترجمات ---
+        // Translation dictionary
         const T = {
             ar: {
                 profile_title: "إدارة الملف الطبي",
@@ -185,7 +185,7 @@
             if(chatPlaceholder) chatPlaceholder.placeholder = l === 'ar' ? 'اسأل عن صحتك...' : 'Ask about your health...';
         }
 
-        // ✅ Route guard — يمنع الوصول بدون تسجيل دخول
+        // Route guard - prevents access without login
         onAuthStateChanged(auth, async (user) => {
             if (!user) {
                 window.location.href = "login.html";
@@ -209,7 +209,7 @@
             }
         });
 
-        // ✅ زر معاينة رسالة الواتساب
+        // Telegram preview button handler
         document.getElementById('testTgBtn').addEventListener('click', () => {
             const l = lang();
             const waNum = document.getElementById('userTgChatId').value.trim(); // chat_id
@@ -231,7 +231,7 @@
             document.getElementById('tgPreview').classList.add('visible');
         });
 
-        // ✅ حفظ مع رقم الواتساب
+        // Save profile data with Telegram chat ID
         document.getElementById('saveBtn').addEventListener('click', async () => {
             const user = auth.currentUser;
             const l = lang();
@@ -252,7 +252,7 @@
                 updatedAt: new Date().toISOString()
             };
             try {
-                // حفظ جزئي — لا يمسح role القديم
+                // Partial save - preserves existing role
                 const snap = await get(ref(db, 'users/' + user.uid));
                 const existing = snap.exists() ? snap.val() : {};
                 await set(ref(db, 'users/' + user.uid), { ...existing, ...newData });
@@ -292,13 +292,13 @@
             a.click();
         };
 
-        // AI نصائح مخصصة
+        // AI personalized tips button handler
         document.getElementById('aiTipsBtn').addEventListener('click', async () => {
             const tipsBox  = document.getElementById('aiTipsBox');
             const tipsText = document.getElementById('aiTipsText');
             const l = lang();
             tipsBox.style.display = 'block';
-            tipsText.innerText = l === 'ar' ? '⏳ جاري تحليل ملفك الطبي...' : '⏳ Analyzing your profile...';
+            tipsText.innerText = l === 'ar' ? '⏳ جاري تحليل ملفك الطبي...' : '⏳ Analyzing your medical profile...';
             try {
                 const patientCtx = {
                     bloodType: document.getElementById('userBlood').value,
@@ -306,11 +306,12 @@
                 };
                 tipsText.innerText = await getPersonalizedTips(patientCtx);
             } catch(e) {
-                tipsText.innerText = '⚠️ تعذّر الاتصال بـ AI. ' + e.message;
+                tipsText.innerText = (l === 'ar' ? '⚠️ تعذّر الاتصال بـ AI. ' : '⚠️ Failed to connect to AI. ') + e.message;
             }
         });
 
-        // Chatbot
+        // Chatbot message handler
+        // Appends a chat bubble to the chat messages container
         function appendMessage(text, isUser) {
             const chatMessages = document.getElementById('chatMessages');
             const bubble = document.createElement('div');
@@ -342,7 +343,7 @@
                 appendMessage(reply, false);
             } catch(e) {
                 document.getElementById('thinking')?.remove();
-                appendMessage('⚠️ تعذّر الاتصال بـ AI.', false);
+                appendMessage((lang() === 'ar' ? '⚠️ تعذّر الاتصال بـ AI.' : '⚠️ Failed to connect to AI.'), false);
             }
         });
 
