@@ -300,7 +300,7 @@
         <!-- ─── Header ─── -->
         <div class="page-top">
             <div>
-                <h1 class="page-title">نصائح <span>طبية</span> يومية</h1>
+                <h1 class="page-title" id="pageTitle">نصائح <span>طبية</span> يومية</h1>
                 <div class="page-meta">
                     <div class="freshness-dot" id="freshnessDot"></div>
                     <span id="freshnessMeta">جاري التحميل...</span>
@@ -309,7 +309,7 @@
             <div class="header-actions">
                 <button class="refresh-btn" id="refreshBtn" onclick="manualRefresh()" disabled>
                     <span class="refresh-icon" id="refreshIcon">🔄</span>
-                    <span id="refreshBtnText">تحديث</span>
+                    <span id="refreshBtnText">Refresh</span>
                 </button>
             </div>
         </div>
@@ -318,20 +318,13 @@
         <div class="personal-banner" id="personalBanner">
             <span class="personal-banner-icon">👤</span>
             <div class="personal-banner-text">
-                <h4 id="personalTitle">نصائح مخصصة لك</h4>
-                <p id="personalDesc">تم تخصيص هذه النصائح بناءً على بياناتك الصحية</p>
+                <h4 id="personalTitle"></h4>
+                <p id="personalDesc"></p>
             </div>
         </div>
 
         <!-- ─── Category tabs ─── -->
-        <div class="cat-tabs" id="catTabs">
-            <button class="cat-tab active" onclick="filterCat('all', this)">🏥 الكل</button>
-            <button class="cat-tab" onclick="filterCat('قلب', this)">❤️ القلب</button>
-            <button class="cat-tab" onclick="filterCat('تغذية', this)">🥗 التغذية</button>
-            <button class="cat-tab" onclick="filterCat('رياضة', this)">🏃 الرياضة</button>
-            <button class="cat-tab" onclick="filterCat('نوم', this)">😴 النوم</button>
-            <button class="cat-tab" onclick="filterCat('ضغط', this)">🩺 الضغط</button>
-        </div>
+        <div class="cat-tabs" id="catTabs"></div>
 
         <!-- ─── Loading skeleton ─── -->
         <div class="skeleton-grid" id="skeletonGrid">
@@ -351,15 +344,15 @@
         <!-- ─── Error state ─── -->
         <div class="error-state" id="errorState" style="display:none;">
             <div style="font-size:48px;margin-bottom:12px;">😕</div>
-            <h3>تعذّر تحميل النصائح</h3>
+            <h3 id="errorTitle">تعذّر تحميل النصائح</h3>
             <p id="errorMsg">تحقق من الاتصال بالإنترنت وأعد المحاولة.</p>
-            <button class="retry-btn" onclick="loadTips(true)">🔄 إعادة المحاولة</button>
+            <button class="retry-btn" onclick="loadTips(true)" id="retryBtn">🔄 إعادة المحاولة</button>
         </div>
 
         <!-- ─── Next refresh ─── -->
         <div class="next-refresh" id="nextRefreshBox" style="display:none;">
-            <strong>⏰</strong> تتجدد النصائح تلقائياً كل 24 ساعة.
-            التحديث التالي: <strong id="nextRefreshTime"></strong>
+            <strong>⏰</strong> <span id="nextRefreshLabel">تتجدد النصائح تلقائياً كل 24 ساعة.</span>
+            <span id="nextRefreshPrefix">التحديث التالي:</span> <strong id="nextRefreshTime"></strong>
         </div>
     </div>
 
@@ -379,7 +372,11 @@ const REFRESH_HOURS  = 24;
 const COOLDOWN_MINS  = 60;
 const TIPS_FIREBASE  = 'daily_tips';
 
-// Category config
+// Returns the current language preference
+const lang = () => localStorage.getItem('preferred_lang') || 'ar';
+const isAr = () => lang() === 'ar';
+
+// Category display configuration for both languages
 const CAT_CONFIG = {
     'قلب':    { color: '#e53e3e', bg: 'rgba(229,62,62,0.1)',    icon: '❤️' },
     'تغذية':  { color: '#38a169', bg: 'rgba(56,161,105,0.1)',   icon: '🥗' },
@@ -389,13 +386,62 @@ const CAT_CONFIG = {
     'عام':    { color: '#6366f1', bg: 'rgba(99,102,241,0.1)',   icon: '💡' },
     'سكر':    { color: '#e53e3e', bg: 'rgba(229,62,62,0.08)',   icon: '🩸' },
     'ذهني':   { color: '#6366f1', bg: 'rgba(99,102,241,0.08)', icon: '🧠' },
+    'heart':     { color: '#e53e3e', bg: 'rgba(229,62,62,0.1)',    icon: '❤️' },
+    'nutrition': { color: '#38a169', bg: 'rgba(56,161,105,0.1)',   icon: '🥗' },
+    'exercise':  { color: '#3182ce', bg: 'rgba(49,130,206,0.1)',   icon: '🏃' },
+    'sleep':     { color: '#805ad5', bg: 'rgba(128,90,213,0.1)',   icon: '😴' },
+    'pressure':  { color: '#d69e2e', bg: 'rgba(214,158,46,0.1)',   icon: '🩺' },
+    'general':   { color: '#6366f1', bg: 'rgba(99,102,241,0.1)',   icon: '💡' },
+    'diabetes':  { color: '#e53e3e', bg: 'rgba(229,62,62,0.08)',   icon: '🩸' },
+    'mental':    { color: '#6366f1', bg: 'rgba(99,102,241,0.08)', icon: '🧠' },
 };
+
+// Category tabs definition per language
+const CAT_TABS = {
+    ar: [
+        { key: 'all', label: '🏥 الكل' },
+        { key: 'قلب', label: '❤️ القلب' },
+        { key: 'تغذية', label: '🥗 التغذية' },
+        { key: 'رياضة', label: '🏃 الرياضة' },
+        { key: 'نوم', label: '😴 النوم' },
+        { key: 'ضغط', label: '🩺 الضغط' }
+    ],
+    en: [
+        { key: 'all', label: '🏥 All' },
+        { key: 'heart', label: '❤️ Heart' },
+        { key: 'nutrition', label: '🥗 Nutrition' },
+        { key: 'exercise', label: '🏃 Exercise' },
+        { key: 'sleep', label: '😴 Sleep' },
+        { key: 'pressure', label: '🩺 Pressure' }
+    ]
+};
+
+// Renders category filter tabs based on current language
+function renderCatTabs() {
+    const tabs = CAT_TABS[lang()] || CAT_TABS.ar;
+    document.getElementById('catTabs').innerHTML = tabs.map((t, i) =>
+        `<button class="cat-tab${i===0?' active':''}" onclick="filterCat('${t.key}', this)">${t.label}</button>`
+    ).join('');
+}
+
+// Applies all language-dependent UI text on the page
+function applyPageLang() {
+    const ar = isAr();
+    document.getElementById('pageTitle').innerHTML = ar ? 'نصائح <span>طبية</span> يومية' : 'Daily <span>Medical</span> Tips';
+    document.getElementById('freshnessMeta').textContent = ar ? 'جاري التحميل...' : 'Loading...';
+    document.getElementById('refreshBtnText').textContent = ar ? 'تحديث' : 'Refresh';
+    document.getElementById('errorTitle').textContent = ar ? 'تعذّر تحميل النصائح' : 'Failed to load tips';
+    document.getElementById('retryBtn').textContent = ar ? '🔄 إعادة المحاولة' : '🔄 Retry';
+    document.getElementById('nextRefreshLabel').textContent = ar ? 'تتجدد النصائح تلقائياً كل 24 ساعة.' : 'Tips refresh automatically every 24 hours.';
+    document.getElementById('nextRefreshPrefix').textContent = ar ? 'التحديث التالي:' : 'Next refresh:';
+    renderCatTabs();
+}
 
 let allTips  = [];
 let userData = null;
 let lastManualRefresh = parseInt(localStorage.getItem('tips_last_manual') || '0');
 
-// ─── Auth ───
+// Listens for auth state and loads user data before fetching tips
 onAuthStateChanged(auth, async user => {
     if (user) {
         try {
@@ -403,16 +449,19 @@ onAuthStateChanged(auth, async user => {
             if (snap.exists()) userData = snap.val();
         } catch(e) {}
     }
+    applyPageLang();
     loadTips();
 });
 
-// ─── Main load ───
+// Loads tips from Firebase cache or generates new ones via AI
 async function loadTips(forceRefresh = false) {
     showSkeleton();
+    const ar = isAr();
 
     // Check Firebase cache first
+    const fbKey = ar ? TIPS_FIREBASE : TIPS_FIREBASE + '_en';
     try {
-        const snap = await get(ref(db, TIPS_FIREBASE));
+        const snap = await get(ref(db, fbKey));
         if (snap.exists()) {
             const cached = snap.val();
             const ageMs  = Date.now() - (cached.generatedAt || 0);
@@ -432,26 +481,30 @@ async function loadTips(forceRefresh = false) {
         if (tips && tips.length > 0) {
             allTips = tips;
             const payload = { tips, generatedAt: Date.now() };
-            // Save to Firebase
-            try { await set(ref(db, TIPS_FIREBASE), payload); } catch(e) {}
+            try { await set(ref(db, fbKey), payload); } catch(e) {}
             renderTips(payload);
         } else {
-            showError('لم يتم الحصول على نصائح. حاول مرة أخرى.');
+            showError(ar ? 'لم يتم الحصول على نصائح. حاول مرة أخرى.' : 'No tips received. Please try again.');
         }
     } catch(err) {
-        showError(err.message || 'حدث خطأ أثناء التوليد.');
+        showError(err.message || (ar ? 'حدث خطأ أثناء التوليد.' : 'An error occurred while generating.'));
     }
 }
 
-// ─── Generate via Groq ───
+// Generates medical tips via Groq AI in the current language
 async function generateTips() {
+    const ar = isAr();
+
     const personalContext = userData
-        ? `المستخدم: فصيلة دم ${userData.bloodType || 'غير محدد'}، أمراض مزمنة: ${(userData.diseases || []).join('، ') || 'لا يوجد'}.`
-        : 'المستخدم: لا توجد بيانات شخصية.';
+        ? (ar
+            ? `المستخدم: فصيلة دم ${userData.bloodType || 'غير محدد'}، أمراض مزمنة: ${(userData.diseases || []).join('، ') || 'لا يوجد'}.`
+            : `User: Blood type ${userData.bloodType || 'Not specified'}, chronic diseases: ${(userData.diseases || []).join(', ') || 'None'}.`)
+        : (ar ? 'المستخدم: لا توجد بيانات شخصية.' : 'User: No personal data available.');
 
-    const today = new Date().toLocaleDateString('ar-SA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    const today = new Date().toLocaleDateString(ar ? 'ar-SA' : 'en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-    const prompt = `أنت طبيب متخصص في الصحة العامة. اليوم ${today}.
+    const prompt = ar
+        ? `أنت طبيب متخصص في الصحة العامة. اليوم ${today}.
 ${personalContext}
 
 أنشئ 8 نصائح طبية متنوعة ومفيدة. يجب أن تشمل الفئات: قلب، تغذية، رياضة، نوم، ضغط، عام.
@@ -468,58 +521,78 @@ ${userData ? 'راعي الحالة الصحية للمستخدم في بعض ا
 - الشرح: 20-40 كلمة
 - الفئات المسموحة: قلب / تغذية / رياضة / نوم / ضغط / عام / سكر / ذهني
 - أجب بالعربية فقط
-- لا تضف أي نص خارج الـ JSON`;
+- لا تضف أي نص خارج الـ JSON`
+        : `You are a public health specialist doctor. Today is ${today}.
+${personalContext}
+
+Generate 8 diverse and useful medical tips. They should cover categories: heart, nutrition, exercise, sleep, pressure, general.
+${userData ? 'Consider the user health conditions in some tips.' : ''}
+
+Respond with JSON ONLY (no markdown or backticks) in this format EXACTLY:
+[
+  {"cat":"heart","title":"Short title","body":"Useful explanation in two to three lines."},
+  {"cat":"nutrition","title":"...","body":"..."}
+]
+
+Rules:
+- Title: 3-5 words
+- Body: 20-40 words
+- Allowed categories: heart / nutrition / exercise / sleep / pressure / general / diabetes / mental
+- Answer in English only
+- Do not add any text outside the JSON`;
 
     const raw = await askGroq(prompt);
 
-    // Parse JSON safely
+    // Safely parses JSON response from AI
     let parsed = [];
     try {
         const clean = raw.replace(/```json|```/g, '').trim();
         parsed = JSON.parse(clean);
         if (!Array.isArray(parsed)) throw new Error('Not array');
     } catch(e) {
-        // Try extracting array from text
         const match = raw.match(/\[[\s\S]*\]/);
         if (match) {
             try { parsed = JSON.parse(match[0]); } catch(e2) {
-                throw new Error('تعذّر تحليل استجابة AI');
+                throw new Error(ar ? 'تعذّر تحليل استجابة AI' : 'Failed to parse AI response');
             }
         } else {
-            throw new Error('استجابة AI غير صالحة');
+            throw new Error(ar ? 'استجابة AI غير صالحة' : 'Invalid AI response');
         }
     }
 
     return parsed.filter(t => t.cat && t.title && t.body);
 }
 
-// ─── Render ───
+// Renders the tips UI including meta info, personalized banner, and refresh controls
 function renderTips(payload) {
     hideSkeleton();
+    const ar = isAr();
     const tips = payload.tips || [];
     allTips    = tips;
 
-    if (tips.length === 0) { showError('لا توجد نصائح متاحة.'); return; }
+    if (tips.length === 0) { showError(ar ? 'لا توجد نصائح متاحة.' : 'No tips available.'); return; }
 
     // Update meta
     const genDate  = new Date(payload.generatedAt);
     const ageMs    = Date.now() - payload.generatedAt;
-    const isOld    = ageMs > REFRESH_HOURS * 60 * 60 * 1000;
+    const oldFlag  = ageMs > REFRESH_HOURS * 60 * 60 * 1000;
     const dot      = document.getElementById('freshnessDot');
-    dot.className  = `freshness-dot${isOld ? ' stale' : ''}`;
+    dot.className  = `freshness-dot${oldFlag ? ' stale' : ''}`;
+    const locale   = ar ? 'ar-SA' : 'en-US';
     document.getElementById('freshnessMeta').textContent =
-        `آخر تحديث: ${genDate.toLocaleString('ar-SA')} ${isOld ? '(قديم)' : ''}`;
+        ar ? `آخر تحديث: ${genDate.toLocaleString(locale)} ${oldFlag ? '(قديم)' : ''}`
+           : `Last update: ${genDate.toLocaleString(locale)} ${oldFlag ? '(outdated)' : ''}`;
 
     // Personalized banner
     if (userData) {
         document.getElementById('personalBanner').classList.add('show');
         document.getElementById('personalTitle').textContent =
-            `نصائح مخصصة لـ ${userData.name || 'حسابك'}`;
+            ar ? `نصائح مخصصة لـ ${userData.name || 'حسابك'}` : `Personalized tips for ${userData.name || 'you'}`;
         const parts = [];
-        if (userData.bloodType) parts.push(`فصيلة دم ${userData.bloodType}`);
-        if (userData.diseases && userData.diseases.length) parts.push(`${userData.diseases.length} حالة مزمنة`);
+        if (userData.bloodType) parts.push(ar ? `فصيلة دم ${userData.bloodType}` : `Blood type ${userData.bloodType}`);
+        if (userData.diseases && userData.diseases.length) parts.push(ar ? `${userData.diseases.length} حالة مزمنة` : `${userData.diseases.length} chronic condition(s)`);
         document.getElementById('personalDesc').textContent =
-            parts.length ? `بناءً على: ${parts.join('، ')}` : 'بيانات حسابك الصحي';
+            parts.length ? (ar ? `بناءً على: ${parts.join('، ')}` : `Based on: ${parts.join(', ')}`) : (ar ? 'بيانات حسابك الصحي' : 'Your health account data');
     }
 
     // Enable refresh button
@@ -528,32 +601,34 @@ function renderTips(payload) {
     btn.disabled = !canRefresh;
     if (!canRefresh) {
         const remainMin = Math.ceil((COOLDOWN_MINS * 60 * 1000 - (Date.now() - lastManualRefresh)) / 60000);
-        document.getElementById('refreshBtnText').textContent = `تحديث (${remainMin} د)`;
+        document.getElementById('refreshBtnText').textContent = ar ? `تحديث (${remainMin} د)` : `Refresh (${remainMin}m)`;
     } else {
         btn.disabled = false;
-        document.getElementById('refreshBtnText').textContent = 'تحديث';
+        document.getElementById('refreshBtnText').textContent = ar ? 'تحديث' : 'Refresh';
     }
 
     // Next refresh time
     const nextRefresh = new Date(payload.generatedAt + REFRESH_HOURS * 60 * 60 * 1000);
-    document.getElementById('nextRefreshTime').textContent = nextRefresh.toLocaleString('ar-SA');
+    document.getElementById('nextRefreshTime').textContent = nextRefresh.toLocaleString(locale);
     document.getElementById('nextRefreshBox').style.display = 'block';
 
     renderFilteredTips(tips);
 }
 
+// Renders the filtered tip cards into the grid
 function renderFilteredTips(tips) {
+    const ar = isAr();
     const grid = document.getElementById('tipsGrid');
     grid.style.display = 'grid';
     grid.innerHTML = '';
 
     if (tips.length === 0) {
-        grid.innerHTML = '<p style="color:var(--muted);text-align:center;grid-column:1/-1;padding:40px 0;">لا توجد نصائح في هذه الفئة.</p>';
+        grid.innerHTML = `<p style="color:var(--muted);text-align:center;grid-column:1/-1;padding:40px 0;">${ar ? 'لا توجد نصائح في هذه الفئة.' : 'No tips in this category.'}</p>`;
         return;
     }
 
     tips.forEach((tip, idx) => {
-        const cfg   = CAT_CONFIG[tip.cat] || CAT_CONFIG['عام'];
+        const cfg   = CAT_CONFIG[tip.cat] || CAT_CONFIG[ar ? 'عام' : 'general'];
         const isFeatured = idx === 0;
 
         const card  = document.createElement('div');
@@ -577,7 +652,7 @@ function renderFilteredTips(tips) {
     });
 }
 
-// ─── Filter ───
+// Handles category tab filter clicks
 window.filterCat = (cat, btn) => {
     document.querySelectorAll('.cat-tab').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
@@ -585,14 +660,15 @@ window.filterCat = (cat, btn) => {
     renderFilteredTips(filtered);
 };
 
-// ─── Manual refresh ───
+// Handles manual refresh button click with cooldown
 window.manualRefresh = async () => {
+    const ar = isAr();
     const btn  = document.getElementById('refreshBtn');
     const icon = document.getElementById('refreshIcon');
     btn.disabled = true;
     btn.classList.add('loading');
     icon.textContent = '↻';
-    document.getElementById('refreshBtnText').textContent = 'جاري التحديث...';
+    document.getElementById('refreshBtnText').textContent = ar ? 'جاري التحديث...' : 'Refreshing...';
     document.getElementById('tipsGrid').style.display  = 'none';
     document.getElementById('nextRefreshBox').style.display = 'none';
 
@@ -604,31 +680,33 @@ window.manualRefresh = async () => {
     icon.textContent = '🔄';
 };
 
-// ─── UI helpers ──
-// 
-
+// Shows the loading skeleton placeholder
 function showSkeleton() {
     document.getElementById('skeletonGrid').style.display = 'grid';
     document.getElementById('tipsGrid').style.display     = 'none';
     document.getElementById('errorState').style.display   = 'none';
     document.getElementById('nextRefreshBox').style.display = 'none';
 }
+
+// Hides the loading skeleton
 function hideSkeleton() {
     document.getElementById('skeletonGrid').style.display = 'none';
     document.getElementById('errorState').style.display   = 'none';
 }
+
+// Displays an error message and re-enables the refresh button
 function showError(msg) {
     hideSkeleton();
     document.getElementById('tipsGrid').style.display   = 'none';
     document.getElementById('errorState').style.display = 'block';
     document.getElementById('errorMsg').textContent     = msg;
     document.getElementById('refreshBtn').disabled      = false;
-    document.getElementById('refreshBtnText').textContent = 'تحديث';
+    document.getElementById('refreshBtnText').textContent = isAr() ? 'تحديث' : 'Refresh';
 }
 
 window.loadTips = loadTips;
 
-// ─── Theme ───
+// Applies the saved theme on page load
 const theme = localStorage.getItem('theme') || 'light';
 document.documentElement.setAttribute('data-theme', theme);
 </script>
