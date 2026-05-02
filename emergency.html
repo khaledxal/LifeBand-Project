@@ -510,7 +510,7 @@ import { auth, db } from './js/firebase-config.js';
 import { ref, get, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 import { askGroq } from './js/gemini-ai.js';
 
-// ─── i18n ───
+// i18n translation strings
 const T = {
     ar: {
         holdTitle:"نظام LifeBand للطوارئ", holdDesc:"اضغط مطولاً على الزر لعرض الملف الطبي للمريض",
@@ -576,7 +576,7 @@ const MEDIA_DB = {
     "default":{imgs:["https://images.pexels.com/photos/1170979/pexels-photo-1170979.jpeg?w=400"],yt:[{id:"587-cZxLvss",t:"إسعافات أولية"}]}
 };
 
-// ─── State ───
+// Application state variables
 let patientData={}, patientName="", patientId="";
 let answers={}, extraAnswers={}, lastAnalysis="";
 let gpsCoords = null;
@@ -586,7 +586,7 @@ let holdTimer, holdTimeout, progress=0;
 const getLang = () => localStorage.getItem('preferred_lang') || 'ar';
 const t       = (k) => T[getLang()][k] || k;
 
-// ─── Theme & Lang ───
+// Theme and language initialization
 const theme = localStorage.getItem('theme') || 'light';
 document.documentElement.setAttribute('data-theme', theme);
 const themeBtn = document.getElementById('themeBtn');
@@ -622,7 +622,7 @@ function applyLang(l) {
     document.getElementById('backBtn').textContent         = T[l].backBtn;
 }
 
-// ─── GPS capture ───
+// Starts GPS location capture
 function startGPS() {
     if (!navigator.geolocation) return;
     const badge = document.getElementById('gpsBadge');
@@ -652,7 +652,7 @@ function showAlert(msg, type = 'warn') {
     el.className = `alert-box show ${type === 'error' ? 'error' : ''}`;
 }
 
-// ─── Hold-to-open ───
+// Hold-to-open button logic
 const circle  = document.getElementById('progressCircle');
 const holdBtn = document.getElementById('holdBtn');
 
@@ -693,7 +693,7 @@ holdBtn.addEventListener('touchstart', startHold, { passive: false });
 window.addEventListener('mouseup',    cancelHold);
 window.addEventListener('touchend',   cancelHold);
 
-// ─── Load patient ───
+// Loads patient data from Firebase and shows the diagnosis form
 async function loadPatientAndShowDiag() {
     document.getElementById('triggerSection').style.display = 'none';
     document.getElementById('diagSection').style.display    = 'block';
@@ -741,7 +741,7 @@ async function loadPatientAndShowDiag() {
     analyzeBtn.onclick = () => runAnalysis(false);
 }
 
-// ─── Diag form ───
+// Renders the diagnosis form with question options
 function renderDiagForm(questions, containerId, answersObj) {
     document.getElementById(containerId).innerHTML = questions.map((q, i) => `
         <div class="diag-q">
@@ -778,7 +778,7 @@ function updateStepDots() {
     });
 }
 
-// ─── Analysis ───
+// Runs the AI-powered analysis based on rescuer answers
 async function runAnalysis(isExtra) {
     const l = getLang();
     document.getElementById('diagSection').style.display    = 'none';
@@ -797,7 +797,8 @@ async function runAnalysis(isExtra) {
     const allAnswers    = isExtra ? {...answers, ...extraAnswers} : answers;
     const answerSummary = Object.entries(allAnswers).map(([k,v]) => `${k}: ${v}`).join('\n');
 
-    const prompt = `أنت طبيب طوارئ خبير. المريض:
+    const prompt = l === 'ar'
+        ? `أنت طبيب طوارئ خبير. المريض:
 - الاسم: ${patientName || 'غير محدد'}
 - فصيلة الدم: ${patientData.bloodType || 'غير محدد'}
 - أمراض مزمنة: ${(patientData.diseases || []).join('، ') || 'لا يوجد'}
@@ -807,7 +808,19 @@ ${answerSummary || 'لم تُجب على الأسئلة بعد'}
 التشخيص: (جملة واحدة)
 الإجراء: (3-4 خطوات)
 التصنيف: (قلب/تنفس/نزيف/تشنج/إغماء/أخرى)
-معلومات_إضافية: نعم/لا`;
+معلومات_إضافية: نعم/لا`
+        : `You are an expert emergency doctor. Patient:
+- Name: ${patientName || 'Unknown'}
+- Blood Type: ${patientData.bloodType || 'Unknown'}
+- Chronic Diseases: ${(patientData.diseases || []).join(', ') || 'None'}
+Rescuer Answers:
+${answerSummary || 'No answers yet'}
+Required:
+Diagnosis: (one sentence)
+Action: (3-4 steps)
+Classification: (قلب/تنفس/نزيف/تشنج/إغماء/أخرى)
+معلومات_إضافية: نعم/لا
+Answer in English.`;
 
     try {
         const result = await askGroq(prompt);
@@ -818,7 +831,7 @@ ${answerSummary || 'لم تُجب على الأسئلة بعد'}
         const needsMore = result.includes('معلومات_إضافية: نعم') || result.includes('معلومات_إضافية:نعم');
         if (needsMore && !isExtra) showExtraQuestions();
     } catch(e) {
-        document.getElementById('aiAnalysisText').innerText = '⚠️ تعذّر الاتصال بـ AI. ' + e.message;
+        document.getElementById('aiAnalysisText').innerText = '⚠️ ' + (l === 'ar' ? 'تعذّر الاتصال بـ AI. ' : 'Failed to connect to AI. ') + e.message;
     }
 }
 
@@ -834,7 +847,7 @@ function showGPSResult() {
     box.classList.add('show');
 }
 
-// ─── Telegram ───
+// Sends a Telegram alert to the patient's emergency contact
 async function sendTelegramAlert(l) {
     const card   = document.getElementById('tgCard');
     const title  = document.getElementById('tgTitle');
@@ -886,7 +899,7 @@ async function sendTelegramAlert(l) {
     }
 }
 
-// ─── Media ───
+// Shows related media (images and YouTube videos) based on category
 function showMedia(category) {
     const key   = Object.keys(MEDIA_DB).find(k => category.includes(k)) || 'default';
     const media = MEDIA_DB[key];
@@ -908,7 +921,7 @@ function showMedia(category) {
     document.getElementById('mediaBox').style.display = 'block';
 }
 
-// ─── Extra Q ───
+// Displays extra follow-up questions when AI requests more info
 function showExtraQuestions() {
     const l = getLang();
     const extraQs = [
@@ -921,7 +934,7 @@ function showExtraQuestions() {
     document.getElementById('reAnalyzeBtn').onclick    = () => runAnalysis(true);
 }
 
-// ─── Save ───
+// Saves the emergency report to Firebase
 document.getElementById('saveExitBtn').addEventListener('click', async () => {
     const l   = getLang();
     const btn = document.getElementById('saveExitBtn');
@@ -952,7 +965,7 @@ document.getElementById('saveExitBtn').addEventListener('click', async () => {
     }
 });
 
-// ─── Modal ───
+// Image modal open/close handlers
 window.openModal  = src => { document.getElementById('modalImg').src = src; document.getElementById('imgModal').classList.add('open'); };
 window.closeModal = ()  => document.getElementById('imgModal').classList.remove('open');
 </script>
