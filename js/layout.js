@@ -1,4 +1,4 @@
-// js/layout.js — LifeBand v4 (Heltro Style)
+// js/layout.js - LifeBand v4 (Heltro Style) - Injects shared layout (topbar, navbar, drawer, footer)
 import { auth, db } from './firebase-config.js';
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { ref, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
@@ -8,7 +8,7 @@ export function injectLayout() {
     const isAr  = lang === 'ar';
     const theme = localStorage.getItem('theme') || 'light';
 
-    // ── Apply theme + lang immediately (no flash) ──
+    // Apply theme + language immediately (no flash)
     document.documentElement.setAttribute('data-theme', theme);
     document.documentElement.lang = lang;
     document.documentElement.dir  = isAr ? 'rtl' : 'ltr';
@@ -262,7 +262,7 @@ function _initEvents() {
         applyTheme(cur === 'dark' ? 'light' : 'dark');
     });
 
-    // ── Lang toggle ──
+    // Language toggle handler
     const switchLang = () => {
         const cur = localStorage.getItem('preferred_lang') || 'ar';
         localStorage.setItem('preferred_lang', cur === 'ar' ? 'en' : 'ar');
