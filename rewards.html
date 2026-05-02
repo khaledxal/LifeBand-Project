@@ -40,23 +40,23 @@
         import { ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
         import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        // 1. تشغيل الهيكل الموحد (الهيدر والفوتر)
+        // Initialize shared layout (header and footer)
         injectLayout();
 
-        // 2. حساب النقاط بناءً على الحالات التي باشرها المسعف
+        // Calculate points based on cases handled by the rescuer
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 onValue(ref(db, 'reports'), (snapshot) => {
                     let count = 0;
                     snapshot.forEach(c => { 
-                        // حساب النقاط إذا كان معرف المنقذ يطابق المستخدم الحالي
+                        // Count points if rescuer ID matches current user
                         if(c.val().rescuerId === user.uid) count++; 
                     });
                     const pointsDisplay = document.getElementById('userPoints');
                     if(pointsDisplay) pointsDisplay.innerText = (count * 10);
                 });
             } else {
-                // إذا لم يسجل دخول، يتم توجيهه لصفحة الدخول
+                // If not logged in, redirect to login page
                 window.location.href = "login.html";
             }
         });
