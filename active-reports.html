@@ -60,7 +60,7 @@
     </main>
 </div>
 
-<!-- Modal للصور -->
+<!-- Image modal -->
 <div id="imgModal" onclick="closeModal()">
     <span>✕</span>
     <img id="modalImg" src="" alt="">
@@ -118,10 +118,10 @@ const MEDIA_DB = {
 const lang = () => localStorage.getItem('preferred_lang') || 'ar';
 const t = () => T[lang()];
 
-// حالة كل بلاغ منفصلة
+// Separate state for each report
 const reportStates = {};
 
-// ===== عرض البلاغات =====
+// ===== Display reports =====
 const reportsList = document.getElementById('reportsList');
 const l = lang();
 
@@ -152,7 +152,7 @@ onValue(ref(db,'reports'), snapshot => {
                     </div>
                 </div>
 
-                <!-- لوحة الأسئلة -->
+                <!-- Questions panel -->
                 <div class="diag-panel" id="diagPanel_${id}">
                     <h4 style="color:#6366f1;margin:0 0 12px;">${t().diag_title}</h4>
                     <div id="diagForm_${id}"></div>
@@ -161,14 +161,14 @@ onValue(ref(db,'reports'), snapshot => {
                     </button>
                 </div>
 
-                <!-- نتيجة AI -->
+                <!-- AI result -->
                 <div class="ai-result-box" id="aiResult_${id}"></div>
                 <div id="mediaSection_${id}" style="display:none;">
                     <p style="font-size:13px;font-weight:bold;margin:10px 0 5px;">${t().media_label}</p>
                     <div class="media-grid" id="mediaGrid_${id}"></div>
                 </div>
 
-                <!-- أسئلة إضافية -->
+                <!-- Extra questions -->
                 <div id="extraPanel_${id}" style="display:none;margin-top:12px;padding:15px;background:rgba(245,158,11,0.07);border:1px solid rgba(245,158,11,0.3);border-radius:12px;">
                     <p style="color:#f59e0b;font-weight:bold;margin:0 0 10px;">⚠️ ${t().extra_needed}</p>
                     <div id="extraForm_${id}"></div>
