@@ -71,10 +71,10 @@
         import { auth } from './js/firebase-config.js';
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        // 1. تشغيل الهيكل الموحد
+        // Initialize shared layout (header and footer)
         injectLayout();
 
-        // 2. تحديث واجهة الدخول في الناف بار
+        // Update login UI in the navbar
         onAuthStateChanged(auth, (user) => {
             const authZone = document.getElementById('auth-zone');
             const lang = localStorage.getItem('preferred_lang') || 'ar';
@@ -87,7 +87,7 @@
             }
         });
 
-        // 3. منطق الترجمة للعناصر المضافة حديثاً
+        // Translation logic for dynamically added elements
         const extraTranslations = {
             ar: {
                 vol_why_t: "لماذا تتطوع في LifeBand؟",
@@ -118,10 +118,10 @@
             });
         }
 
-        // تشغيل الترجمة عند التحميل
+        // Apply translations on page load
         updateExtraLang(localStorage.getItem('preferred_lang') || 'ar');
 
-        // مراقبة تغيير اللغة من الهيدر
+        // Watch for language change from header
         document.addEventListener('click', (e) => {
             if (e.target.id === 'langBtn') {
                 setTimeout(() => updateExtraLang(localStorage.getItem('preferred_lang')), 50);
