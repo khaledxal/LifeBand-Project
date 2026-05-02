@@ -47,7 +47,7 @@
                         </select>
                     </div>
 
-                    <!-- ✅ حقل معرّف تيليغرام جهة الطوارئ -->
+                    <!-- Emergency Telegram chat ID field -->
                     <div class="input-group" style="margin-top: 15px;">
                         <label data-i18n="label_tg_chat_id">📱 رقم معرّف تيليغرام جهة الطوارئ:</label>
                         <input type="tel" id="regTgChatId" class="input-style" 
@@ -97,7 +97,7 @@
             const lang = localStorage.getItem('preferred_lang') || 'ar';
             const btn = document.getElementById('regBtn');
 
-            // ✅ تعطيل الزر أثناء المعالجة (يمنع الضغط المزدوج)
+            // Disable button during processing (prevents double-click)
             btn.disabled = true;
             btn.innerText = lang === 'ar' ? '⏳ جاري الإنشاء...' : '⏳ Creating...';
             
@@ -133,7 +133,7 @@
                 }
 
             } catch (error) {
-                // ✅ إعادة تفعيل الزر عند الخطأ
+                // Re-enable button on error
                 btn.disabled = false;
                 btn.innerText = lang === 'ar' ? 'إنشاء الحساب وبناء الملف' : 'Create Account';
                 alert(lang === 'ar' ? "خطأ في التسجيل: " + error.message : "Registration Error: " + error.message);
