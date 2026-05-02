@@ -36,16 +36,16 @@
         import { ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
         import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        // 1. تشغيل الهيكل الموحد (الهيدر والفوتر)
+        // Initialize shared layout (header and footer)
         injectLayout();
 
-        // 2. ترجمات خاصة بمحتوى هذه الصفحة فقط
+        // Page-specific translations
         const pageTranslations = {
             ar: { done: "تمت المباشرة بنجاح", empty: "لم تقم بمباشرة أي حالات بعد." },
             en: { done: "Successfully Responded", empty: "You haven't responded to any cases yet." }
         };
 
-        // 3. جلب وعرض الحالات بتنسيق Cards
+        // Fetch and display cases as cards
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 onValue(ref(db, 'reports'), (snapshot) => {
@@ -55,7 +55,7 @@
                     
                     snapshot.forEach((child) => {
                         const data = child.val();
-                        // عرض الحالات التي باشرها هذا المسعف فقط
+                        // Show only cases handled by this rescuer
                         if (data.rescuerId === user.uid) {
                             const date = new Date(data.timestamp).toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-US');
                             const card = document.createElement('div');
